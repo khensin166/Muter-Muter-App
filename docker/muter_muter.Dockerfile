@@ -1,15 +1,5 @@
 # ==========================================
-# STAGE 1: FRONTEND BUILD (Vite + Vue 3)
-# ==========================================
-FROM node:20-alpine AS frontend-builder
-WORKDIR /app
-COPY package.json package-lock.json ./
-RUN npm ci
-COPY . .
-RUN npm run build
-
-# ==========================================
-# STAGE 2: COMPOSER VENDOR (PHP Dependencies)
+# STAGE 1: COMPOSER VENDOR (PHP Dependencies)
 # ==========================================
 FROM composer:2 AS vendor-builder
 WORKDIR /app
@@ -17,6 +7,18 @@ COPY composer.json composer.lock ./
 RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
+
+# ==========================================
+# STAGE 2: FRONTEND BUILD (Vite + Vue 3)
+# Ziggy is imported from vendor/tightenco/ziggy, so vendor must be present.
+# ==========================================
+FROM node:20-alpine AS frontend-builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+COPY --from=vendor-builder /app/vendor/tightenco/ziggy /app/vendor/tightenco/ziggy
+RUN npm run build
 
 # ==========================================
 # STAGE 3: PRODUCTION RUNNER (FrankenPHP)
