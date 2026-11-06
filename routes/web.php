@@ -8,6 +8,7 @@ use App\Http\Controllers\Public\DestinationController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\PaymentProofController;
 use App\Http\Controllers\Public\TourController;
+use App\Http\Controllers\Public\UserDashboardController;
 use App\Http\Controllers\Public\VehicleController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -36,9 +37,7 @@ Route::post('/bookings/{code}/payment-proof', [PaymentProofController::class, 's
 Route::get('/my-bookings', [BookingController::class, 'myBookings'])->middleware('auth')->name('bookings.my');
 
 // Customer Dashboard
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [UserDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::post('/bookings/{code}/cancel', [BookingCancellationController::class, 'cancel'])->name('bookings.cancel');

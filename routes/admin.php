@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminRefundController;
 use App\Http\Controllers\Admin\AdminSettlementController;
@@ -10,9 +11,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
-    Route::get('/', function () {
-        return Inertia::render('Admin/DashboardPreview');
-    })->name('dashboard');
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
     // Partner KYC & Verification
     Route::get('partners', [PartnerVerificationController::class, 'index'])->name('partners.index');
