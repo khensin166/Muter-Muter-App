@@ -7,3 +7,4 @@ enum OwnershipType: string
     case INTERNAL = 'INTERNAL';
     case PARTNER = 'PARTNER';
 }
+

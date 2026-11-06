@@ -8,4 +8,14 @@ enum VehicleType: string
     case MINIBUS = 'MINIBUS';
     case BUS = 'BUS';
     case BOAT = 'BOAT';
+
+    public function label(): string
+    {
+        return match ($this) {
+            self::CAR => 'Mobil MPV / SUV',
+            self::MINIBUS => 'Minibus (HiAce / Elf)',
+            self::BUS => 'Medium / Big Bus',
+            self::BOAT => 'Kapal Wisata Danau',
+        };
+    }
 }

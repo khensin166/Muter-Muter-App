@@ -9,3 +9,4 @@ enum PartnerStatus: string
     case SUSPENDED = 'SUSPENDED';
     case REJECTED = 'REJECTED';
 }
+

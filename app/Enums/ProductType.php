@@ -8,3 +8,4 @@ enum ProductType: string
     case VEHICLE = 'VEHICLE';
     case TRANSFER = 'TRANSFER';
 }
+

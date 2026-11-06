@@ -8,3 +8,4 @@ enum PricingType: string
     case PER_VEHICLE = 'PER_VEHICLE';
     case PER_GROUP = 'PER_GROUP';
 }
+

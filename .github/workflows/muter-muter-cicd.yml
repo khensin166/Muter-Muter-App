@@ -1,0 +1,158 @@
+name: Muter-Muter Danau Toba CI/CD
+
+on:
+  push:
+    branches: [ "master", "main" ]
+    paths:
+      - 'app/**'
+      - 'bootstrap/**'
+      - 'config/**'
+      - 'database/**'
+      - 'public/**'
+      - 'resources/**'
+      - 'routes/**'
+      - 'composer.json'
+      - 'composer.lock'
+      - 'package.json'
+      - 'package-lock.json'
+      - 'docker/**'
+      - 'docker-compose.deploy.yml'
+      - 'deploy/**'
+      - '.github/workflows/muter-muter-cicd.yml'
+
+env:
+  REGISTRY: ghcr.io
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  # ==========================================
+  # JOB 0: AUTOMATED TEST SUITE (Pest PHP & Vite)
+  # ==========================================
+  pest_test:
+    name: Run Automated Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo_sqlite, sqlite3, curl, fileinfo, bcmath, intl, zip
+          coverage: none
+
+      - name: Setup Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Composer Dependencies
+        run: composer install --prefer-dist --no-interaction --no-progress
+
+      - name: Install Node Dependencies & Build Vite Assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Prepare Laravel Environment for Testing
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+
+      - name: Execute Pest Feature & Unit Tests
+        run: php artisan test
+
+  # ==========================================
+  # JOB 1: BUILD & PUSH DOCKER IMAGE TO GHCR
+  # ==========================================
+  build_image:
+    name: Build & Push Docker Image
+    needs: pest_test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set lowercase repository image name
+        run: echo "IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')" >> $GITHUB_ENV
+
+      - name: Log in to the Container registry (GHCR)
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Docker metadata (tags, labels)
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha,format=short
+            type=raw,value=latest
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./docker/muter_muter.Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+
+  # ==========================================
+  # JOB 2: ANSIBLE DEPLOY TO VPS
+  # ==========================================
+  deploy_to_server:
+    name: Deploy to Production VPS
+    needs: build_image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Ansible & SSHPass
+        run: sudo apt-get update && sudo apt-get install -y ansible sshpass
+
+      - name: Setup SSH Key & Ansible Inventory
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "${{ secrets.VPS_SSH_KEY || vars.VPS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ vars.VPS_IP }} >> ~/.ssh/known_hosts
+
+          # Buat file inventory Ansible dinamis
+          echo "[webservers]" > inventory.ini
+          echo "${{ vars.VPS_IP }} ansible_user=${{ vars.VPS_USER }} ansible_ssh_private_key_file=~/.ssh/id_rsa" >> inventory.ini
+
+      - name: Run Ansible Playbook (Pull Image, Env, Migrate & Restart)
+        run: |
+          IMAGE_NAME=$(echo ${{ github.repository }} | tr '[:upper:]' '[:lower:]')
+          TARGET_IMAGE="${{ env.REGISTRY }}/${IMAGE_NAME}:latest"
+
+          ansible-playbook -i inventory.ini deploy/ansible/deploy.yml \
+            -e "target_image=${TARGET_IMAGE}" \
+            -e "app_key=${{ secrets.APP_KEY || vars.APP_KEY }}" \
+            -e "app_url=${{ vars.APP_URL }}" \
+            -e "app_port=${{ vars.APP_PORT || '8000' }}" \
+            -e "db_host=${{ vars.DB_HOST || 'muter_postgres' }}" \
+            -e "db_port=${{ vars.DB_PORT || '5432' }}" \
+            -e "db_database=${{ vars.DB_DATABASE || 'muter_muter_prod' }}" \
+            -e "db_username=${{ vars.DB_USERNAME || 'postgres' }}" \
+            -e "db_password=${{ secrets.DB_PASSWORD || vars.DB_PASSWORD }}" \
+            -e "whatsapp_enabled=${{ vars.WHATSAPP_ENABLED || 'true' }}" \
+            -e "whatsapp_mock_mode=${{ vars.WHATSAPP_MOCK_MODE || 'false' }}" \
+            -e "whatsapp_gateway_url=${{ vars.WHATSAPP_GATEWAY_URL }}" \
+            -e "whatsapp_api_token=${{ secrets.WHATSAPP_API_TOKEN || vars.WHATSAPP_API_TOKEN }}" \
+            -e "whatsapp_timeout=${{ vars.WHATSAPP_TIMEOUT || '5' }}"
+

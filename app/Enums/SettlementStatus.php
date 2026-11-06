@@ -10,3 +10,4 @@ enum SettlementStatus: string
     case PAID = 'PAID';
     case ON_HOLD = 'ON_HOLD';
 }
+

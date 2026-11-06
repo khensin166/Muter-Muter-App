@@ -9,3 +9,4 @@ enum RefundStatus: string
     case PROCESSED = 'PROCESSED';
     case REJECTED = 'REJECTED';
 }
+

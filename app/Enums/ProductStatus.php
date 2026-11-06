@@ -9,3 +9,4 @@ enum ProductStatus: string
     case ARCHIVED = 'ARCHIVED';
     case SUSPENDED = 'SUSPENDED';
 }
+

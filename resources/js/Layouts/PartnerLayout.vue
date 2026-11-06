@@ -88,14 +88,21 @@ const isSidebarOpen = ref(false);
           Katalog Produk
         </div>
         <Link
-          href="/partner/tours"
+          href="/partner/products"
+          class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
+        >
+          <span>🏷️</span>
+          <span>Semua Produk</span>
+        </Link>
+        <Link
+          href="/partner/products?type=TOUR"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🎒</span>
           <span>Paket Wisata</span>
         </Link>
         <Link
-          href="/partner/vehicles"
+          href="/partner/products?type=VEHICLE"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🚐</span>

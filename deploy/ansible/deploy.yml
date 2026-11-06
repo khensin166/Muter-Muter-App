@@ -1,0 +1,107 @@
+---
+- name: Muter-Muter Travel Marketplace - Deploy & Force Update
+  hosts: webservers
+  become: yes
+  become_method: sudo
+  become_user: root
+  vars:
+    project_dir: "/opt/muter-muter-app"
+
+  tasks:
+    - name: Membuat folder proyek di server target
+      file:
+        path: "{{ project_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Menyalin file docker-compose.deploy.yml ke server target
+      copy:
+        src: ../../docker-compose.deploy.yml
+        dest: "{{ project_dir }}/docker-compose.yml"
+
+    - name: Generate file .env di server target
+      copy:
+        content: |
+          APP_NAME="Muter-Muter Danau Toba"
+          APP_ENV=production
+          APP_KEY={{ app_key }}
+          APP_DEBUG={{ app_debug | default('false') }}
+          APP_URL={{ app_url }}
+          APP_PORT={{ app_port | default('8000') }}
+          TARGET_IMAGE={{ target_image }}
+
+          # Database Configuration (PostgreSQL)
+          DB_CONNECTION=pgsql
+          DB_HOST={{ db_host if (db_host is defined and db_host != '') else 'muter_postgres' }}
+          DB_PORT={{ db_port | default('5432') }}
+          DB_DATABASE={{ db_database | default('muter_muter_prod') }}
+          DB_USERNAME={{ db_username | default('postgres') }}
+          DB_PASSWORD={{ db_password }}
+
+          # Session, Cache & Queue
+          SESSION_DRIVER=database
+          SESSION_LIFETIME=120
+          CACHE_STORE=database
+          QUEUE_CONNECTION=database
+          FILESYSTEM_DISK=public
+
+          # WhatsApp API Gateway Integration
+          WHATSAPP_ENABLED={{ whatsapp_enabled | default('true') }}
+          WHATSAPP_MOCK_MODE={{ whatsapp_mock_mode | default('false') }}
+          WHATSAPP_GATEWAY_URL={{ whatsapp_gateway_url }}
+          WHATSAPP_API_TOKEN={{ whatsapp_api_token }}
+          WHATSAPP_TIMEOUT={{ whatsapp_timeout | default('5') }}
+        dest: "{{ project_dir }}/.env"
+        mode: '0600'
+      no_log: true
+
+    - name: Memastikan jaringan global 'muter_net' tersedia
+      command: docker network create muter_net
+      register: network_result
+      failed_when:
+        - network_result.rc != 0
+        - "'already exists' not in network_result.stderr"
+      changed_when: network_result.rc == 0
+
+    - name: Memaksa pembaruan (Pull & Up) Docker Compose
+      command: docker compose up -d --pull always --force-recreate --remove-orphans
+      args:
+        chdir: "{{ project_dir }}"
+      register: compose_result
+      failed_when: compose_result.rc != 0
+      ignore_errors: yes
+
+    - name: Debug Docker Compose Output (Jika Gagal)
+      debug:
+        msg: |
+          STDOUT: {{ compose_result.stdout }}
+          STDERR: {{ compose_result.stderr }}
+      when: compose_result.rc != 0
+
+    - name: Fail jika Docker Compose Gagal
+      fail:
+        msg: "Deployment gagal pada tahapan Docker Compose."
+      when: compose_result.rc != 0
+
+    - name: Menjalankan database migration di dalam container
+      command: docker compose exec -T muter_muter_app php artisan migrate --force
+      args:
+        chdir: "{{ project_dir }}"
+      register: migrate_result
+      changed_when: "'Migrating' in migrate_result.stdout"
+
+    - name: Optimasi cache konfigurasi, route, dan view
+      command: docker compose exec -T muter_muter_app php artisan optimize
+      args:
+        chdir: "{{ project_dir }}"
+
+    - name: Hapus image lama yang tidak terpakai (Prune)
+      command: docker image prune -f
+
+    - name: Verifikasi Container Berjalan
+      command: "docker inspect muter-muter-app --format='{{ '{{' }}.State.Status{{ '}}' }}'"
+      register: container_status
+      retries: 5
+      delay: 5
+      until: container_status.stdout == "running"
+

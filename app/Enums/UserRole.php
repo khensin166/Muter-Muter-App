@@ -9,3 +9,4 @@ enum UserRole: string
     case ADMIN = 'ADMIN';
     case SUPER_ADMIN = 'SUPER_ADMIN';
 }
+

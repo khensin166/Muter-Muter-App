@@ -7,3 +7,4 @@ enum PartnerRole: string
     case OWNER = 'OWNER';
     case STAFF = 'STAFF';
 }
+

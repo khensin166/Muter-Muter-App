@@ -52,3 +52,4 @@ return new class extends Migration
         Schema::dropIfExists('tour_itinerary_days');
     }
 };
+
