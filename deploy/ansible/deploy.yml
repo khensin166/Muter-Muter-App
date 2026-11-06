@@ -8,11 +8,16 @@
     project_dir: "/opt/muter-muter-app"
 
   tasks:
-    - name: Membuat folder proyek di server target
+    - name: Membuat folder proyek dan direktori fisik data di server target
       file:
-        path: "{{ project_dir }}"
+        path: "{{ item }}"
         state: directory
-        mode: "0755"
+        mode: "0777"
+      loop:
+        - "{{ project_dir }}"
+        - "{{ project_dir }}/data/postgres"
+        - "{{ project_dir }}/storage/public"
+        - "{{ project_dir }}/storage/logs"
 
     - name: Menyalin file docker-compose.deploy.yml ke server target
       copy:

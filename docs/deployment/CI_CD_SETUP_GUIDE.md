@@ -80,18 +80,25 @@ Tambahkan pada tab **Variables** $\rightarrow$ **New repository variable**:
 
 ---
 
-## 3. Database PostgreSQL Bawaan (Sudah Termasuk)
+## 3. Database PostgreSQL Bawaan & Penyimpanan Fisik (Host Bind Mount)
 
-File [`docker-compose.deploy.yml`](file:///d:/eksplor/Muter-Muter-App/docker-compose.deploy.yml) **sudah menyertakan service database PostgreSQL 15**:
+File [`docker-compose.deploy.yml`](file:///d:/eksplor/Muter-Muter-App/docker-compose.deploy.yml) menggunakan **Bind Mount ke Folder Fisik Langsung di VPS**:
 
-1. **Otomatis Dijalankan di VPS:**
-   Saat Ansible menjalankan `docker compose up -d`, service `muter_postgres` (image `postgres:15-alpine`) akan otomatis diunduh dan dijalankan bersamaan dengan aplikasi web.
-2. **Data Persisten (Aman saat Update):**
-   Data PostgreSQL disimpan di Docker volume bernama `muter_db_data`. Ketika ada pembaruan kode atau rebuild image, data database **tetap utuh dan tidak akan hilang**.
-3. **Healthcheck Otomatis:**
+1. **Folder Fisik Database:**
+   Data PostgreSQL dipetakan langsung ke direktori fisik di VPS:
+   `/opt/muter-muter-app/data/postgres/`
+2. **100% Kebal Terhadap Docker Prune / Volume Remove:**
+   Karena menggunakan folder fisik di harddisk host VPS (bukan Docker managed volume), data database **TIDAK AKAN PERNAH HILANG** sekalipun container dihapus, di-restart, di-update, atau bahkan jika seseorang menjalankan `docker compose down -v` atau `docker system prune`.
+3. **Folder Fisik File Upload:**
+   Bukti transfer DP dan dokumen KYC mitra juga langsung tersimpan di folder fisik host VPS:
+   `/opt/muter-muter-app/storage/public/`
+4. **Sangat Mudah Dilihat & Di-Backup:**
+   Anda bisa melihat file database langsung di terminal VPS dengan `ls -la /opt/muter-muter-app/data/postgres/` dan membuat backup rutin semudah:
+   ```bash
+   tar -czf backup-db-$(date +%F).tar.gz /opt/muter-muter-app/data/postgres
+   ```
+5. **Healthcheck Otomatis:**
    Container aplikasi web `muter_muter_app` dikonfigurasi dengan `depends_on: muter_postgres: condition: service_healthy`. Sistem akan menunggu database benar-benar siap menerima koneksi sebelum menjalankan `php artisan migrate --force`.
-4. **Opsi Database Eksternal:**
-   Jika di masa depan Anda ingin menggunakan database terpisah di luar Docker (misal AWS RDS, DigitalOcean Managed Database, atau PostgreSQL bawaan host VPS), Anda cukup mengisi variable `DB_HOST` dengan IP/domain database eksternal tersebut.
 
 ---
 

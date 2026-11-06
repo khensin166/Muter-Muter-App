@@ -13,7 +13,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME:-postgres}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
-      - muter_db_data:/var/lib/postgresql/data
+      - ./data/postgres:/var/lib/postgresql/data
     networks:
       - muter_net
     mem_limit: 384m
@@ -45,14 +45,9 @@ services:
     mem_reservation: 256m
     cpus: 1.0
     volumes:
-      - muter_storage:/app/storage/app/public
-      - muter_logs:/app/storage/logs
+      - ./storage/public:/app/storage/app/public
+      - ./storage/logs:/app/storage/logs
 
 networks:
   muter_net:
     external: true
-
-volumes:
-  muter_db_data:
-  muter_storage:
-  muter_logs:

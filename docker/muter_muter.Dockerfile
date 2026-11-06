@@ -4,7 +4,14 @@
 FROM composer:2 AS vendor-builder
 WORKDIR /app
 COPY composer.json composer.lock ./
-RUN composer install --no-dev --no-scripts --no-autoloader --prefer-dist --ignore-platform-reqs
+RUN --mount=type=secret,id=github_token \
+    if [ -f /run/secrets/github_token ]; then \
+        composer config --global github-oauth.github.com "$(cat /run/secrets/github_token)"; \
+    fi && \
+    composer config --global process-timeout 600 && \
+    for i in 1 2 3; do \
+        composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs && break || sleep 10; \
+    done
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
