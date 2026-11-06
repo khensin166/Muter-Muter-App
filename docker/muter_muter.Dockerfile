@@ -10,14 +10,13 @@ RUN composer dump-autoload --optimize --no-dev
 
 # ==========================================
 # STAGE 2: FRONTEND BUILD (Vite + Vue 3)
-# Ziggy is imported from vendor/tightenco/ziggy, so vendor must be present.
 # ==========================================
 FROM node:20-alpine AS frontend-builder
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
-COPY --from=vendor-builder /app/vendor/tightenco/ziggy /app/vendor/tightenco/ziggy
+COPY --from=vendor-builder /app/vendor ./vendor
 RUN npm run build
 
 # ==========================================

@@ -68,7 +68,7 @@ Tambahkan pada tab **Variables** $\rightarrow$ **New repository variable**:
 | `VPS_IP` | `103.127.xxx.xxx` | **Wajib** | Alamat IP Publik server VPS Anda |
 | `VPS_USER` | `root` (atau `ubuntu`) | **Wajib** | Username SSH di server VPS |
 | `APP_URL` | `https://muter-muter.id` | **Wajib** | Domain publik aplikasi produksi |
-| `APP_PORT` | `8000` | Opsional (Default: 8000) | Port host yang diekspos oleh container |
+| `APP_PORT` | `8282` | Opsional (Default: 8282) | Port host yang diekspos oleh container |
 | `DB_HOST` | `muter_postgres` | **Opsional** (Default: `muter_postgres`) | Otomatis terhubung ke container PostgreSQL bawaan |
 | `DB_PORT` | `5432` | Opsional (Default: 5432) | Port database PostgreSQL |
 | `DB_DATABASE` | `muter_muter_prod` | Opsional (Default: `muter_muter_prod`) | Nama database PostgreSQL di server |
@@ -95,7 +95,21 @@ File [`docker-compose.deploy.yml`](file:///d:/eksplor/Muter-Muter-App/docker-com
 
 ---
 
-## 4. Persiapan di Sisi Server VPS (One-time Setup)
+## 4. Pembatasan Resource Server (RAM & CPU) & Path Lokasi
+
+### Lokasi Direktori di VPS:
+File konfigurasi dan project dideploy ke direktori:
+`/opt/muter-muter-app` (berisi `docker-compose.yml` dan `.env`).
+
+### Alokasi Resource (Budget RAM < 1 GB):
+Untuk menjaga sisa RAM VPS (2 GB) tetap aman dan tidak terkena *Out of Memory (OOM)*, kedua container telah dibatasi ketat:
+- **`muter_muter_app` (Web):** Maksimal **640 MB** RAM (`mem_limit: 640m`, limit PHP: `256M`, CPU: 1.0 core).
+- **`muter_postgres` (Database):** Maksimal **384 MB** RAM (`mem_limit: 384m`, CPU: 0.5 core).
+- **Total Beban Maksimum:** ~1 GB RAM, menyisakan > 1 GB RAM untuk OS Ubuntu dan container lain yang sudah berjalan (`porto-analysis-api`, `kainest-backend`, dll).
+
+---
+
+## 5. Persiapan di Sisi Server VPS (One-time Setup)
 
 Sebelum trigger pipeline pertama kali, pastikan hal berikut di VPS Anda:
 
@@ -116,7 +130,7 @@ Sebelum trigger pipeline pertama kali, pastikan hal berikut di VPS Anda:
 
 ---
 
-## 5. File-File CI/CD yang Dihasilkan
+## 6. File-File CI/CD yang Dihasilkan
 
 1. [`.github/workflows/muter-muter-cicd.yml`](file:///d:/eksplor/Muter-Muter-App/.github/workflows/muter-muter-cicd.yml) — GitHub Actions pipeline definition.
 2. [`docker/muter_muter.Dockerfile`](file:///d:/eksplor/Muter-Muter-App/docker/muter_muter.Dockerfile) — Multi-stage production container build (Vite + Composer + FrankenPHP).

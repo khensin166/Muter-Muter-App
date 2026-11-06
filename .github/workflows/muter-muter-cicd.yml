@@ -144,7 +144,7 @@ jobs:
             -e "target_image=${TARGET_IMAGE}" \
             -e "app_key=${{ secrets.APP_KEY || vars.APP_KEY }}" \
             -e "app_url=${{ vars.APP_URL }}" \
-            -e "app_port=${{ vars.APP_PORT || '8000' }}" \
+            -e "app_port=${{ vars.APP_PORT || '8282' }}" \
             -e "db_host=${{ vars.DB_HOST || 'muter_postgres' }}" \
             -e "db_port=${{ vars.DB_PORT || '5432' }}" \
             -e "db_database=${{ vars.DB_DATABASE || 'muter_muter_prod' }}" \
