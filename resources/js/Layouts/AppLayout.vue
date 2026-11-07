@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
@@ -11,7 +12,7 @@ const user = page.props.auth ? page.props.auth.user : null;
   <div class="min-h-screen bg-background text-text-main flex flex-col font-sans selection:bg-accent selection:text-white">
     <!-- Top Alert / Info Bar -->
     <div class="bg-primary-dark text-white text-xs py-1.5 px-4 text-center">
-      <span>✨ Jelajahi pesona Danau Toba & Sumatera Utara dengan pemesanan terintegrasi, transparan, dan terpercaya.</span>
+      <span>✨ Jelajahi keindahan Sumatera Utara (Danau Toba, Bukit Lawang, Tangkahan, Berastagi) dengan pemesanan terintegrasi, transparan, dan terpercaya.</span>
     </div>
 
     <!-- Main Navigation Bar -->
@@ -21,13 +22,7 @@ const user = page.props.auth ? page.props.auth.user : null;
           <!-- Logo & Brand -->
           <div class="flex items-center gap-8">
             <Link :href="route('home', {}, false) ? '/' : '/'" class="flex items-center gap-2 group">
-              <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-card group-hover:scale-105 transition-transform">
-                M
-              </div>
-              <div class="flex flex-col">
-                <span class="text-lg font-extrabold tracking-tight text-primary leading-none">Muter-Muter</span>
-                <span class="text-xs font-semibold text-accent tracking-widest uppercase">Lake Toba</span>
-              </div>
+              <ApplicationLogo className="h-9 sm:h-10 w-auto group-hover:scale-105 transition-transform" />
             </Link>
 
             <!-- Desktop Nav Links -->
@@ -142,36 +137,36 @@ const user = page.props.auth ? page.props.auth.user : null;
     <footer class="bg-primary-dark text-white pt-12 pb-8 border-t border-primary/20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-4 gap-8">
         <div class="space-y-3">
-          <div class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center font-black text-white text-lg">M</div>
-            <span class="text-lg font-bold">Muter-Muter App</span>
-          </div>
+          <Link href="/" class="inline-block">
+            <ApplicationLogo variant="white" className="h-10 w-auto" />
+          </Link>
           <p class="text-sm text-slate-300 leading-relaxed">
-            Platform perjalanan wisata terintegrasi untuk menemukan keindahan Danau Toba dan Sumatera Utara.
+            Platform perjalanan wisata terintegrasi untuk menemukan pesona Sumatera Utara — Danau Toba, Bukit Lawang, Tangkahan, Berastagi, Medan, dan sekitarnya.
           </p>
         </div>
         <div>
           <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Wilayah Wisata</h4>
           <ul class="space-y-2 text-sm text-slate-300">
-            <li><a href="#" class="hover:text-white transition">Parapat & Danau</a></li>
-            <li><a href="#" class="hover:text-white transition">Samosir East (Tomok, Tuktuk)</a></li>
-            <li><a href="#" class="hover:text-white transition">Samosir West (Pangururan)</a></li>
-            <li><a href="#" class="hover:text-white transition">Merek & Tongging</a></li>
+            <li><Link href="/destinations?cluster=TOBA" class="hover:text-white transition">Danau Toba & Samosir</Link></li>
+            <li><Link href="/destinations?cluster=BUKIT_LAWANG" class="hover:text-white transition">Bukit Lawang (Orangutan)</Link></li>
+            <li><Link href="/destinations?cluster=TANGKAHAN" class="hover:text-white transition">Tangkahan Eco-Park (Gajah)</Link></li>
+            <li><Link href="/destinations?cluster=BERASTAGI" class="hover:text-white transition">Berastagi & Dataran Tinggi Karo</Link></li>
+            <li><Link href="/destinations?cluster=MEDAN" class="hover:text-white transition">Medan City & Transit Hub</Link></li>
           </ul>
         </div>
         <div>
           <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Layanan Kami</h4>
           <ul class="space-y-2 text-sm text-slate-300">
-            <li><a href="#" class="hover:text-white transition">Paket Tour (One-day & Open Trip)</a></li>
-            <li><a href="#" class="hover:text-white transition">Rental Mobil & Minibus</a></li>
-            <li><a href="#" class="hover:text-white transition">Custom Trip & Rombongan</a></li>
-            <li><a href="#" class="hover:text-white transition">Gabung Jadi Mitra Vendor</a></li>
+            <li><Link href="/tours" class="hover:text-white transition">Paket Tour (One-day & Open Trip)</Link></li>
+            <li><Link href="/vehicles" class="hover:text-white transition">Rental Mobil & Minibus</Link></li>
+            <li><Link href="/custom-trip" class="hover:text-white transition">Custom Trip & Rombongan</Link></li>
+            <li><Link :href="route('partner.register')" class="hover:text-white transition text-accent font-semibold">Gabung Jadi Mitra Vendor &rarr;</Link></li>
           </ul>
         </div>
         <div>
           <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Bantuan & Kontak</h4>
           <p class="text-sm text-slate-300 leading-relaxed mb-3">
-            Butuh konsultasi perjalanan atau bantuan mendesak?
+            Butuh konsultasi perjalanan atau bantuan reservasi?
           </p>
           <a
             href="https://wa.me/6281234567890"
@@ -183,7 +178,7 @@ const user = page.props.auth ? page.props.auth.user : null;
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
-        © 2026 Lake Toba Travel Marketplace (Muter-Muter App). Hak Cipta Dilindungi.
+        © 2026 BetaTudia — Platform Wisata Sumatera Utara. Hak Cipta Dilindungi.
       </div>
     </footer>
   </div>

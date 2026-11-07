@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
@@ -21,9 +22,10 @@ const isSidebarOpen = ref(false);
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
             </svg>
           </button>
-          <div class="flex items-center gap-2">
+          <div class="flex items-center gap-3">
+            <ApplicationLogo className="h-8 w-auto" />
             <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md">Mitra Vendor</span>
-            <span class="text-sm font-semibold text-text-main">Portal Operasional Danau Toba</span>
+            <span class="text-sm font-semibold text-text-main hidden sm:inline">Portal Operasional Mitra Wisata</span>
           </div>
         </div>
 

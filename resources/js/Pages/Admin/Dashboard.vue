@@ -26,9 +26,9 @@ const formatRupiah = (value) => {
     <div class="bg-surface rounded-2xl p-6 border border-border mb-8 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <span class="text-xs font-bold text-accent uppercase tracking-wider">Super Administrator Console</span>
-        <h1 class="text-2xl font-black text-text-main">Pusat Kendali Operasional Danau Toba</h1>
+        <h1 class="text-2xl font-black text-text-main">Pusat Kendali Operasional Marketplace</h1>
         <p class="text-xs text-text-muted mt-0.5">
-          Pantau kesehatan platform, verifikasi KYC mitra, validasi pembayaran, dan intervensi operasional SLA secara real-time.
+          Pantau kesehatan platform, verifikasi KYC mitra, validasi pembayaran, dan intervensi operasional SLA se-Sumatera Utara secara real-time.
         </p>
       </div>
 

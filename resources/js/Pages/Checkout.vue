@@ -68,7 +68,7 @@ const submit = () => {
 
 <template>
   <AppLayout>
-    <Head title="Pengajuan Pemesanan — Muter-Muter Danau Toba" />
+    <Head title="Pengajuan Pemesanan — BetaTudia" />
 
     <div class="bg-surface-muted border-b border-border py-4 px-4 sm:px-6 lg:px-8">
       <div class="max-w-6xl mx-auto flex items-center gap-2 text-xs text-text-muted">

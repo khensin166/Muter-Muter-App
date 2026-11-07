@@ -43,7 +43,7 @@ const clusterIcons = {
 
 <template>
   <AppLayout>
-    <Head title="Lake Toba Travel Marketplace — Muter-Muter Danau Toba" />
+    <Head title="BetaTudia — Marketplace Wisata Sumatera Utara" />
 
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-b from-primary-dark via-primary to-primary-light text-white py-16 md:py-24 overflow-hidden">
@@ -57,7 +57,7 @@ const clusterIcons = {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
         <div class="inline-flex items-center gap-2 bg-white/15 backdrop-blur-md px-3.5 py-1.5 rounded-full text-xs font-semibold mb-6 border border-white/20">
           <span>✨</span>
-          <span>Marketplace Perjalanan Terintegrasi Danau Toba</span>
+          <span>Marketplace Perjalanan Terintegrasi Sumatera Utara</span>
         </div>
 
         <h1 class="text-3xl sm:text-5xl md:text-6xl font-black tracking-tight max-w-4xl mx-auto leading-tight">
@@ -66,7 +66,7 @@ const clusterIcons = {
         </h1>
 
         <p class="mt-6 text-base sm:text-lg md:text-xl text-slate-200 max-w-2xl mx-auto font-light leading-relaxed">
-          Temukan pesona Danau Toba, pesan paket tour kurasi lokal, sewa armada kendaraan berizin, dan nikmati liburan aman dengan skema Down Payment (DP) transparan.
+          Temukan pesona Sumatera Utara — jelajahi Danau Toba, rimba liar Bukit Lawang, gajah Tangkahan, hingga sejuknya Berastagi. Pesan paket tour kurasi lokal dan sewa armada kendaraan berizin dengan skema Down Payment (DP) transparan.
         </p>
 
         <!-- Search / Filter Card -->
@@ -98,7 +98,7 @@ const clusterIcons = {
             <div>
               <label class="block text-xs font-bold text-text-muted uppercase tracking-wider mb-1">Pilih Kawasan / Klaster</label>
               <select v-model="selectedCluster" class="w-full text-sm font-medium border-border rounded-xl focus:border-primary focus:ring-primary bg-background">
-                <option value="">Semua Kawasan Danau Toba</option>
+                <option value="">Semua Wilayah Sumatera Utara</option>
                 <option v-for="c in clusters" :key="c.value" :value="c.value">
                   {{ c.label }}
                 </option>
@@ -137,7 +137,7 @@ const clusterIcons = {
         <div class="mt-8 flex flex-wrap justify-center items-center gap-3 text-xs">
           <span class="text-slate-300">Akses Cepat Pengguna:</span>
           <Link href="/destinations" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition">
-            📍 10 Destinasi Danau Toba
+            📍 Destinasi Unggulan
           </Link>
           <Link href="/partner" class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 font-semibold transition">
             🏢 Portal Mitra Vendor →
@@ -154,10 +154,10 @@ const clusterIcons = {
       <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
         <div>
           <span class="text-xs font-bold text-accent uppercase tracking-widest">Kawasan Wisata</span>
-          <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">4 Klaster Utama Danau Toba (MVP)</h2>
+          <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">Klaster Wisata Unggulan</h2>
         </div>
         <p class="text-sm text-text-muted mt-2 md:mt-0 max-w-md">
-          Eksplorasi wilayah keindahan danau terbesar di Asia Tenggara dari titik pelabuhan hingga dataran tinggi kaldera.
+          Eksplorasi wilayah keindahan Sumatera Utara dari kaldera danau terbesar, hutan tropis, hingga dataran tinggi.
         </p>
       </div>
 
@@ -196,7 +196,7 @@ const clusterIcons = {
         <div class="flex flex-col md:flex-row md:items-end justify-between mb-10">
           <div>
             <span class="text-xs font-bold text-secondary uppercase tracking-widest">Eksplorasi Objek</span>
-            <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">Destinasi Populer Danau Toba</h2>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">Destinasi Populer di Sumatera Utara</h2>
           </div>
           <Link href="/destinations" class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1">
             Lihat Semua 10 Destinasi →
@@ -385,7 +385,7 @@ const clusterIcons = {
     <section class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center max-w-2xl mx-auto mb-12">
         <span class="text-xs font-bold text-accent uppercase tracking-widest">Jaminan Keamanan Marketplace</span>
-        <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">Mengapa Memesan di Muter-Muter Danau Toba?</h2>
+        <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">Mengapa Memesan di BetaTudia?</h2>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

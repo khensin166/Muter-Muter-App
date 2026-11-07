@@ -30,13 +30,13 @@ const formatRupiah = (value) => {
         <div class="relative z-10 max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold mb-3">
             <span>🌿</span>
-            <span>Muter-Muter Lake Toba Travel Hub</span>
+            <span>BetaTudia Travel Hub — Sumatera Utara</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
             Horas, {{ $page.props.auth.user.name }}! 👋
           </h1>
           <p class="text-white/80 text-sm mt-1 sm:mt-2">
-            Rencanakan petualangan Danau Toba Anda dengan nyaman, pantau konfirmasi reservasi mitra lokal, dan akses tiket perjalanan Anda di sini.
+            Rencanakan petualangan wisata Sumatera Utara Anda (Danau Toba, Bukit Lawang, Tangkahan, Berastagi), pantau konfirmasi reservasi mitra lokal, dan akses tiket perjalanan Anda di sini.
           </p>
 
           <div class="flex flex-wrap gap-3 mt-5">
@@ -292,8 +292,8 @@ const formatRupiah = (value) => {
       <div class="pt-6 border-t border-border space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-lg font-black text-text-main">Destinasi Populer di Kawasan Danau Toba</h2>
-            <p class="text-xs text-text-muted">Kunjungi spot ikonik di sekitar Samosir, Parapat, dan Kaldera Toba.</p>
+            <h2 class="text-lg font-black text-text-main">Destinasi Pilihan di Sumatera Utara</h2>
+            <p class="text-xs text-text-muted">Kunjungi spot ikonik di Danau Toba, Bukit Lawang, Tangkahan, Berastagi, dan Medan.</p>
           </div>
           <Link href="/destinations" class="text-xs font-bold text-primary hover:underline">
             Lihat Semua &rarr;
@@ -315,7 +315,7 @@ const formatRupiah = (value) => {
                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
               />
               <div v-else class="w-full h-full flex items-center justify-center bg-primary/10 text-primary font-bold text-sm">
-                Danau Toba
+                Sumatera Utara
               </div>
               <span class="absolute bottom-2 left-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-sm text-[10px] font-bold text-white">
                 {{ d.cluster }}

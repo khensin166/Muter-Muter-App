@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
+import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
@@ -22,8 +23,9 @@ const isSidebarOpen = ref(false);
             </svg>
           </button>
           <div class="flex items-center gap-3">
+            <ApplicationLogo variant="white" className="h-7 w-auto" />
             <span class="text-xs font-black uppercase tracking-wider px-2 py-0.5 bg-accent text-white rounded">ADMIN</span>
-            <span class="text-sm font-bold tracking-tight">Platform Operations Console</span>
+            <span class="text-sm font-bold tracking-tight hidden sm:inline">Platform Operations Console</span>
           </div>
         </div>
 

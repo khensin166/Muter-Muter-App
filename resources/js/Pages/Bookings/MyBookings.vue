@@ -17,7 +17,7 @@ const formatRupiah = (value) => {
 
 <template>
   <AppLayout>
-    <Head title="Pesanan Saya — Muter-Muter Danau Toba" />
+    <Head title="Pesanan Saya — BetaTudia" />
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       <div class="flex items-center justify-between">
