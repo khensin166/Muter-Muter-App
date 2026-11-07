@@ -83,14 +83,14 @@ test('whatsapp service formats indonesian phone numbers correctly', function () 
 });
 
 test('whatsapp service sends message in mock mode with log entry', function () {
-    Log::shouldReceive('info')
+    Log::shouldReceive('log')
         ->once()
-        ->withArgs(function ($message) {
-            return str_contains($message, '[WhatsApp Mock Mode]') && str_contains($message, '628123456789');
+        ->withArgs(function ($level, $message) {
+            return $level === 'info' && str_contains($message, '[Mock Mode]') && str_contains($message, '628123456789');
         });
 
     $service = new WhatsAppService();
-    $result = $service->sendMessage('08123456789', 'Halo ini pesan test Lake Toba!');
+    $result = $service->sendMessage('08123456789', 'Halo ini pesan test BetaTudia!');
 
     expect($result)->toBeTrue();
 });

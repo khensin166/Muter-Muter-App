@@ -12,7 +12,7 @@ const user = page.props.auth ? page.props.auth.user : null;
   <div class="min-h-screen bg-background text-text-main flex flex-col font-sans selection:bg-accent selection:text-white">
     <!-- Top Alert / Info Bar -->
     <div class="bg-primary-dark text-white text-xs py-1.5 px-4 text-center">
-      <span>✨ Jelajahi keindahan Sumatera Utara (Danau Toba, Bukit Lawang, Tangkahan, Berastagi) dengan pemesanan terintegrasi, transparan, dan terpercaya.</span>
+      <span>Jelajahi keindahan Sumatera Utara dengan pemesanan terintegrasi, transparan, dan terpercaya.</span>
     </div>
 
     <!-- Main Navigation Bar -->
@@ -178,7 +178,7 @@ const user = page.props.auth ? page.props.auth.user : null;
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
-        © 2026 BetaTudia — Platform Wisata Sumatera Utara. Hak Cipta Dilindungi.
+        © 2026 BetaTudia - Platform Wisata Sumatera Utara. Hak Cipta Dilindungi.
       </div>
     </footer>
   </div>

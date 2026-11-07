@@ -43,7 +43,7 @@ const clusterIcons = {
 
 <template>
   <AppLayout>
-    <Head title="BetaTudia — Marketplace Wisata Sumatera Utara" />
+    <Head title="BetaTudia - Wisata Sumatera Utara" />
 
     <!-- Hero Section -->
     <section class="relative bg-gradient-to-b from-primary-dark via-primary to-primary-light text-white py-16 md:py-24 overflow-hidden">

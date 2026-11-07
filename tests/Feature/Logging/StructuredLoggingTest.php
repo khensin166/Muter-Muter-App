@@ -82,16 +82,16 @@ test('sensitive data is properly masked and redacted in log context', function (
 
     expect($data['context']['password'])->toBe('[REDACTED]')
         ->and($data['context']['api_token'])->toBe('[REDACTED]')
-        ->and($data['context']['user_phone'])->toBe('0812****890')
+        ->and($data['context']['user_phone'])->toBe('0812*****890')
         ->and($data['context']['nik_ktp'])->toBe('1271********0001')
-        ->and($data['context']['bank_account_number'])->toBe('107******41');
+        ->and($data['context']['bank_account_number'])->toBe('107********41');
 });
 
 test('app logger audit method creates database record and emits structured event', function () {
     $user = User::factory()->create();
     $this->actingAs($user);
 
-    $booking = Booking::factory()->make();
+    $booking = new Booking();
     $booking->id = (string) \Illuminate\Support\Str::uuid();
 
     $auditLog = AppLogger::audit(

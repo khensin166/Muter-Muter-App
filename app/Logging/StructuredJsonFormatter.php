@@ -44,7 +44,7 @@ class StructuredJsonFormatter extends NormalizerFormatter
 
         $payload = [
             'timestamp' => $record->datetime->format('Y-m-d\TH:i:s.v\Z'),
-            'level' => $record->level->name,
+            'level' => strtoupper($record->level->name),
             'service' => $this->serviceName,
             'channel' => $channel,
             'event' => $event,
