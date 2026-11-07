@@ -114,3 +114,4 @@ test('app logger audit method creates database record and emits structured event
         'action' => 'STATUS_FORCE_APPROVED',
     ]);
 });
+

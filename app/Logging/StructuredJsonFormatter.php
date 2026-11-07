@@ -131,3 +131,4 @@ class StructuredJsonFormatter extends NormalizerFormatter
         return $masked;
     }
 }
+

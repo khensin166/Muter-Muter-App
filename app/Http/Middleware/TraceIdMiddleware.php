@@ -52,3 +52,4 @@ class TraceIdMiddleware
         return $response;
     }
 }
+

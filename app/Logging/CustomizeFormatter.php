@@ -2,16 +2,18 @@
 
 namespace App\Logging;
 
-use Monolog\Logger;
-
 class CustomizeFormatter
 {
     /**
      * Customize the given logger instance with StructuredJsonFormatter.
      */
-    public function __invoke(Logger $logger): void
+    public function __invoke(mixed $logger): void
     {
-        foreach ($logger->getHandlers() as $handler) {
+        $handlers = method_exists($logger, 'getHandlers')
+            ? $logger->getHandlers()
+            : (method_exists($logger, 'getLogger') ? $logger->getLogger()->getHandlers() : []);
+
+        foreach ($handlers as $handler) {
             $handler->setFormatter(new StructuredJsonFormatter(config('app.name', 'muter-muter-app')));
         }
     }
