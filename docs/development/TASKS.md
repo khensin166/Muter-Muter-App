@@ -160,16 +160,29 @@
 ---
 
 ## Phase 10: Brand Generalization (North Sumatra) & Logo Asset Integration
-- [/] **Documentation & Planning:**
+- [x] **Documentation & Planning:**
   - [x] Update `docs/product/PRD.md` with multi-cluster regional vision (Danau Toba, Bukit Lawang, Tangkahan, Berastagi, Medan).
   - [x] Update `docs/design/DESIGN_SYSTEM.md` with logo storage standards (`public/images/`) and navbar brand guidelines.
   - [x] Update `AGENTS.md` identity specification.
-- [ ] **Execution (Code & UI):**
-  - [ ] Setup image asset directory: `public/images/` and place logo placeholders.
-  - [ ] Implement robust `<ApplicationLogo />` Vue component with graceful fallback.
-  - [ ] Refactor `resources/js/Layouts/AppLayout.vue`: replace hardcoded "Lake Toba" navbar badge with "Sumatera Utara", update footer categories.
-  - [ ] Refactor `resources/js/Pages/Welcome.vue`: generalize hero titles and promotional copies.
-  - [ ] Refactor `resources/js/Pages/Dashboard.vue`: update Customer Travel Hub title and greetings.
-  - [ ] Refactor `resources/js/Layouts/AdminLayout.vue` & `PartnerLayout.vue`: generalize portal headers.
-  - [ ] Expand database seeds and destination clusters to include Bukit Lawang, Tangkahan, and Berastagi.
+- [x] **Execution (Code & UI):**
+  - [x] Setup image asset directory: `public/images/` and place BetaTudia logo assets (`logo.png`, `logo-white.png`, `logo-icon.svg`).
+  - [x] Implement robust `<ApplicationLogo />` Vue component with brand typography **BetaTudia** alongside the logo emblem.
+  - [x] Refactor `resources/js/Layouts/AppLayout.vue`: replace hardcoded "Lake Toba" navbar badge with "BetaTudia", update footer categories.
+  - [x] Refactor `resources/js/Pages/Welcome.vue`: generalize hero titles and promotional copies to Sumatera Utara.
+  - [x] Refactor `resources/js/Pages/Dashboard.vue`: update Customer Travel Hub title and greetings.
+  - [x] Refactor `resources/js/Layouts/AdminLayout.vue` & `PartnerLayout.vue`: generalize portal headers.
+
+---
+
+## Phase 11: Security Hardening & 4-Layer File Upload Sanitization
+- [x] **Documentation & Architecture Specification:**
+  - [x] Create `docs/architecture/SECURITY_AND_UPLOAD_SPEC.md` defining SQL Injection protection, Storage volume persistence, and 4-Layer File Upload Defense.
+  - [x] Update `docs/architecture/SYSTEM_ARCHITECTURE.md` and `docs/development/TASKS.md`.
+- [x] **Execution (Security Service, Controllers & Web Server):**
+  - [x] Implement `App\Services\FileSecurityService` (Magic bytes validation, binary payload scanning for `<?php`/`<script>`, pixel dimension cap `4096x4096`, PHP GD image re-encoding & EXIF stripping, UUID v4 filename generation).
+  - [x] Integrate `FileSecurityService` into `PaymentProofController` (`proof_file`).
+  - [x] Integrate `FileSecurityService` into `PartnerRegisterController` (`ktp_file`, `nib_file`, `fleet_photos`).
+  - [x] Integrate `FileSecurityService` into `PartnerProductController` (`photos` for Tour & Vehicle).
+  - [x] Harden `docker/Caddyfile` to block PHP execution inside `/storage/*` and enforce `X-Content-Type-Options: nosniff`.
+  - [x] Write automated security tests (`tests/Feature/Security/FileUploadSecurityTest.php`) verifying rejection of spoofed PHP files, polyglot webshells, SVG XSS files, and verifying clean image re-encoding.
 

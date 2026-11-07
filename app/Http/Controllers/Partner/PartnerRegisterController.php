@@ -10,6 +10,7 @@ use App\Models\Partner;
 use App\Models\PartnerDocument;
 use App\Models\PartnerMember;
 use App\Models\User;
+use App\Services\FileSecurityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -59,7 +60,29 @@ class PartnerRegisterController extends Controller
             'fleet_photos.*' => ['file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        DB::transaction(function () use ($request, $validated) {
+        // Deep 4-layer file inspection & sanitization before DB transaction
+        $ktpPath = $request->hasFile('ktp_file')
+            ? FileSecurityService::validateAndStore($request->file('ktp_file'), 'partner_documents/ktp', 'ktp_file', allowPdf: true, disk: 'public')
+            : null;
+
+        $nibPath = $request->hasFile('nib_file')
+            ? FileSecurityService::validateAndStore($request->file('nib_file'), 'partner_documents/nib', 'nib_file', allowPdf: true, disk: 'public')
+            : null;
+
+        $fleetPaths = [];
+        if ($request->hasFile('fleet_photos')) {
+            foreach ($request->file('fleet_photos') as $idx => $photo) {
+                $fleetPaths[] = FileSecurityService::validateAndStore(
+                    file: $photo,
+                    directory: 'partner_documents/fleet',
+                    fieldName: "fleet_photos.{$idx}",
+                    allowPdf: false,
+                    disk: 'public'
+                );
+            }
+        }
+
+        DB::transaction(function () use ($validated, $ktpPath, $nibPath, $fleetPaths) {
             // 1. Create Partner Entity
             $partner = Partner::create([
                 'business_name' => $validated['business_name'],
@@ -94,8 +117,7 @@ class PartnerRegisterController extends Controller
             ]);
 
             // 4. Save KYC Documents
-            if ($request->hasFile('ktp_file')) {
-                $ktpPath = $request->file('ktp_file')->store('partner_documents/ktp', 'public');
+            if ($ktpPath) {
                 PartnerDocument::create([
                     'partner_id' => $partner->id,
                     'document_type' => 'KTP',
@@ -104,8 +126,7 @@ class PartnerRegisterController extends Controller
                 ]);
             }
 
-            if ($request->hasFile('nib_file')) {
-                $nibPath = $request->file('nib_file')->store('partner_documents/nib', 'public');
+            if ($nibPath) {
                 PartnerDocument::create([
                     'partner_id' => $partner->id,
                     'document_type' => 'NIB',
@@ -114,16 +135,13 @@ class PartnerRegisterController extends Controller
                 ]);
             }
 
-            if ($request->hasFile('fleet_photos')) {
-                foreach ($request->file('fleet_photos') as $photo) {
-                    $photoPath = $photo->store('partner_documents/fleet', 'public');
-                    PartnerDocument::create([
-                        'partner_id' => $partner->id,
-                        'document_type' => 'FLEET_PHOTO',
-                        'file_path' => $photoPath,
-                        'verification_status' => 'PENDING',
-                    ]);
-                }
+            foreach ($fleetPaths as $photoPath) {
+                PartnerDocument::create([
+                    'partner_id' => $partner->id,
+                    'document_type' => 'FLEET_PHOTO',
+                    'file_path' => $photoPath,
+                    'verification_status' => 'PENDING',
+                ]);
             }
 
             Auth::login($user);

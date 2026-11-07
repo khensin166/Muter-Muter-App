@@ -33,7 +33,7 @@ test('partner can register with valid information and kyc documents', function (
         'bank_account_number' => '1070099887766',
         'bank_account_holder' => 'CV Danau Toba Sejahtera',
         'ktp_file' => UploadedFile::fake()->image('ktp.jpg'),
-        'nib_file' => UploadedFile::fake()->create('nib.pdf', 500, 'application/pdf'),
+        'nib_file' => UploadedFile::fake()->createWithContent('nib.pdf', "%PDF-1.4\n1 0 obj\n<< /Type /Catalog >>\nendobj\n%%EOF"),
         'fleet_photos' => [
             UploadedFile::fake()->image('unit1.jpg'),
             UploadedFile::fake()->image('unit2.jpg'),

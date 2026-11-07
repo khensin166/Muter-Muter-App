@@ -106,7 +106,14 @@ To eliminate race conditions, double bookings, and inventory overselling:
 ## 5. Security & Compliance Architecture
 
 - **CSRF Protection:** Native Laravel CSRF tokens validated on all mutation requests.
-- **File Upload Hardening:** Strict MIME-type checking (JPEG, PNG, WebP, PDF only) and random UUID-based file naming; files stored outside public root or in protected object storage.
-- **Authorization Enforcement:** Every controller endpoint MUST execute `$this->authorize(...)` using dedicated Laravel Policies.
+- **SQL Injection Immunity:** 100% Eloquent ORM & PDO prepared statements with strict PostgreSQL UUID v4 type enforcement; zero unparameterized raw SQL queries.
+- **4-Layer File Upload Hardening (`FileSecurityService`):**
+  1. *Magic Bytes & Binary Inspection:* Real MIME verification via `finfo`, strict rejection of `.svg`/`.php`/executable extensions, pixel dimension bounds (`<= 4096x4096`), and binary payload scanning against embedded `<?php` or `<script>` tags.
+  2. *Image Re-Encoding & EXIF Stripping:* Re-renders uploaded raster images via PHP GD to destroy hidden EXIF metadata and polyglot webshell payloads.
+  3. *UUID Filename Sanitization:* Original user filenames are discarded and replaced with cryptographic UUID v4 names.
+  4. *Web Server Execution Lock (`Caddyfile`):* `/storage/*` is strictly isolated from `php_server` execution and served with `X-Content-Type-Options: nosniff`.
+  - See full specification in [`docs/architecture/SECURITY_AND_UPLOAD_SPEC.md`](SECURITY_AND_UPLOAD_SPEC.md).
+- **Structured Logging & Audit Trail:** Unified JSON logging (`daily` + Docker `stderr` stack) with automatic PII masking and immutable database `audit_logs`. See [`docs/architecture/LOGGING_AND_AUDIT_SPEC.md`](LOGGING_AND_AUDIT_SPEC.md).
+- **Authorization Enforcement:** Every controller endpoint MUST execute `$this->authorize(...)` or RBAC policy validation.
 - **Data Privacy:** Customer phone numbers and bank account numbers are only accessible to authorized Admins and assigned fulfillment Partners.
 

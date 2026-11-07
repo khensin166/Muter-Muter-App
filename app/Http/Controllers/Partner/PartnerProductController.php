@@ -18,6 +18,7 @@ use App\Models\TourItineraryDay;
 use App\Models\TourItineraryStop;
 use App\Models\TourPackage;
 use App\Models\Vehicle;
+use App\Services\FileSecurityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -133,7 +134,7 @@ class PartnerProductController extends Controller
             'inclusions' => ['nullable', 'string'],
             'exclusions' => ['nullable', 'string'],
             'terms_conditions' => ['nullable', 'string'],
-            'photos.*' => ['nullable', 'image', 'max:5120'],
+            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'itinerary' => ['nullable', 'array'],
             'itinerary.*.day_number' => ['required_with:itinerary', 'integer'],
             'itinerary.*.title' => ['required_with:itinerary', 'string', 'max:255'],
@@ -145,7 +146,21 @@ class PartnerProductController extends Controller
             'itinerary.*.stops.*.estimated_minutes' => ['nullable', 'integer'],
         ]);
 
-        DB::transaction(function () use ($partner, $validated, $request) {
+        // Deep 4-layer file inspection & sanitization before DB transaction
+        $photoPaths = [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $idx => $photo) {
+                $photoPaths[] = FileSecurityService::validateAndStore(
+                    file: $photo,
+                    directory: 'products/tours',
+                    fieldName: "photos.{$idx}",
+                    allowPdf: false,
+                    disk: 'public'
+                );
+            }
+        }
+
+        DB::transaction(function () use ($partner, $validated, $photoPaths) {
             $slug = Str::slug($validated['name']).'-'.Str::random(6);
 
             $product = Product::create([
@@ -203,17 +218,14 @@ class PartnerProductController extends Controller
             }
 
             // Save Photos
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $idx => $photo) {
-                    $path = $photo->store('products/tours', 'public');
-                    ProductMedia::create([
-                        'product_id' => $product->id,
-                        'media_url' => '/storage/'.$path,
-                        'media_type' => 'IMAGE',
-                        'is_primary' => $idx === 0,
-                        'sort_order' => $idx,
-                    ]);
-                }
+            foreach ($photoPaths as $idx => $path) {
+                ProductMedia::create([
+                    'product_id' => $product->id,
+                    'media_url' => '/storage/'.$path,
+                    'media_type' => 'IMAGE',
+                    'is_primary' => $idx === 0,
+                    'sort_order' => $idx,
+                ]);
             }
         });
 
@@ -264,10 +276,24 @@ class PartnerProductController extends Controller
             'license_plate' => ['required', 'string', 'max:20'],
             'base_price' => ['required', 'numeric', 'min:50000'],
             'pricing_type' => ['required', 'string', 'in:'.implode(',', array_column(PricingType::cases(), 'value'))],
-            'photos.*' => ['nullable', 'image', 'max:5120'],
+            'photos.*' => ['nullable', 'file', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
         ]);
 
-        DB::transaction(function () use ($partner, $validated, $request) {
+        // Deep 4-layer file inspection & sanitization before DB transaction
+        $photoPaths = [];
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $idx => $photo) {
+                $photoPaths[] = FileSecurityService::validateAndStore(
+                    file: $photo,
+                    directory: 'products/vehicles',
+                    fieldName: "photos.{$idx}",
+                    allowPdf: false,
+                    disk: 'public'
+                );
+            }
+        }
+
+        DB::transaction(function () use ($partner, $validated, $photoPaths) {
             $slug = Str::slug($validated['name']).'-'.Str::random(6);
 
             $product = Product::create([
@@ -299,17 +325,14 @@ class PartnerProductController extends Controller
                 'license_plate' => strtoupper($validated['license_plate']),
             ]);
 
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $idx => $photo) {
-                    $path = $photo->store('products/vehicles', 'public');
-                    ProductMedia::create([
-                        'product_id' => $product->id,
-                        'media_url' => '/storage/'.$path,
-                        'media_type' => 'IMAGE',
-                        'is_primary' => $idx === 0,
-                        'sort_order' => $idx,
-                    ]);
-                }
+            foreach ($photoPaths as $idx => $path) {
+                ProductMedia::create([
+                    'product_id' => $product->id,
+                    'media_url' => '/storage/'.$path,
+                    'media_type' => 'IMAGE',
+                    'is_primary' => $idx === 0,
+                    'sort_order' => $idx,
+                ]);
             }
         });
 

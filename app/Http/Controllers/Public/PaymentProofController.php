@@ -9,6 +9,7 @@ use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\Payment;
 use App\Models\PaymentProof;
+use App\Services\FileSecurityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -35,14 +36,22 @@ class PaymentProofController extends Controller
         }
 
         $validated = $request->validate([
-            'proof_file' => ['required', 'file', 'mimes:jpeg,jpg,png,pdf', 'max:5120'],
+            'proof_file' => ['required', 'file', 'mimes:jpeg,jpg,png,webp,pdf', 'max:5120'],
             'bank_sender_name' => ['required', 'string', 'max:100'],
             'bank_sender_account' => ['required', 'string', 'max:50'],
             'transferred_at' => ['nullable', 'date'],
         ]);
 
-        DB::transaction(function () use ($booking, $validated, $request, $user) {
-            $path = $request->file('proof_file')->store('payments/proofs', 'public');
+        // Deep 4-layer file inspection, EXIF stripping & UUID storage
+        $path = FileSecurityService::validateAndStore(
+            file: $request->file('proof_file'),
+            directory: 'payments/proofs',
+            fieldName: 'proof_file',
+            allowPdf: true,
+            disk: 'public'
+        );
+
+        DB::transaction(function () use ($booking, $validated, $path, $user) {
 
             // Find or create Payment record
             $payment = Payment::firstOrCreate(

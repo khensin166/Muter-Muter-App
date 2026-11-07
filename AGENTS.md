@@ -80,6 +80,8 @@ Always refer back to the project documentation located in `docs/`:
 - `docs/product/USER_FLOWS.md` — Step-by-step user and transaction flows
 - `docs/architecture/DATABASE_ERD.md` — Schema diagrams and relations
 - `docs/architecture/DATA_DICTIONARY.md` — Column-level specs
+- `docs/architecture/LOGGING_AND_AUDIT_SPEC.md` — Structured JSON logging, PII masking & audit trail
+- `docs/architecture/SECURITY_AND_UPLOAD_SPEC.md` — 4-layer file upload security, EXIF stripping & web server hardening
 - `docs/development/IMPLEMENTATION_PLAN.md` — Phased roadmap
 - `docs/development/TASKS.md` — Actionable checklist
 

@@ -1,12 +1,23 @@
 {
-    frankenphp
-    order php_server before file_server
+	frankenphp
+	order php_server before file_server
 }
 
 :8000 {
-    root * /app/public
-    encode zstd gzip
-    php_server
-    file_server
-}
+	root * /app/public
+	encode zstd gzip
 
+	@blocked_storage {
+		path /storage/*.php /storage/*.phtml /storage/*.phar /storage/*.sh /storage/*.svg /storage/*.html /storage/*.htm
+	}
+	respond @blocked_storage "Forbidden" 403
+
+	handle /storage/* {
+		header X-Content-Type-Options "nosniff"
+		header Content-Security-Policy "default-src 'none'; style-src 'unsafe-inline'; sandbox"
+		file_server
+	}
+
+	php_server
+	file_server
+}

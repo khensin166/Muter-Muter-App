@@ -35,6 +35,8 @@ FROM dunglas/frankenphp:latest-php8.2-alpine AS runner
 RUN install-php-extensions \
     pdo_pgsql \
     pgsql \
+    gd \
+    exif \
     bcmath \
     intl \
     opcache \
