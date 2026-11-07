@@ -17,7 +17,7 @@ class RoleAndUserSeeder extends Seeder
     {
         // 1. Super Admin
         $admin = User::firstOrCreate(
-            ['email' => 'admin@mutermuter.com'],
+            ['email' => 'admin@betatudia.com'],
             [
                 'name' => 'Super Administrator Platform',
                 'phone' => '081260000001',
@@ -29,7 +29,7 @@ class RoleAndUserSeeder extends Seeder
 
         // 2. Demo Partner (Horas Samosir Tour & Transport)
         $partner = Partner::firstOrCreate(
-            ['email' => 'contact@horassamosir.com'],
+            ['email' => 'partner@betatudia.com'],
             [
                 'business_name' => 'CV Horas Samosir Wisata',
                 'brand_name' => 'Horas Samosir Tour & Transport',
@@ -46,7 +46,7 @@ class RoleAndUserSeeder extends Seeder
 
         // 2a. Partner Owner User
         $partnerOwner = User::firstOrCreate(
-            ['email' => 'togu@horassamosir.com'],
+            ['email' => 'partner_owner@betatudia.com'],
             [
                 'name' => 'Togu Simanjuntak',
                 'phone' => '081260000002',
@@ -69,7 +69,7 @@ class RoleAndUserSeeder extends Seeder
 
         // 2b. Partner Staff User
         $partnerStaff = User::firstOrCreate(
-            ['email' => 'butet@horassamosir.com'],
+            ['email' => 'partner_user@betatudia.com'],
             [
                 'name' => 'Butet Nainggolan',
                 'phone' => '081260000003',
@@ -92,7 +92,7 @@ class RoleAndUserSeeder extends Seeder
 
         // 3. Demo Customer User
         $customer = User::firstOrCreate(
-            ['email' => 'budi.santoso@gmail.com'],
+            ['email' => 'user@betatudia.com'],
             [
                 'name' => 'Budi Santoso',
                 'phone' => '081370000001',
