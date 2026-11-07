@@ -186,3 +186,18 @@
   - [x] Harden `docker/Caddyfile` to block PHP execution inside `/storage/*` and enforce `X-Content-Type-Options: nosniff`.
   - [x] Write automated security tests (`tests/Feature/Security/FileUploadSecurityTest.php`) verifying rejection of spoofed PHP files, polyglot webshells, SVG XSS files, and verifying clean image re-encoding.
 
+---
+
+## Phase 12: Multilingual Architecture (i18n), PostgreSQL JSONB & Translation Integration
+- [x] **Documentation & Architecture Specification:**
+  - [x] Create `docs/architecture/LOCALIZATION_I18N_SPEC.md` defining bilingual schema (`id` & `en`), PostgreSQL JSONB columns, Expression & GIN Indexing, and Google Cloud Translation Service.
+  - [x] Update `docs/architecture/SYSTEM_ARCHITECTURE.md`, `docs/development/TASKS.md`, and `AGENTS.md`.
+- [ ] **Execution (Database, Services, UI & Forms):**
+  - [ ] Create PostgreSQL migration to convert translatable columns to `JSONB` with B-Tree expression indexes and GIN full-text indexes.
+  - [ ] Implement `App\Traits\HasTranslations` trait for translatable Eloquent models.
+  - [ ] Implement `App\Services\GoogleTranslationService` with HTTP client and mock mode.
+  - [ ] Implement `SetLocaleMiddleware`, `POST /locale` switcher route, and `lang/id.json` & `lang/en.json` dictionaries.
+  - [ ] Build `resources/js/Components/LanguageSwitcher.vue` in `AppLayout.vue` navbar.
+  - [ ] Build dynamic `ID` / `EN` toggle button & Auto-Translate button in `PartnerProductController` forms (`CreateTour.vue`, `CreateVehicle.vue`, and itinerary modals).
+  - [ ] Write automated tests for locale persistence, JSONB queries, and translation fallback.
+

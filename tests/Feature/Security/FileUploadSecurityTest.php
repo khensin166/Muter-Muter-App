@@ -124,3 +124,4 @@ test('pdf containing embedded javascript action is strictly rejected', function 
         disk: 'public'
     ))->toThrow(ValidationException::class);
 });
+

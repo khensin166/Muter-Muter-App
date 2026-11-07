@@ -82,6 +82,7 @@ Always refer back to the project documentation located in `docs/`:
 - `docs/architecture/DATA_DICTIONARY.md` — Column-level specs
 - `docs/architecture/LOGGING_AND_AUDIT_SPEC.md` — Structured JSON logging, PII masking & audit trail
 - `docs/architecture/SECURITY_AND_UPLOAD_SPEC.md` — 4-layer file upload security, EXIF stripping & web server hardening
+- `docs/architecture/LOCALIZATION_I18N_SPEC.md` — Multilingual PostgreSQL JSONB, indexing & Google Translate integration
 - `docs/development/IMPLEMENTATION_PLAN.md` — Phased roadmap
 - `docs/development/TASKS.md` — Actionable checklist
 
