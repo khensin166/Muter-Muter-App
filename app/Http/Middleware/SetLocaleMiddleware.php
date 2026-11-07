@@ -26,3 +26,4 @@ class SetLocaleMiddleware
         return $next($request);
     }
 }
+

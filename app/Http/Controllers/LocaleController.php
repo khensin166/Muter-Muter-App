@@ -25,3 +25,4 @@ class LocaleController extends Controller
         return back()->with('success', $locale === 'en' ? 'Language switched to English.' : 'Bahasa dialihkan ke Bahasa Indonesia.');
     }
 }
+

@@ -37,6 +37,7 @@ class GoogleTranslationService
 
         try {
             $response = Http::timeout(8)
+                ->withoutVerifying()
                 ->asJson()
                 ->post("{$this->endpoint}?key={$this->apiKey}", [
                     'q' => [$text],
@@ -92,6 +93,7 @@ class GoogleTranslationService
 
         try {
             $response = Http::timeout(10)
+                ->withoutVerifying()
                 ->asJson()
                 ->post("{$this->endpoint}?key={$this->apiKey}", [
                     'q' => $values,
@@ -157,3 +159,4 @@ class GoogleTranslationService
         return $translated;
     }
 }
+

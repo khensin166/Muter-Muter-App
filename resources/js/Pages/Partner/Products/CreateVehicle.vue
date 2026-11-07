@@ -1,6 +1,7 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
+import FlagIcon from '@/Components/FlagIcon.vue';
 import { ref } from 'vue';
 import axios from 'axios';
 
@@ -107,7 +108,8 @@ const submit = () => {
                 contentLang === 'id' ? 'bg-white shadow text-primary font-black' : 'text-text-muted hover:text-text-main'
               ]"
             >
-              <span>🇮🇩</span> Indonesia <span class="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold">Default</span>
+              <FlagIcon country="id" className="w-4 h-2.5" />
+              <span>Indonesia</span> <span class="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold">Default</span>
             </button>
             <button
               type="button"
@@ -117,7 +119,8 @@ const submit = () => {
                 contentLang === 'en' ? 'bg-white shadow text-secondary font-black' : 'text-text-muted hover:text-text-main'
               ]"
             >
-              <span>🇬🇧</span> English <span v-if="form.name_en" class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-semibold">Ready</span>
+              <FlagIcon country="en" className="w-4 h-2.5" />
+              <span>English</span> <span v-if="form.name_en" class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-semibold">Ready</span>
             </button>
           </div>
         </div>
@@ -277,8 +280,9 @@ const submit = () => {
             <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
               2. Tarif & Deskripsi Layanan
             </h2>
-            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" :class="contentLang === 'id' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'">
-              Mode: {{ contentLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English Version' }}
+            <span class="text-[11px] font-bold px-2.5 py-1 rounded-full inline-flex items-center gap-1.5" :class="contentLang === 'id' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'">
+              <FlagIcon :country="contentLang" className="w-3.5 h-2.5" />
+              <span>{{ contentLang === 'id' ? 'Bahasa Indonesia' : 'English Version' }}</span>
             </span>
           </div>
 

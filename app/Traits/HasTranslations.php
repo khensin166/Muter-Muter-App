@@ -129,3 +129,4 @@ trait HasTranslations
         return $this;
     }
 }
+
