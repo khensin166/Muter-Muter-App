@@ -19,6 +19,7 @@ use App\Models\TourItineraryStop;
 use App\Models\TourPackage;
 use App\Models\Vehicle;
 use App\Services\FileSecurityService;
+use App\Services\GoogleTranslationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -160,17 +161,36 @@ class PartnerProductController extends Controller
             }
         }
 
-        DB::transaction(function () use ($partner, $validated, $photoPaths) {
+        $translator = app(GoogleTranslationService::class);
+
+        $nameEn = $request->input('name_en') ?: $translator->translate($validated['name'], 'en', 'id');
+        $shortDescEn = $request->input('short_description_en') ?: $translator->translate($validated['short_description'], 'en', 'id');
+        $fullDescEn = $request->input('full_description_en') ?: $translator->translate($validated['full_description'], 'en', 'id');
+
+        $namePayload = ['id' => $validated['name'], 'en' => $nameEn];
+        $shortDescPayload = ['id' => $validated['short_description'], 'en' => $shortDescEn];
+        $fullDescPayload = ['id' => $validated['full_description'], 'en' => $fullDescEn];
+
+        $inclusionsEn = $request->input('inclusions_en') ?: (! empty($validated['inclusions']) ? $translator->translate($validated['inclusions'], 'en', 'id') : null);
+        $inclusionsPayload = ! empty($validated['inclusions']) ? ['id' => $validated['inclusions'], 'en' => $inclusionsEn] : null;
+
+        $exclusionsEn = $request->input('exclusions_en') ?: (! empty($validated['exclusions']) ? $translator->translate($validated['exclusions'], 'en', 'id') : null);
+        $exclusionsPayload = ! empty($validated['exclusions']) ? ['id' => $validated['exclusions'], 'en' => $exclusionsEn] : null;
+
+        $termsEn = $request->input('terms_conditions_en') ?: (! empty($validated['terms_conditions']) ? $translator->translate($validated['terms_conditions'], 'en', 'id') : null);
+        $termsPayload = ! empty($validated['terms_conditions']) ? ['id' => $validated['terms_conditions'], 'en' => $termsEn] : null;
+
+        DB::transaction(function () use ($partner, $validated, $photoPaths, $namePayload, $shortDescPayload, $fullDescPayload, $inclusionsPayload, $exclusionsPayload, $termsPayload, $translator) {
             $slug = Str::slug($validated['name']).'-'.Str::random(6);
 
             $product = Product::create([
                 'partner_id' => $partner->id,
                 'ownership_type' => OwnershipType::PARTNER,
                 'product_type' => ProductType::TOUR,
-                'name' => $validated['name'],
+                'name' => $namePayload,
                 'slug' => $slug,
-                'short_description' => $validated['short_description'],
-                'full_description' => $validated['full_description'],
+                'short_description' => $shortDescPayload,
+                'full_description' => $fullDescPayload,
                 'base_price' => $validated['base_price'],
                 'pricing_type' => $validated['pricing_type'],
                 'dp_percentage' => 30.00, // Default MVP 30%
@@ -186,30 +206,36 @@ class PartnerProductController extends Controller
                 'duration_nights' => $validated['duration_nights'],
                 'min_participants' => $validated['min_participants'],
                 'max_participants' => $validated['max_participants'],
-                'inclusions' => $validated['inclusions'] ?? null,
-                'exclusions' => $validated['exclusions'] ?? null,
-                'terms_conditions' => $validated['terms_conditions'] ?? null,
+                'inclusions' => $inclusionsPayload,
+                'exclusions' => $exclusionsPayload,
+                'terms_conditions' => $termsPayload,
                 'includes_ferry' => $validated['includes_ferry'],
             ]);
 
             // Save Itinerary
             if (! empty($validated['itinerary'])) {
                 foreach ($validated['itinerary'] as $dayData) {
+                    $dayTitleEn = $dayData['title_en'] ?? $translator->translate($dayData['title'], 'en', 'id');
+                    $dayDescEn = ! empty($dayData['description']) ? ($dayData['description_en'] ?? $translator->translate($dayData['description'], 'en', 'id')) : null;
+
                     $day = TourItineraryDay::create([
                         'tour_package_id' => $tourPackage->id,
                         'day_number' => $dayData['day_number'],
-                        'title' => $dayData['title'],
-                        'description' => $dayData['description'] ?? null,
+                        'title' => ['id' => $dayData['title'], 'en' => $dayTitleEn],
+                        'description' => ! empty($dayData['description']) ? ['id' => $dayData['description'], 'en' => $dayDescEn] : null,
                     ]);
 
                     if (! empty($dayData['stops'])) {
                         foreach ($dayData['stops'] as $index => $stopData) {
+                            $stopTitleEn = $stopData['title_en'] ?? $translator->translate($stopData['title'], 'en', 'id');
+                            $stopActEn = ! empty($stopData['activity_description']) ? ($stopData['activity_description_en'] ?? $translator->translate($stopData['activity_description'], 'en', 'id')) : null;
+
                             TourItineraryStop::create([
                                 'tour_itinerary_day_id' => $day->id,
                                 'destination_id' => $stopData['destination_id'] ?? null,
                                 'stop_order' => $index + 1,
-                                'title' => $stopData['title'],
-                                'activity_description' => $stopData['activity_description'] ?? null,
+                                'title' => ['id' => $stopData['title'], 'en' => $stopTitleEn],
+                                'activity_description' => ! empty($stopData['activity_description']) ? ['id' => $stopData['activity_description'], 'en' => $stopActEn] : null,
                                 'estimated_minutes' => $stopData['estimated_minutes'] ?? 60,
                             ]);
                         }
@@ -293,17 +319,26 @@ class PartnerProductController extends Controller
             }
         }
 
-        DB::transaction(function () use ($partner, $validated, $photoPaths) {
+        $translator = app(GoogleTranslationService::class);
+        $nameEn = $request->input('name_en') ?: $translator->translate($validated['name'], 'en', 'id');
+        $shortDescEn = $request->input('short_description_en') ?: $translator->translate($validated['short_description'], 'en', 'id');
+        $fullDescEn = $request->input('full_description_en') ?: $translator->translate($validated['full_description'], 'en', 'id');
+
+        $namePayload = ['id' => $validated['name'], 'en' => $nameEn];
+        $shortDescPayload = ['id' => $validated['short_description'], 'en' => $shortDescEn];
+        $fullDescPayload = ['id' => $validated['full_description'], 'en' => $fullDescEn];
+
+        DB::transaction(function () use ($partner, $validated, $photoPaths, $namePayload, $shortDescPayload, $fullDescPayload) {
             $slug = Str::slug($validated['name']).'-'.Str::random(6);
 
             $product = Product::create([
                 'partner_id' => $partner->id,
                 'ownership_type' => OwnershipType::PARTNER,
                 'product_type' => ProductType::VEHICLE,
-                'name' => $validated['name'],
+                'name' => $namePayload,
                 'slug' => $slug,
-                'short_description' => $validated['short_description'],
-                'full_description' => $validated['full_description'],
+                'short_description' => $shortDescPayload,
+                'full_description' => $fullDescPayload,
                 'base_price' => $validated['base_price'],
                 'pricing_type' => $validated['pricing_type'],
                 'dp_percentage' => 30.00,

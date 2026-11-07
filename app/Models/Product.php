@@ -7,16 +7,23 @@ use App\Enums\OwnershipType;
 use App\Enums\PricingType;
 use App\Enums\ProductStatus;
 use App\Enums\ProductType;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Product extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, HasTranslations;
 
     protected $keyType = 'string';
     public $incrementing = false;
+
+    protected array $translatable = [
+        'name',
+        'short_description',
+        'full_description',
+    ];
 
     protected $fillable = [
         'partner_id',

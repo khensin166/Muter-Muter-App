@@ -1,16 +1,24 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
+import { ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
   vehicleTypes: Array,
   transmissions: Array,
 });
 
+const contentLang = ref('id');
+const isTranslating = ref(false);
+
 const form = useForm({
   name: '',
+  name_en: '',
   short_description: '',
+  short_description_en: '',
   full_description: '',
+  full_description_en: '',
   vehicle_type: 'CAR',
   brand: 'Toyota',
   model: 'Innova Reborn 2.4 V Diesel',
@@ -24,6 +32,38 @@ const form = useForm({
   pricing_type: 'PER_VEHICLE',
   photos: [],
 });
+
+const autoTranslateAll = async () => {
+  if (!form.name && !form.short_description) {
+    alert('Harap isi Judul Unit atau Ringkasan Singkat (Bahasa Indonesia) terlebih dahulu.');
+    return;
+  }
+
+  isTranslating.value = true;
+  try {
+    const res = await axios.post('/api/translate-batch', {
+      fields: {
+        name: form.name,
+        short_description: form.short_description,
+        full_description: form.full_description,
+      },
+      source: 'id',
+      target: 'en',
+    });
+
+    if (res.data && res.data.translations) {
+      const t = res.data.translations;
+      form.name_en = t.name || '';
+      form.short_description_en = t.short_description || '';
+      form.full_description_en = t.full_description || '';
+      contentLang.value = 'en';
+    }
+  } catch (err) {
+    console.error('Translation error:', err);
+  } finally {
+    isTranslating.value = false;
+  }
+};
 
 const handlePhotoUpload = (e) => {
   form.photos = Array.from(e.target.files);
@@ -54,6 +94,46 @@ const submit = () => {
         </Link>
       </div>
 
+      <!-- Bilingual Switcher & Auto-Translate Action Bar -->
+      <div class="bg-surface p-4 rounded-2xl border border-border shadow-card flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Bahasa Formulir:</span>
+          <div class="inline-flex rounded-xl p-1 bg-surface-muted border border-border">
+            <button
+              type="button"
+              @click="contentLang = 'id'"
+              :class="[
+                'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5',
+                contentLang === 'id' ? 'bg-white shadow text-primary font-black' : 'text-text-muted hover:text-text-main'
+              ]"
+            >
+              <span>🇮🇩</span> Indonesia <span class="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold">Default</span>
+            </button>
+            <button
+              type="button"
+              @click="contentLang = 'en'"
+              :class="[
+                'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5',
+                contentLang === 'en' ? 'bg-white shadow text-secondary font-black' : 'text-text-muted hover:text-text-main'
+              ]"
+            >
+              <span>🇬🇧</span> English <span v-if="form.name_en" class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-semibold">Ready</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          @click="autoTranslateAll"
+          :disabled="isTranslating"
+          class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-600 to-secondary hover:from-teal-700 hover:to-secondary/90 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition disabled:opacity-50"
+        >
+          <span v-if="isTranslating" class="animate-spin text-sm">⏳</span>
+          <span v-else>✨</span>
+          <span>{{ isTranslating ? 'Menerjemahkan via AI...' : 'Auto-Translate ID ➔ EN' }}</span>
+        </button>
+      </div>
+
       <form @submit.prevent="submit" class="space-y-6">
         <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
           <h2 class="text-sm font-bold text-text-main uppercase tracking-wider border-b border-border pb-2">
@@ -61,8 +141,8 @@ const submit = () => {
           </h2>
 
           <div class="space-y-4 text-xs">
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Judul Tampilan Unit *</label>
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Judul Tampilan Unit (Bahasa Indonesia) *</label>
               <input
                 v-model="form.name"
                 type="text"
@@ -71,6 +151,16 @@ const submit = () => {
                 required
               />
               <span v-if="form.errors.name" class="text-danger mt-1 block">{{ form.errors.name }}</span>
+            </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Unit Display Title (English)</label>
+              <input
+                v-model="form.name_en"
+                type="text"
+                placeholder="e.g. Toyota Innova Reborn Diesel + Experienced English Driver"
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary focus:ring-secondary bg-secondary/5"
+              />
+              <p class="text-[11px] text-text-muted mt-1">Jika dikosongkan, sistem akan otomatis menerjemahkan dari teks Indonesia.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -183,9 +273,14 @@ const submit = () => {
         </div>
 
         <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
-          <h2 class="text-sm font-bold text-text-main uppercase tracking-wider border-b border-border pb-2">
-            2. Tarif & Deskripsi Layanan
-          </h2>
+          <div class="flex items-center justify-between border-b border-border pb-2">
+            <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
+              2. Tarif & Deskripsi Layanan
+            </h2>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" :class="contentLang === 'id' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'">
+              Mode: {{ contentLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English Version' }}
+            </span>
+          </div>
 
           <div class="space-y-4 text-xs">
             <div>
@@ -201,8 +296,9 @@ const submit = () => {
               />
             </div>
 
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Singkat *</label>
+            <!-- Short Description -->
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Singkat (ID) *</label>
               <input
                 v-model="form.short_description"
                 type="text"
@@ -211,15 +307,34 @@ const submit = () => {
                 required
               />
             </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Short Summary (EN)</label>
+              <input
+                v-model="form.short_description_en"
+                type="text"
+                placeholder="Premium vehicle option for family comfort touring Lake Toba"
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary bg-secondary/5"
+              />
+            </div>
 
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Deskripsi Kondisi Armada & Kebijakan BBM *</label>
+            <!-- Full Description -->
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Deskripsi Kondisi Armada & Kebijakan BBM (ID) *</label>
               <textarea
                 v-model="form.full_description"
                 rows="4"
                 placeholder="Armada ber-AC dingin, bersih, terawat berkala. Sudah termasuk BBM dan uang makan driver untuk pemakaian dalam kawasan kaldera Danau Toba..."
                 class="w-full text-xs font-medium rounded-xl border-border focus:border-primary focus:ring-primary"
                 required
+              ></textarea>
+            </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Fleet Condition Description & Fuel Policy (EN)</label>
+              <textarea
+                v-model="form.full_description_en"
+                rows="4"
+                placeholder="Cold AC fleet, clean, periodically serviced. Includes fuel and driver meals for Lake Toba caldera area..."
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary bg-secondary/5"
               ></textarea>
             </div>
 

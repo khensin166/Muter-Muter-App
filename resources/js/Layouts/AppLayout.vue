@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
@@ -36,6 +37,8 @@ const user = page.props.auth ? page.props.auth.user : null;
 
           <!-- Auth & CTA Section -->
           <div class="hidden md:flex items-center gap-4">
+            <LanguageSwitcher />
+
             <template v-if="user">
               <Link
                 v-if="user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'"
@@ -83,7 +86,9 @@ const user = page.props.auth ? page.props.auth.user : null;
           </div>
 
           <!-- Mobile Hamburger -->
-          <div class="flex items-center md:hidden">
+          <div class="flex items-center gap-2 md:hidden">
+            <LanguageSwitcher />
+
             <button
               @click="showingNavigationDropdown = !showingNavigationDropdown"
               class="p-2 rounded-lg text-text-muted hover:text-text-main hover:bg-surface-muted transition"

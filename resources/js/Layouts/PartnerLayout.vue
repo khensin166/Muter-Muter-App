@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
+import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
@@ -30,6 +31,7 @@ const isSidebarOpen = ref(false);
         </div>
 
         <div class="flex items-center gap-4">
+          <LanguageSwitcher />
           <Link href="/" class="text-xs font-medium text-text-muted hover:text-primary hidden sm:inline">
             ← Ke Marketplace
           </Link>

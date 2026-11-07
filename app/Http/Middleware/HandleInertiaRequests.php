@@ -47,6 +47,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => fn () => $request->session()->get('success'),
                 'error' => fn () => $request->session()->get('error'),
             ],
+            'locale' => fn () => app()->getLocale(),
             'trace_id' => fn () => $request->attributes->get('trace_id'),
         ];
     }

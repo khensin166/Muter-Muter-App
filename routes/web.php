@@ -39,6 +39,13 @@ Route::get('/my-bookings', [BookingController::class, 'myBookings'])->middleware
 // Customer Dashboard
 Route::get('/dashboard', [UserDashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
+// Language Locale Switcher
+Route::post('/locale', [\App\Http\Controllers\LocaleController::class, 'switch'])->name('locale.switch');
+
+// Translation API for Partner & Admin dynamic forms
+Route::post('/api/translate', [\App\Http\Controllers\Api\TranslationController::class, 'translate'])->name('api.translate');
+Route::post('/api/translate-batch', [\App\Http\Controllers\Api\TranslationController::class, 'translateBatch'])->name('api.translate.batch');
+
 Route::middleware('auth')->group(function () {
     Route::post('/bookings/{code}/cancel', [BookingCancellationController::class, 'cancel'])->name('bookings.cancel');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

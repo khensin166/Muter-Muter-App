@@ -2,16 +2,23 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
 import { ref } from 'vue';
+import axios from 'axios';
 
 const props = defineProps({
   destinations: Array,
   tourTypes: Array,
 });
 
+const contentLang = ref('id');
+const isTranslating = ref(false);
+
 const form = useForm({
   name: '',
+  name_en: '',
   short_description: '',
+  short_description_en: '',
   full_description: '',
+  full_description_en: '',
   tour_type: 'PRIVATE_TRIP',
   base_price: '',
   pricing_type: 'PER_PERSON',
@@ -21,19 +28,26 @@ const form = useForm({
   max_participants: 10,
   includes_ferry: true,
   inclusions: "- Tiket Ferry Penyeberangan Danau Toba PP\n- Transportasi Privat Mobil/Minibus\n- Driver merangkap Local Guide\n- Air mineral harian\n- Tiket objek wisata",
+  inclusions_en: '',
   exclusions: "- Tiket penerbangan ke Silangit/Kualanamu\n- Pengeluaran pribadi & tips driver\n- Makan di luar paket",
+  exclusions_en: '',
   terms_conditions: "Pemesanan minimal H-1 sebelum jadwal keberangkatan. DP 30% wajib dilunasi dalam waktu 24 jam setelah ketersediaan disetujui.",
+  terms_conditions_en: '',
   photos: [],
   itinerary: [
     {
       day_number: 1,
       title: 'Penjemputan & Eksplorasi Danau Toba',
+      title_en: '',
       description: 'Penjemputan rombongan di titik temu dan perjalanan menuju destinasi utama.',
+      description_en: '',
       stops: [
         {
           destination_id: props.destinations[0]?.id || '',
           title: 'Kunjungan Destinasi Ikonik',
+          title_en: '',
           activity_description: 'Eksplorasi spot wisata dan foto pemandangan.',
+          activity_description_en: '',
           estimated_minutes: 90,
         },
       ],
@@ -41,11 +55,73 @@ const form = useForm({
   ],
 });
 
+const autoTranslateAll = async () => {
+  if (!form.name && !form.short_description) {
+    alert('Harap isi Nama Paket Tour atau Ringkasan Singkat (Bahasa Indonesia) terlebih dahulu.');
+    return;
+  }
+
+  isTranslating.value = true;
+  try {
+    const fieldsToTranslate = {
+      name: form.name,
+      short_description: form.short_description,
+      full_description: form.full_description,
+      inclusions: form.inclusions,
+      exclusions: form.exclusions,
+      terms_conditions: form.terms_conditions,
+    };
+
+    form.itinerary.forEach((day, dIdx) => {
+      fieldsToTranslate[`itinerary_day_${dIdx}_title`] = day.title;
+      fieldsToTranslate[`itinerary_day_${dIdx}_desc`] = day.description;
+      day.stops.forEach((stop, sIdx) => {
+        fieldsToTranslate[`itinerary_stop_${dIdx}_${sIdx}_title`] = stop.title;
+        fieldsToTranslate[`itinerary_stop_${dIdx}_${sIdx}_desc`] = stop.activity_description;
+      });
+    });
+
+    const res = await axios.post('/api/translate-batch', {
+      fields: fieldsToTranslate,
+      source: 'id',
+      target: 'en',
+    });
+
+    if (res.data && res.data.translations) {
+      const t = res.data.translations;
+      form.name_en = t.name || '';
+      form.short_description_en = t.short_description || '';
+      form.full_description_en = t.full_description || '';
+      form.inclusions_en = t.inclusions || '';
+      form.exclusions_en = t.exclusions || '';
+      form.terms_conditions_en = t.terms_conditions || '';
+
+      form.itinerary.forEach((day, dIdx) => {
+        day.title_en = t[`itinerary_day_${dIdx}_title`] || '';
+        day.description_en = t[`itinerary_day_${dIdx}_desc`] || '';
+        day.stops.forEach((stop, sIdx) => {
+          stop.title_en = t[`itinerary_stop_${dIdx}_${sIdx}_title`] || '';
+          stop.activity_description_en = t[`itinerary_stop_${dIdx}_${sIdx}_desc`] || '';
+        });
+      });
+
+      // Switch to English tab to review translated content
+      contentLang.value = 'en';
+    }
+  } catch (err) {
+    console.error('Translation error:', err);
+  } finally {
+    isTranslating.value = false;
+  }
+};
+
 const addDay = () => {
   form.itinerary.push({
     day_number: form.itinerary.length + 1,
     title: `Hari ke-${form.itinerary.length + 1}`,
+    title_en: `Day ${form.itinerary.length + 1}`,
     description: '',
+    description_en: '',
     stops: [],
   });
 };
@@ -59,7 +135,9 @@ const addStop = (dayIndex) => {
   form.itinerary[dayIndex].stops.push({
     destination_id: props.destinations[0]?.id || '',
     title: 'Spot Kunjungan Baru',
+    title_en: '',
     activity_description: '',
+    activity_description_en: '',
     estimated_minutes: 60,
   });
 };
@@ -97,16 +175,63 @@ const submit = () => {
         </Link>
       </div>
 
+      <!-- Bilingual Switcher & Auto-Translate Action Bar -->
+      <div class="bg-surface p-4 rounded-2xl border border-border shadow-card flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <span class="text-xs font-bold text-text-muted uppercase tracking-wider">Bahasa Formulir:</span>
+          <div class="inline-flex rounded-xl p-1 bg-surface-muted border border-border">
+            <button
+              type="button"
+              @click="contentLang = 'id'"
+              :class="[
+                'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5',
+                contentLang === 'id' ? 'bg-white shadow text-primary font-black' : 'text-text-muted hover:text-text-main'
+              ]"
+            >
+              <span>🇮🇩</span> Indonesia <span class="text-[10px] bg-primary/10 text-primary px-1.5 py-0.2 rounded font-semibold">Default</span>
+            </button>
+            <button
+              type="button"
+              @click="contentLang = 'en'"
+              :class="[
+                'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5',
+                contentLang === 'en' ? 'bg-white shadow text-secondary font-black' : 'text-text-muted hover:text-text-main'
+              ]"
+            >
+              <span>🇬🇧</span> English <span v-if="form.name_en" class="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 py-0.2 rounded font-semibold">Ready</span>
+            </button>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          @click="autoTranslateAll"
+          :disabled="isTranslating"
+          class="w-full sm:w-auto px-4 py-2 bg-gradient-to-r from-teal-600 to-primary hover:from-teal-700 hover:to-primary-dark text-white rounded-xl text-xs font-bold flex items-center justify-center gap-2 shadow-sm transition disabled:opacity-50"
+        >
+          <span v-if="isTranslating" class="animate-spin text-sm">⏳</span>
+          <span v-else>✨</span>
+          <span>{{ isTranslating ? 'Menerjemahkan via AI...' : 'Auto-Translate ID ➔ EN' }}</span>
+        </button>
+      </div>
+
       <form @submit.prevent="submit" class="space-y-6">
         <!-- Section 1: Informasi Dasar -->
         <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
-          <h2 class="text-sm font-bold text-text-main uppercase tracking-wider border-b border-border pb-2">
-            1. Informasi Dasar Paket
-          </h2>
+          <div class="flex items-center justify-between border-b border-border pb-2">
+            <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
+              1. Informasi Dasar Paket
+            </h2>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" :class="contentLang === 'id' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'">
+              Mode: {{ contentLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English Version' }}
+            </span>
+          </div>
 
+          <!-- Bilingual inputs for Basic Info -->
           <div class="space-y-4 text-xs">
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Nama Paket Tour *</label>
+            <!-- Name -->
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Nama Paket Tour (Bahasa Indonesia) *</label>
               <input
                 v-model="form.name"
                 type="text"
@@ -116,9 +241,20 @@ const submit = () => {
               />
               <span v-if="form.errors.name" class="text-danger mt-1 block">{{ form.errors.name }}</span>
             </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Tour Package Name (English)</label>
+              <input
+                v-model="form.name_en"
+                type="text"
+                placeholder="e.g. 3D2N Exotic Lake Toba & Samosir Cultural Tour"
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary focus:ring-secondary bg-secondary/5"
+              />
+              <p class="text-[11px] text-text-muted mt-1">Jika dikosongkan, sistem akan otomatis menerjemahkan dari teks Indonesia.</p>
+            </div>
 
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Singkat (Short Description) *</label>
+            <!-- Short Description -->
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Singkat (Short Description - ID) *</label>
               <input
                 v-model="form.short_description"
                 type="text"
@@ -128,9 +264,19 @@ const submit = () => {
               />
               <span v-if="form.errors.short_description" class="text-danger mt-1 block">{{ form.errors.short_description }}</span>
             </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Short Description (English)</label>
+              <input
+                v-model="form.short_description_en"
+                type="text"
+                placeholder="1-2 sentences overview for marketplace search cards"
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary focus:ring-secondary bg-secondary/5"
+              />
+            </div>
 
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Deskripsi Lengkap *</label>
+            <!-- Full Description -->
+            <div v-show="contentLang === 'id'">
+              <label class="block font-bold text-text-muted uppercase mb-1">Deskripsi Lengkap (Bahasa Indonesia) *</label>
               <textarea
                 v-model="form.full_description"
                 rows="4"
@@ -139,6 +285,15 @@ const submit = () => {
                 required
               ></textarea>
               <span v-if="form.errors.full_description" class="text-danger mt-1 block">{{ form.errors.full_description }}</span>
+            </div>
+            <div v-show="contentLang === 'en'">
+              <label class="block font-bold text-secondary uppercase mb-1">Full Description (English)</label>
+              <textarea
+                v-model="form.full_description_en"
+                rows="4"
+                placeholder="Explore the wonders of the tour, travel routes, authentic local experiences, and accommodations..."
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary focus:ring-secondary bg-secondary/5"
+              ></textarea>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -233,9 +388,12 @@ const submit = () => {
         <!-- Section 2: Itinerary Harian -->
         <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
           <div class="flex items-center justify-between border-b border-border pb-2">
-            <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
-              2. Jadwal Perjalanan (Itinerary Harian)
-            </h2>
+            <div>
+              <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
+                2. Jadwal Perjalanan (Itinerary Harian)
+              </h2>
+              <span class="text-[11px] text-text-muted">Menampilkan teks dalam: <strong class="text-text-main">{{ contentLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English' }}</strong></span>
+            </div>
             <button
               type="button"
               @click="addDay"
@@ -263,9 +421,10 @@ const submit = () => {
                 </button>
               </div>
 
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <!-- Day inputs based on contentLang -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" v-if="contentLang === 'id'">
                 <div>
-                  <label class="block font-bold text-text-muted uppercase mb-1">Judul Hari</label>
+                  <label class="block font-bold text-text-muted uppercase mb-1">Judul Hari (ID)</label>
                   <input
                     v-model="day.title"
                     type="text"
@@ -275,12 +434,33 @@ const submit = () => {
                   />
                 </div>
                 <div>
-                  <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Aktivitas</label>
+                  <label class="block font-bold text-text-muted uppercase mb-1">Ringkasan Aktivitas (ID)</label>
                   <input
                     v-model="day.description"
                     type="text"
                     placeholder="Contoh: Menyeberang dengan ferry dan menikmati budaya Batak."
                     class="w-full text-xs font-medium rounded-xl border-border bg-white"
+                  />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs" v-else>
+                <div>
+                  <label class="block font-bold text-secondary uppercase mb-1">Day Title (EN)</label>
+                  <input
+                    v-model="day.title_en"
+                    type="text"
+                    placeholder="e.g. Exploring Tomok & East Samosir"
+                    class="w-full text-xs font-medium rounded-xl border-secondary/30 bg-white"
+                  />
+                </div>
+                <div>
+                  <label class="block font-bold text-secondary uppercase mb-1">Day Overview (EN)</label>
+                  <input
+                    v-model="day.description_en"
+                    type="text"
+                    placeholder="e.g. Crossing by ferry and immersing in Batak culture."
+                    class="w-full text-xs font-medium rounded-xl border-secondary/30 bg-white"
                   />
                 </div>
               </div>
@@ -305,12 +485,21 @@ const submit = () => {
                     class="p-3 bg-white rounded-lg border border-border flex flex-col sm:flex-row gap-2 items-center text-xs"
                   >
                     <input
+                      v-if="contentLang === 'id'"
                       v-model="stop.title"
                       type="text"
-                      placeholder="Nama Kegiatan/Spot"
+                      placeholder="Nama Kegiatan/Spot (ID)"
                       class="flex-1 text-xs font-medium rounded-lg border-border"
                       required
                     />
+                    <input
+                      v-else
+                      v-model="stop.title_en"
+                      type="text"
+                      placeholder="Activity/Spot Title (EN)"
+                      class="flex-1 text-xs font-medium rounded-lg border-secondary/30 bg-secondary/5"
+                    />
+
                     <select
                       v-model="stop.destination_id"
                       class="text-xs font-medium rounded-lg border-border sm:w-48"
@@ -320,12 +509,14 @@ const submit = () => {
                         {{ d.name }}
                       </option>
                     </select>
+
                     <input
                       v-model.number="stop.estimated_minutes"
                       type="number"
                       placeholder="Menit"
                       class="w-20 text-xs font-medium rounded-lg border-border"
                     />
+
                     <button
                       type="button"
                       @click="removeStop(dIndex, sIndex)"
@@ -340,15 +531,21 @@ const submit = () => {
           </div>
         </div>
 
-        <!-- Section 3: Fasilitas & Foto -->
+        <!-- Section 3: Fasilitas & Kebijakan -->
         <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
-          <h2 class="text-sm font-bold text-text-main uppercase tracking-wider border-b border-border pb-2">
-            3. Fasilitas & Foto
-          </h2>
+          <div class="flex items-center justify-between border-b border-border pb-2">
+            <h2 class="text-sm font-bold text-text-main uppercase tracking-wider">
+              3. Fasilitas & Kebijakan Tour
+            </h2>
+            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full" :class="contentLang === 'id' ? 'bg-primary/10 text-primary' : 'bg-secondary/10 text-secondary'">
+              Mode: {{ contentLang === 'id' ? '🇮🇩 Bahasa Indonesia' : '🇬🇧 English Version' }}
+            </span>
+          </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+          <!-- Inclusions & Exclusions -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs" v-if="contentLang === 'id'">
             <div>
-              <label class="block font-bold text-emerald-700 uppercase mb-1">Fasilitas Termasuk (Inclusions)</label>
+              <label class="block font-bold text-emerald-700 uppercase mb-1">Fasilitas Termasuk (Inclusions - ID)</label>
               <textarea
                 v-model="form.inclusions"
                 rows="4"
@@ -356,7 +553,7 @@ const submit = () => {
               ></textarea>
             </div>
             <div>
-              <label class="block font-bold text-rose-700 uppercase mb-1">Tidak Termasuk (Exclusions)</label>
+              <label class="block font-bold text-rose-700 uppercase mb-1">Tidak Termasuk (Exclusions - ID)</label>
               <textarea
                 v-model="form.exclusions"
                 rows="4"
@@ -365,7 +562,47 @@ const submit = () => {
             </div>
           </div>
 
-          <div class="text-xs">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs" v-else>
+            <div>
+              <label class="block font-bold text-emerald-700 uppercase mb-1">Included Amenities (Inclusions - EN)</label>
+              <textarea
+                v-model="form.inclusions_en"
+                rows="4"
+                placeholder="Included tour amenities..."
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary bg-secondary/5"
+              ></textarea>
+            </div>
+            <div>
+              <label class="block font-bold text-rose-700 uppercase mb-1">Not Included (Exclusions - EN)</label>
+              <textarea
+                v-model="form.exclusions_en"
+                rows="4"
+                placeholder="Exclusions..."
+                class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary bg-secondary/5"
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Terms & Conditions -->
+          <div class="text-xs" v-if="contentLang === 'id'">
+            <label class="block font-bold text-text-muted uppercase mb-1">Syarat & Ketentuan / Kebijakan Pembatalan (ID)</label>
+            <textarea
+              v-model="form.terms_conditions"
+              rows="3"
+              class="w-full text-xs font-medium rounded-xl border-border focus:border-primary"
+            ></textarea>
+          </div>
+          <div class="text-xs" v-else>
+            <label class="block font-bold text-secondary uppercase mb-1">Terms & Conditions / Cancellation Policy (EN)</label>
+            <textarea
+              v-model="form.terms_conditions_en"
+              rows="3"
+              placeholder="Booking conditions, DP rules, and cancellation terms..."
+              class="w-full text-xs font-medium rounded-xl border-secondary/30 focus:border-secondary bg-secondary/5"
+            ></textarea>
+          </div>
+
+          <div class="text-xs pt-2">
             <label class="block font-bold text-text-muted uppercase mb-1">Upload Foto Tour (JPG/PNG, Max 5MB)</label>
             <input
               type="file"

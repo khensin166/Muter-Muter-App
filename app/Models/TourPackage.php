@@ -3,16 +3,23 @@
 namespace App\Models;
 
 use App\Enums\TourType;
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class TourPackage extends Model
 {
-    use HasFactory, HasUuids;
+    use HasFactory, HasUuids, HasTranslations;
 
     protected $keyType = 'string';
     public $incrementing = false;
+
+    protected array $translatable = [
+        'inclusions',
+        'exclusions',
+        'terms_conditions',
+    ];
 
     protected $fillable = [
         'product_id',

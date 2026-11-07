@@ -31,4 +31,10 @@ return [
         ],
     ],
 
+    'google_translate' => [
+        'api_key' => env('GOOGLE_TRANSLATE_API_KEY'),
+        'mock_mode' => env('GOOGLE_TRANSLATE_MOCK_MODE', false),
+        'endpoint' => 'https://translation.googleapis.com/language/translate/v2',
+    ],
+
 ];
