@@ -157,3 +157,19 @@
 - [x] Perform mobile responsive UX audit (tested breakpoints `sm:`, `md:`, `lg:` with responsive navigation).
 - [x] Prepare deployment documentation and environment checklist (`docs/deployment/DEPLOYMENT_GUIDE.md`).
 
+---
+
+## Phase 10: Brand Generalization (North Sumatra) & Logo Asset Integration
+- [/] **Documentation & Planning:**
+  - [x] Update `docs/product/PRD.md` with multi-cluster regional vision (Danau Toba, Bukit Lawang, Tangkahan, Berastagi, Medan).
+  - [x] Update `docs/design/DESIGN_SYSTEM.md` with logo storage standards (`public/images/`) and navbar brand guidelines.
+  - [x] Update `AGENTS.md` identity specification.
+- [ ] **Execution (Code & UI):**
+  - [ ] Setup image asset directory: `public/images/` and place logo placeholders.
+  - [ ] Implement robust `<ApplicationLogo />` Vue component with graceful fallback.
+  - [ ] Refactor `resources/js/Layouts/AppLayout.vue`: replace hardcoded "Lake Toba" navbar badge with "Sumatera Utara", update footer categories.
+  - [ ] Refactor `resources/js/Pages/Welcome.vue`: generalize hero titles and promotional copies.
+  - [ ] Refactor `resources/js/Pages/Dashboard.vue`: update Customer Travel Hub title and greetings.
+  - [ ] Refactor `resources/js/Layouts/AdminLayout.vue` & `PartnerLayout.vue`: generalize portal headers.
+  - [ ] Expand database seeds and destination clusters to include Bukit Lawang, Tangkahan, and Berastagi.
+

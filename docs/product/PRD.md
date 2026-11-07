@@ -1,9 +1,9 @@
-# Product Requirements Document (PRD) — Lake Toba Travel Marketplace
+# Product Requirements Document (PRD) — Muter-Muter Travel Marketplace
 
-- **Document Version:** 1.0
-- **Status:** Approved Post-Grooming
-- **Product Type:** Travel Marketplace & Trip Management Platform
-- **Initial Target Market:** Lake Toba and surrounding regions, North Sumatra, Indonesia
+- **Document Version:** 1.1
+- **Status:** Approved Architecture & Scope Alignment
+- **Product Type:** Regional Travel Marketplace & Trip Management Platform
+- **Initial Target Market:** North Sumatra (Sumatera Utara), Indonesia — covering Lake Toba, Bukit Lawang, Tangkahan, Berastagi, and Medan Hub
 
 ---
 
@@ -12,32 +12,35 @@
 ### 1.1 Product Vision
 > *"One platform to discover, plan, and experience North Sumatra."*
 
-The Lake Toba Travel Marketplace is an integrated digital ecosystem designed to connect travelers, local tourism operators, and vehicle rental providers. It empowers tourists to discover regional attractions, book curated tour packages, rent vehicles with or without drivers, and consult on custom itineraries with transparent pricing and centralized booking management.
+**Muter-Muter App** is an integrated regional tourism marketplace connecting travelers, local tour operators, and vehicle rental providers across North Sumatra. Rather than being restricted to a single attraction, Muter-Muter encompasses the entire North Sumatra travel corridor.
+
+**Danau Toba (Lake Toba)** is positioned as one of the flagship destination clusters alongside **Bukit Lawang** (orangutan jungle trekking), **Tangkahan** (elephant sanctuary & river tubing), **Berastagi** (volcanoes & highlands), and **Medan** (cultural & transit hub).
 
 ### 1.2 Core Objectives
-1. **Discoverability:** Provide comprehensive, curated listings of destinations in the Lake Toba region.
+1. **Discoverability:** Provide comprehensive, curated listings across major North Sumatra travel corridors.
 2. **Integrated Commerce:** Offer direct booking for Tour Packages and Vehicle Rentals under a unified platform.
-3. **Local Partner Empowerment:** Provide local operators with digital storefronts, availability management, and transparent financial settlement.
+3. **Local Partner Empowerment:** Provide local operators (tour guides, transport providers) with digital storefronts, availability management, and transparent financial settlement.
 4. **Reliable Fulfillment:** Ensure booking confirmations, inventory holds, and customer notifications are clear, predictable, and supported by local customer service.
-5. **Extensibility:** Build a scalable modular architecture that can seamlessly expand to other regions in North Sumatra (e.g., Berastagi, Bukit Lawang, Nias).
+5. **Brand Flexibility & Scalability:** Establish a scalable, regional brand identity that can seamlessly onboard partners across all regencies of North Sumatra.
 
 ---
 
 ## 2. Target Market & User Personas
 
 ### 2.1 Target Personas
-- **Primary MVP Persona:** Domestic tourists from outside North Sumatra (Jakarta, Java, Riau, Batam), typically traveling in small private groups of 2–6 people (couples, families, close friend groups) seeking seamless logistical coordination (transport + curated stops).
+- **Primary MVP Persona:** Domestic tourists from outside North Sumatra (Jakarta, Java, Riau, Batam), typically traveling in small private groups of 2–6 people (couples, families, close friend groups) seeking seamless logistical coordination (transport + curated stops across North Sumatra).
 - **Secondary Persona:** Local North Sumatran weekenders seeking spontaneous vehicle rentals or 1-day weekend open trips.
+- **International Eco-Tourists:** Backpackers and wildlife enthusiasts seeking certified guides for Bukit Lawang jungle treks and Tangkahan elephant experiences.
 - **Supply-Side Personas:**
   - *Local Tour Operator (Partner):* Small-to-medium operators offering guided excursions and cultural experiences.
   - *Transport Provider (Partner):* Car rental owners, minibus drivers, and private transfer operators.
 
-### 2.2 Geographic Clusters (MVP)
-1. **Parapat:** Main mainland harbor and commercial gateway to Lake Toba.
-2. **Samosir East:** Core cultural tourism strip (Tomok, Ambarita, Tuktuk).
-3. **Samosir West:** Scenic landscapes and hot springs (Pangururan, Tele viewpoint).
-4. **Merek / Tongging:** Northern Lake Toba highland attractions (Sipiso-piso Waterfall, Taman Simalem area).
-5. **Medan Hub:** Primary arrival/departure transit center (Kualanamu Airport, Medan Train Station).
+### 2.2 Geographic Clusters
+1. **Danau Toba Caldera (Parapat, Samosir, Merek/Tongging):** Volcanic lake, Batak cultural heritage, waterfalls, and scenic viewpoints.
+2. **Bukit Lawang & Gunung Leuser (Langkat):** Tropical rainforest exploration, wild orangutan trekking, and river activities.
+3. **Tangkahan Eco-Tourism (Langkat):** Hidden jungle paradise, elephant washing & patrol, and natural hot springs.
+4. **Berastagi & Karo Highlands:** Highland agriculture, fruit markets, Mount Sibayak, and Mount Sinabung views.
+5. **Medan City Hub:** Primary arrival and departure center (Kualanamu International Airport, railway station, heritage landmarks, and culinary tourism).
 
 ---
 

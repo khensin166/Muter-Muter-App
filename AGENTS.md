@@ -1,9 +1,9 @@
 # AGENTS.md — Development Guidelines for Google Antigravity & AI Assistants
 
 ## 1. Project Overview & Identity
-- **Project Name:** Lake Toba Travel Marketplace (Muter-Muter App)
-- **Product Type:** Travel Marketplace & Trip Management Platform
-- **Initial Target Market:** Lake Toba and surrounding areas (North Sumatra, Indonesia)
+- **Project Name:** Muter-Muter Travel Marketplace (Muter-Muter App)
+- **Product Type:** Regional Travel Marketplace & Trip Management Platform
+- **Initial Target Market:** North Sumatra / Sumatera Utara, Indonesia (Danau Toba, Bukit Lawang, Tangkahan, Berastagi, Medan Hub)
 - **Architecture:** Modular Monolith using Laravel 11, Inertia.js, Vue 3, Tailwind CSS, and PostgreSQL.
 
 ## 2. Fundamental Engineering & Business Principles

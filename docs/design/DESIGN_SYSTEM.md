@@ -1,22 +1,69 @@
-# Design System & UI Specification — Lake Toba Travel Marketplace
+# Design System & UI Specification — Muter-Muter Travel Marketplace
 
-- **Document Version:** 1.0
-- **Status:** Approved Post-Grooming
-- **Design Philosophy:** Modern, nature-infused, culturally warm, mobile-first responsive travel marketplace.
+- **Document Version:** 1.1
+- **Status:** Approved Architecture & Scope Alignment
+- **Design Philosophy:** Modern, nature-infused, culturally warm, mobile-first responsive regional travel marketplace (Sumatera Utara / North Sumatra).
 
 ---
 
 ## 1. Brand Identity & Visual Philosophy
 
-The visual theme for Lake Toba Travel Marketplace (Muter-Muter App) draws inspiration from the natural grandeur and cultural warmth of the Lake Toba region:
-- **Deep Toba Teal:** Reflects the vast, calm, and mystic volcanic waters of Lake Toba. Conveys reliability, cleanliness, and tranquility.
-- **Caldera Terracotta / Coral:** Reflects the warm sunrise over the caldera cliffs and Batak cultural warmth. Used for high-priority Call to Action (CTA) buttons, booking triggers, and promotional badges.
-- **Highland Emerald / Pine:** Reflects the surrounding pine hills (Bukit Holbung, Tele, Sipiso-piso). Used for availability badges, eco-tags, and positive confirmation states.
+The visual theme for **Muter-Muter App** draws inspiration from the diverse topography and rich cultural heritage of **Sumatera Utara (North Sumatra)** — from the volcanic caldera of Lake Toba, the dense rainforests of Bukit Lawang & Tangkahan, to the cool agricultural highlands of Berastagi:
+- **Deep Toba Teal:** Reflects deep volcanic lakes and calm coastal rivers. Conveys trust, reliability, and tranquility.
+- **Caldera Terracotta / Coral:** Reflects warm tropical sunrise and vibrant Sumatran cultural warmth. Used for high-priority Call to Action (CTA) buttons, booking triggers, and promotional badges.
+- **Highland Emerald / Rainforest Green:** Reflects the Leuser tropical rainforest (Bukit Lawang, Tangkahan) and pine-covered hills. Used for availability badges, eco-tags, and positive confirmation states.
 - **Morning Mist & Slate:** High-contrast neutral palette ensuring crisp legibility under outdoor mobile sunlight.
 
 ---
 
-## 2. Global CSS Variables Architecture
+## 2. Logo Asset Placement & Navbar Guidelines
+
+### 2.1 File Storage Location Standards
+Static brand identity assets must be placed in the public asset directory so they can be referenced without Vite hashing issues across Vue templates, invoices, OpenGraph social sharing meta tags, and favicons:
+
+📂 **`public/images/`**
+```
+public/
+└── images/
+    ├── logo.png          # Primary full logo (horizontal mark + typography)
+    ├── logo-icon.png     # Square logo icon (app icon, favicon, avatar)
+    └── logo-white.png    # Monochrome white logo (for dark surfaces: footer, admin header)
+```
+
+### 2.2 Reusable `<ApplicationLogo />` Component Standard
+All layouts (`AppLayout`, `AdminLayout`, `PartnerLayout`, and Auth views) MUST consume the logo via `resources/js/Components/ApplicationLogo.vue`:
+```vue
+<template>
+  <div class="flex items-center gap-2.5">
+    <img 
+      src="/images/logo.png" 
+      alt="Muter-Muter" 
+      class="h-9 w-auto object-contain" 
+      @error="fallbackToText = true"
+    />
+    <div v-if="fallbackToText" class="flex items-center gap-2">
+      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-xs">
+        M
+      </div>
+      <div class="flex flex-col">
+        <span class="text-lg font-black tracking-tight text-primary leading-none">Muter-Muter</span>
+        <span class="text-[10px] font-bold text-accent tracking-widest uppercase">Sumatera Utara</span>
+      </div>
+    </div>
+  </div>
+</template>
+```
+
+### 2.3 Global Brand De-coupling (Removing Restrictive "Lake Toba" Badge)
+- **Problem Statement:** Previously, the navbar hardcoded `<span class="uppercase">Lake Toba</span>` under the brand name. This alienates travelers seeking packages in Bukit Lawang, Tangkahan, Berastagi, or Medan.
+- **Policy Rule:**
+  1. The global navbar brand MUST display **`Muter-Muter`** accompanied by a broader regional tagline: **`Sumatera Utara`** (or **`North Sumatra`**).
+  2. "Danau Toba" MUST NOT be hardcoded into global top-level headers, page titles, or portal headers. It must strictly exist as a **Destination Cluster** or **Package Filter**.
+  3. Header & Footer copy must highlight the regional variety: *"Jelajahi Sumatera Utara: Danau Toba, Bukit Lawang, Tangkahan, Berastagi, dan Medan."*
+
+---
+
+## 3. Global CSS Variables Architecture
 
 Colors are defined as CSS variables at `:root` inside `resources/css/app.css` (or `resources/css/variables.css`). This enables effortless white-labeling, seasonal theming, and centralized color adjustments.
 
