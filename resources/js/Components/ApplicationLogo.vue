@@ -10,13 +10,26 @@ const props = defineProps({
     type: String,
     default: '',
   },
+  showText: {
+    type: Boolean,
+    default: true,
+  },
+  subtext: {
+    type: String,
+    default: '',
+  },
+  textClassName: {
+    type: String,
+    default: '',
+  },
 });
 
 const imageError = ref(false);
 </script>
 
 <template>
-  <div class="inline-flex items-center gap-2 select-none">
+  <div class="inline-flex items-center gap-2.5 select-none">
+    <!-- Emblem Image -->
     <img
       v-if="!imageError && variant === 'white'"
       src="/images/logo-white.png"
@@ -35,19 +48,37 @@ const imageError = ref(false);
       v-else-if="!imageError"
       src="/images/logo.png"
       alt="BetaTudia"
-      :class="[className || 'h-10 w-auto', 'object-contain']"
+      :class="[className || 'h-9 sm:h-10 w-auto', 'object-contain']"
       @error="imageError = true"
     />
 
-    <!-- Graceful Fallback if image not rendered -->
-    <div v-if="imageError" class="flex items-center gap-2">
-      <div class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-xs">
-        B
-      </div>
-      <div class="flex flex-col">
-        <span class="text-lg font-black tracking-tight text-primary leading-none">BetaTudia</span>
-        <span class="text-[10px] font-bold text-accent tracking-widest uppercase">Sumatera Utara</span>
-      </div>
+    <!-- Fallback if image fails to load -->
+    <div
+      v-if="imageError"
+      class="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-white font-black text-xl shadow-xs"
+    >
+      B
+    </div>
+
+    <!-- Brand Typography "BetaTudia" beside logo -->
+    <div v-if="showText" class="flex flex-col">
+      <span
+        :class="[
+          textClassName || (variant === 'white' ? 'text-white' : 'text-primary'),
+          'text-lg sm:text-xl font-black tracking-tight leading-none font-sans'
+        ]"
+      >
+        BetaTudia
+      </span>
+      <span
+        v-if="subtext"
+        :class="[
+          variant === 'white' ? 'text-slate-300' : 'text-accent',
+          'text-[9px] sm:text-[10px] font-bold tracking-widest uppercase leading-tight mt-0.5'
+        ]"
+      >
+        {{ subtext }}
+      </span>
     </div>
   </div>
 </template>
