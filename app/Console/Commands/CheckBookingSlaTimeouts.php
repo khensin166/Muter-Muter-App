@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\BookingStatus;
 use App\Models\Booking;
 use App\Models\BookingStatusHistory;
+use App\Services\AppLogger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -63,6 +64,13 @@ class CheckBookingSlaTimeouts extends Command
                     ],
                 ]);
             });
+
+            AppLogger::booking('booking.sla.breached', "SLA 24 jam terlampaui untuk booking [{$booking->booking_code}], dialihkan ke MANUAL_REVIEW", [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->booking_code,
+                'partner_id' => $booking->partner_id,
+                'sla_deadline' => $booking->vendor_sla_deadline?->toIso8601String(),
+            ], level: 'warning');
 
             $this->line("Pesanan [{$booking->booking_code}] berhasil dialihkan ke MANUAL_REVIEW.");
         }

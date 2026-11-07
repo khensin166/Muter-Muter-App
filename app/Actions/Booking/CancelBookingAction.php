@@ -15,6 +15,7 @@ use App\Models\InventoryHold;
 use App\Models\Refund;
 use App\Models\User;
 use App\Models\VendorSettlement;
+use App\Services\AppLogger;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -135,6 +136,16 @@ class CancelBookingAction
                     'refund_percentage' => $refundPercentage,
                 ],
                 'ip_address' => request()->ip(),
+            ]);
+
+            // Structured Logging
+            AppLogger::booking('booking.cancelled', "Pesanan [{$booking->booking_code}] dibatalkan oleh {$actor->name}. Refund: {$refundPercentage}% (Rp {$formattedRefund})", [
+                'booking_id' => $booking->id,
+                'booking_code' => $booking->booking_code,
+                'actor_id' => $actor->id,
+                'refund_amount' => $refundAmount,
+                'refund_percentage' => $refundPercentage,
+                'reason' => $reason,
             ]);
 
             return [

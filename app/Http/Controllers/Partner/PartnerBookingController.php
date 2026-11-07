@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\InventoryHold;
+use App\Services\AppLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -189,6 +190,15 @@ class PartnerBookingController extends Controller
             // Non-blocking
         }
 
+        // Structured Logging
+        AppLogger::booking('booking.vendor.approved', "Mitra menyetujui pesanan [{$booking->booking_code}]", [
+            'booking_id' => $booking->id,
+            'booking_code' => $booking->booking_code,
+            'partner_id' => $partner->id,
+            'actor_id' => $user->id,
+            'hold_expires_at' => now()->addHours(24)->toIso8601String(),
+        ]);
+
         return redirect()->route('partner.bookings.index')
             ->with('success', "Pesanan {$booking->booking_code} disetujui! Customer kini dapat membayar DP dalam 24 jam.");
     }
@@ -227,6 +237,15 @@ class PartnerBookingController extends Controller
                 'reason' => $request->reason,
             ]);
         });
+
+        // Structured Logging
+        AppLogger::booking('booking.vendor.rejected', "Mitra menolak pesanan [{$booking->booking_code}] dengan alasan: {$request->reason}", [
+            'booking_id' => $booking->id,
+            'booking_code' => $booking->booking_code,
+            'partner_id' => $partner->id,
+            'actor_id' => $user->id,
+            'reason' => $request->reason,
+        ]);
 
         return redirect()->route('partner.bookings.index')
             ->with('success', "Pesanan {$booking->booking_code} telah ditolak.");

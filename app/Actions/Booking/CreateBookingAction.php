@@ -14,6 +14,7 @@ use App\Models\BookingTourDetail;
 use App\Models\BookingVehicleDetail;
 use App\Models\Product;
 use App\Models\User;
+use App\Services\AppLogger;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -203,6 +204,18 @@ class CreateBookingAction
 
             return $booking;
         });
+
+        // Structured Logging
+        AppLogger::booking('booking.created', "Booking baru diajukan [{$booking->booking_code}] untuk produk {$product->name}", [
+            'booking_id' => $booking->id,
+            'booking_code' => $booking->booking_code,
+            'customer_id' => $customer->id,
+            'partner_id' => $product->partner_id,
+            'product_id' => $product->id,
+            'total_price' => (float) $booking->total_price,
+            'dp_amount' => (float) $booking->dp_amount,
+            'sla_deadline' => $booking->vendor_sla_deadline->toIso8601String(),
+        ]);
 
         // WhatsApp Notification Dispatch
         try {

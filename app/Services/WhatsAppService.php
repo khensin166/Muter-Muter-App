@@ -4,7 +4,6 @@ namespace App\Services;
 
 use App\Models\Booking;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Throwable;
 
 class WhatsAppService
@@ -50,7 +49,11 @@ class WhatsAppService
         $formattedPhone = $this->formatPhoneNumber($phone);
 
         if ($this->mockMode || ! $this->enabled) {
-            Log::info("[WhatsApp Mock Mode] Dispatched to {$formattedPhone}:\n{$message}");
+            AppLogger::notification('notification.whatsapp.dispatched', "[Mock Mode] Pesan WhatsApp terkirim ke {$formattedPhone}", [
+                'recipient' => $formattedPhone,
+                'mock_mode' => true,
+                'preview' => mb_substr($message, 0, 100),
+            ]);
 
             return true;
         }
@@ -67,16 +70,26 @@ class WhatsAppService
                 ]);
 
             if ($response->successful()) {
-                Log::info("[WhatsApp Gateway] Success sending to {$formattedPhone}");
+                AppLogger::notification('notification.whatsapp.dispatched', "Pesan WhatsApp berhasil dikirim ke {$formattedPhone}", [
+                    'recipient' => $formattedPhone,
+                    'mock_mode' => false,
+                ]);
 
                 return true;
             }
 
-            Log::error("[WhatsApp Gateway Error] HTTP {$response->status()}: {$response->body()}");
+            AppLogger::notification('notification.whatsapp.failed', "Gagal mengirim WhatsApp ke {$formattedPhone}: HTTP {$response->status()}", [
+                'recipient' => $formattedPhone,
+                'status_code' => $response->status(),
+                'response' => $response->body(),
+            ], level: 'error');
 
             return false;
         } catch (Throwable $e) {
-            Log::error('[WhatsApp Gateway Exception] '.$e->getMessage());
+            AppLogger::notification('notification.whatsapp.failed', "Exception WhatsApp ke {$formattedPhone}: {$e->getMessage()}", [
+                'recipient' => $formattedPhone,
+                'error' => $e->getMessage(),
+            ], level: 'error');
 
             return false;
         }

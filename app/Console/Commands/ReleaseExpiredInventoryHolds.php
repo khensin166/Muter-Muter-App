@@ -7,6 +7,7 @@ use App\Enums\InventoryStatus;
 use App\Enums\PaymentStatus;
 use App\Models\BookingStatusHistory;
 use App\Models\InventoryHold;
+use App\Services\AppLogger;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -74,6 +75,13 @@ class ReleaseExpiredInventoryHolds extends Command
                     ]);
 
                     $this->line("Pesanan [{$booking->booking_code}] diubah ke EXPIRED dan ketersediaan dilepas.");
+
+                    AppLogger::payment('payment.hold.expired', "Hold 24 jam kedaluwarsa untuk pesanan [{$booking->booking_code}], kuota dilepas ke publik", [
+                        'booking_id' => $booking->id,
+                        'booking_code' => $booking->booking_code,
+                        'hold_id' => $hold->id,
+                        'held_quantity' => $hold->held_quantity,
+                    ], level: 'warning');
                 }
             });
         }

@@ -13,6 +13,7 @@ use App\Models\BookingStatusHistory;
 use App\Models\InventoryHold;
 use App\Models\Payment;
 use App\Models\VendorSettlement;
+use App\Services\AppLogger;
 use App\Services\WhatsAppService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -194,6 +195,15 @@ class AdminPaymentController extends Controller
             \Illuminate\Support\Facades\Log::warning('WhatsApp confirmation notification failed: '.$e->getMessage());
         }
 
+        // Structured Logging
+        AppLogger::payment('payment.proof.verified', "Pembayaran diverifikasi untuk pesanan [{$booking->booking_code}] senilai Rp {$payment->amount}", [
+            'booking_id' => $booking->id,
+            'booking_code' => $booking->booking_code,
+            'payment_id' => $payment->id,
+            'amount' => (float) $payment->amount,
+            'admin_id' => $admin->id,
+        ]);
+
         return redirect()->route('admin.payments.index')
             ->with('success', "Pembayaran untuk pesanan {$booking->booking_code} berhasil diverifikasi! Pesanan kini berstatus Terkonfirmasi.");
     }
@@ -248,6 +258,15 @@ class AdminPaymentController extends Controller
                 'ip_address' => request()->ip(),
             ]);
         });
+
+        // Structured Logging
+        AppLogger::payment('payment.proof.rejected', "Bukti pembayaran ditolak untuk pesanan [{$booking->booking_code}]", [
+            'booking_id' => $booking->id,
+            'booking_code' => $booking->booking_code,
+            'payment_id' => $payment->id,
+            'reason' => $request->reason,
+            'admin_id' => $admin->id,
+        ], level: 'warning');
 
         return redirect()->route('admin.payments.index')
             ->with('success', "Bukti transfer untuk pesanan {$booking->booking_code} telah ditolak dengan catatan evaluasi.");
