@@ -40,6 +40,7 @@ class GoogleTranslationService
             try {
                 $response = Http::timeout(8)
                     ->withoutVerifying()
+                    ->withHeaders(array_filter(['X-API-Key' => $this->libretranslateApiKey]))
                     ->asJson()
                     ->post(rtrim($this->libretranslateUrl, '/').'/translate', array_filter([
                         'q' => $text,
@@ -122,6 +123,7 @@ class GoogleTranslationService
             try {
                 $response = Http::timeout(15)
                     ->withoutVerifying()
+                    ->withHeaders(array_filter(['X-API-Key' => $this->libretranslateApiKey]))
                     ->asJson()
                     ->post(rtrim($this->libretranslateUrl, '/').'/translate', array_filter([
                         'q' => $values,
