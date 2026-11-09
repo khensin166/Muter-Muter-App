@@ -124,7 +124,7 @@ To eliminate race conditions, double bookings, and inventory overselling:
 - **Bilingual Core Support:** Native support for Bahasa Indonesia (`id` - default) and English (`en` - international tourists).
 - **PostgreSQL JSONB Dynamic Content:** Translatable catalog attributes (`name`, `description`, `inclusions`, `exclusions`, `itinerary`) are persisted as `JSONB` objects (`{"id": "...", "en": "..."}`).
 - **Performance Indexing:** Dual PostgreSQL indexes — B-Tree Expression indexes for fast locale sorting (`(name->>'en')`) and GIN Full-Text Search indexes for multilingual search.
-- **Translate-on-Save Service:** Integrated `GoogleTranslationService` translates Indonesian inputs into English asynchronously, reducing runtime latency and external API cost.
+- **Translate-on-Save Service:** Integrated `TranslationService` (powered by self-hosted LibreTranslate at `https://translate.kenantomfie.com`) translates Indonesian inputs into English with zero external cloud API costs and offline dictionary fallback.
 - **Dynamic Partner/Admin Form UX:** Forms default to Indonesian with dynamic `ID` / `EN` toggle buttons and 1-click Auto-Translate triggers.
 - See full specification in [`docs/architecture/LOCALIZATION_I18N_SPEC.md`](LOCALIZATION_I18N_SPEC.md).
 

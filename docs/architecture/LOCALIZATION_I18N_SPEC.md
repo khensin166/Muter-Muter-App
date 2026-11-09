@@ -133,22 +133,23 @@ $product->setTranslation('name', 'en', 'Updated English Title');
 
 ---
 
-## 6. Integrasi Google Cloud Translation API (Translate-on-Save)
+## 6. Integrasi Self-Hosted Translation Service (LibreTranslate - Translate-on-Save)
 
 ### Alur Kerja:
 1. Vendor/Admin menginput form dalam bahasa default (**Bahasa Indonesia**).
-2. Sistem menyediakan tombol **`✨ Terjemahkan Otomatis (Google Translate)`** pada form.
+2. Sistem menyediakan tombol **`✨ Terjemahkan Otomatis (LibreTranslate)`** pada form.
 3. Saat tombol diklik (atau saat form disimpan jika field bahasa Inggris dibiarkan kosong):
-   - `GoogleTranslationService` mengirimkan teks sumber (`id`) ke Google Cloud Translation API.
+   - `TranslationService` mengirimkan teks sumber (`id`) ke self-hosted LibreTranslate API (`https://translate.kenantomfie.com/translate`) dengan header pengaman `X-API-Key`.
    - API merespons dengan hasil terjemahan bahasa Inggris (`en`).
    - Teks bahasa Inggris otomatis mengisi field `en`.
-4. **Manual Override:** Vendor atau Admin dapat meninjau dan merevisi teks terjemahan secara manual (terutama untuk nama tempat lokal khas Batak/Karo seperti *Sigale-gale*, *Ulos*, *Batu Parsidangan*, *Aek Sipitudai*).
+4. **Manual Override & Local Dictionary Fallback:** Vendor atau Admin dapat meninjau dan merevisi teks terjemahan secara manual (terutama untuk nama tempat lokal khas Batak/Karo seperti *Sigale-gale*, *Ulos*, *Batu Parsidangan*, *Aek Sipitudai*). Jika API eksternal offline, sistem secara otomatis fallback ke kamus lokal pariwisata Sumatera Utara.
 
 ### Arsitektur Service:
-- **`App\Services\GoogleTranslationService`**:
+- **`App\Services\TranslationService`**:
   - `translate(string $text, string $targetLocale = 'en', string $sourceLocale = 'id'): string`
   - `translateBatch(array $texts, string $targetLocale = 'en', string $sourceLocale = 'id'): array`
-  - Mendukung **Mock Mode** (`TRANSLATION_MOCK_MODE=true` di `.env`) untuk pengujian lokal/CI testing tanpa kuota API eksternal.
+  - Terkoneksi ke `https://translate.kenantomfie.com` dengan batasan memori (1.2GB) dan model bahasa khusus `id,en`.
+  - Mendukung **Mock Mode** (`TRANSLATION_MOCK_MODE=true` di `.env`) untuk pengujian lokal/CI testing tanpa dependensi jaringan.
 
 ---
 
@@ -212,8 +213,8 @@ Form input produk, destinasi, dan itinerary dirancang dinamis dengan mekanisme t
   - Tambahkan B-Tree Expression Index dan GIN Full-Text Index.
 - [ ] **Langkah 3: Model Trait `HasTranslations`**
   - Implementasikan trait `HasTranslations` pada model `Product`, `Destination`, `DestinationCategory`, `TourPackage`, `TourItineraryDay`, `TourItineraryStop`.
-- [ ] **Langkah 4: Google Cloud Translation Service**
-  - Buat `GoogleTranslationService` lengkap dengan mock mode untuk pengujian unit/feature.
+- [ ] **Langkah 4: Self-Hosted Translation Service (LibreTranslate)**
+  - Buat `TranslationService` mandiri terhubung ke `https://translate.kenantomfie.com` dengan header otentikasi `X-API-Key` dan kamus fallback pariwisata lokal.
 - [ ] **Langkah 5: Pembaruan Form Input Partner & Admin**
   - Update `CreateTour.vue`, `CreateVehicle.vue`, dan modal itinerary dengan tab dinamis `ID / EN` dan tombol *Auto-Translate*.
 - [ ] **Langkah 6: Automated Testing**

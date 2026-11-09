@@ -195,7 +195,7 @@
 - [x] **Execution (Database, Services, UI & Forms):**
   - [x] Create PostgreSQL migration to convert translatable columns to `JSONB` with B-Tree expression indexes and GIN full-text indexes.
   - [x] Implement `App\Traits\HasTranslations` trait for translatable Eloquent models.
-  - [x] Implement `App\Services\GoogleTranslationService` with HTTP client and mock mode fallback.
+  - [x] Implement `App\Services\TranslationService` with self-hosted LibreTranslate client (`https://translate.kenantomfie.com`), `X-API-Key` auth, and mock mode fallback.
   - [x] Implement `SetLocaleMiddleware`, `POST /locale` switcher route, and session/cookie persistence.
   - [x] Build `resources/js/Components/LanguageSwitcher.vue` in `AppLayout.vue`, `PartnerLayout.vue`, and `AdminLayout.vue`.
   - [x] Build dynamic `ID` / `EN` toggle button & Auto-Translate button in `PartnerProductController` forms (`CreateTour.vue`, `CreateVehicle.vue`, and itinerary modals).
