@@ -33,6 +33,8 @@
           APP_DEBUG={{ app_debug | default('false') }}
           APP_URL={{ app_url }}
           APP_PORT={{ app_port | default('8282') }}
+          APP_LOCALE=id
+          APP_FALLBACK_LOCALE=id
           TARGET_IMAGE={{ target_image }}
 
           # Database Configuration (PostgreSQL)
