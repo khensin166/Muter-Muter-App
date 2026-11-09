@@ -37,4 +37,9 @@ return [
         'endpoint' => 'https://translation.googleapis.com/language/translate/v2',
     ],
 
+    'libretranslate' => [
+        'url' => env('LIBRETRANSLATE_URL'),
+        'api_key' => env('LIBRETRANSLATE_API_KEY'),
+    ],
+
 ];
