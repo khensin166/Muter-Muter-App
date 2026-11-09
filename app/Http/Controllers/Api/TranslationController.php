@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Services\GoogleTranslationService;
+use App\Services\TranslationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -12,7 +12,7 @@ class TranslationController extends Controller
     /**
      * Translate single text string dynamically for partner/admin forms.
      */
-    public function translate(Request $request, GoogleTranslationService $service): JsonResponse
+    public function translate(Request $request, TranslationService $service): JsonResponse
     {
         $validated = $request->validate([
             'text' => ['required', 'string', 'max:5000'],
@@ -35,7 +35,7 @@ class TranslationController extends Controller
     /**
      * Translate batch key-value fields (e.g. name, short_description, full_description).
      */
-    public function translateBatch(Request $request, GoogleTranslationService $service): JsonResponse
+    public function translateBatch(Request $request, TranslationService $service): JsonResponse
     {
         $validated = $request->validate([
             'fields' => ['required', 'array'],

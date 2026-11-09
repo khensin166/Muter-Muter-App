@@ -19,7 +19,7 @@ use App\Models\TourItineraryStop;
 use App\Models\TourPackage;
 use App\Models\Vehicle;
 use App\Services\FileSecurityService;
-use App\Services\GoogleTranslationService;
+use App\Services\TranslationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -161,7 +161,7 @@ class PartnerProductController extends Controller
             }
         }
 
-        $translator = app(GoogleTranslationService::class);
+        $translator = app(TranslationService::class);
 
         $nameEn = $request->input('name_en') ?: $translator->translate($validated['name'], 'en', 'id');
         $shortDescEn = $request->input('short_description_en') ?: $translator->translate($validated['short_description'], 'en', 'id');
@@ -319,7 +319,7 @@ class PartnerProductController extends Controller
             }
         }
 
-        $translator = app(GoogleTranslationService::class);
+        $translator = app(TranslationService::class);
         $nameEn = $request->input('name_en') ?: $translator->translate($validated['name'], 'en', 'id');
         $shortDescEn = $request->input('short_description_en') ?: $translator->translate($validated['short_description'], 'en', 'id');
         $fullDescEn = $request->input('full_description_en') ?: $translator->translate($validated['full_description'], 'en', 'id');

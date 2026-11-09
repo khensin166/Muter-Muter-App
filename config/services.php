@@ -31,15 +31,11 @@ return [
         ],
     ],
 
-    'google_translate' => [
-        'api_key' => env('GOOGLE_TRANSLATE_API_KEY'),
-        'mock_mode' => env('GOOGLE_TRANSLATE_MOCK_MODE', false),
-        'endpoint' => 'https://translation.googleapis.com/language/translate/v2',
-    ],
-
-    'libretranslate' => [
-        'url' => env('LIBRETRANSLATE_URL'),
+    'translation' => [
+        'driver' => env('TRANSLATION_DRIVER', 'libretranslate'),
+        'url' => env('LIBRETRANSLATE_URL', 'https://translate.kenantomfie.com'),
         'api_key' => env('LIBRETRANSLATE_API_KEY'),
+        'mock_mode' => env('TRANSLATION_MOCK_MODE', false),
     ],
 
 ];
