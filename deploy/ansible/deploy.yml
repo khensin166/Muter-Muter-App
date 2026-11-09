@@ -56,6 +56,12 @@
           WHATSAPP_GATEWAY_URL={{ whatsapp_gateway_url }}
           WHATSAPP_API_TOKEN={{ whatsapp_api_token }}
           WHATSAPP_TIMEOUT={{ whatsapp_timeout | default('5') }}
+
+          # Translation Service (Self-Hosted LibreTranslate)
+          TRANSLATION_DRIVER={{ translation_driver | default('libretranslate') }}
+          LIBRETRANSLATE_URL={{ libretranslate_url | default('https://translate.kenantomfie.com') }}
+          LIBRETRANSLATE_API_KEY="{{ libretranslate_api_key | default('kenan_secret_translate_key_2026') }}"
+          TRANSLATION_MOCK_MODE={{ translation_mock_mode | default('false') }}
         dest: "{{ project_dir }}/.env"
         mode: '0600'
       no_log: true

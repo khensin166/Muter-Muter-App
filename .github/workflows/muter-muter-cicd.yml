@@ -62,6 +62,7 @@ jobs:
         run: |
           cp .env.example .env
           php artisan key:generate
+          sed -i 's/LIBRETRANSLATE_API_KEY=.*/LIBRETRANSLATE_API_KEY="kenan_secret_translate_key_2026"/' .env
 
       - name: Execute Pest Feature & Unit Tests
         run: php artisan test
@@ -159,5 +160,9 @@ jobs:
             -e "whatsapp_mock_mode=${{ vars.WHATSAPP_MOCK_MODE || 'false' }}" \
             -e "whatsapp_gateway_url=${{ vars.WHATSAPP_GATEWAY_URL }}" \
             -e "whatsapp_api_token=${{ secrets.WHATSAPP_API_TOKEN || vars.WHATSAPP_API_TOKEN }}" \
-            -e "whatsapp_timeout=${{ vars.WHATSAPP_TIMEOUT || '5' }}"
+            -e "whatsapp_timeout=${{ vars.WHATSAPP_TIMEOUT || '5' }}" \
+            -e "translation_driver=${{ vars.TRANSLATION_DRIVER || 'libretranslate' }}" \
+            -e "libretranslate_url=${{ vars.LIBRETRANSLATE_URL || 'https://translate.kenantomfie.com' }}" \
+            -e "libretranslate_api_key=${{ secrets.LIBRETRANSLATE_API_KEY || vars.LIBRETRANSLATE_API_KEY || 'kenan_secret_translate_key_2026' }}" \
+            -e "translation_mock_mode=${{ vars.TRANSLATION_MOCK_MODE || 'false' }}"
 

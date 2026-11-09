@@ -34,7 +34,7 @@ return [
     'translation' => [
         'driver' => env('TRANSLATION_DRIVER', 'libretranslate'),
         'url' => env('LIBRETRANSLATE_URL', 'https://translate.kenantomfie.com'),
-        'api_key' => env('LIBRETRANSLATE_API_KEY'),
+        'api_key' => env('LIBRETRANSLATE_API_KEY', 'kenan_secret_translate_key_2026'),
         'mock_mode' => env('TRANSLATION_MOCK_MODE', false),
     ],
 
