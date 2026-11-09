@@ -19,6 +19,31 @@ trait HasTranslations
     }
 
     /**
+     * Set a given attribute on the model, automatically encoding array/plain translations to JSON.
+     */
+    public function setAttribute($key, $value)
+    {
+        if ($this->isTranslatableAttribute($key)) {
+            if (is_array($value)) {
+                $this->attributes[$key] = json_encode($value, JSON_UNESCAPED_UNICODE);
+
+                return $this;
+            }
+
+            if (is_string($value)) {
+                $decoded = json_decode($value, true);
+                if (json_last_error() !== JSON_ERROR_NONE || ! is_array($decoded)) {
+                    $this->attributes[$key] = json_encode(['id' => $value], JSON_UNESCAPED_UNICODE);
+
+                    return $this;
+                }
+            }
+        }
+
+        return parent::setAttribute($key, $value);
+    }
+
+    /**
      * Check if the given attribute key is registered as translatable.
      */
     public function isTranslatableAttribute(string $key): bool

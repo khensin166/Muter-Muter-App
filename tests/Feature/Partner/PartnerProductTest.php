@@ -118,8 +118,9 @@ test('partner can create vehicle rental unit', function () {
 
     $response->assertRedirect(route('partner.products.index'));
 
-    $product = Product::where('name', 'Toyota HiAce 14 Penumpang')->first();
+    $product = Product::where('partner_id', $this->partner->id)->first();
     expect($product)->not->toBeNull();
+    expect($product->name)->toBe('Toyota HiAce 14 Penumpang');
     expect($product->approval_status)->toBe(ApprovalStatus::PENDING_REVIEW);
     expect($product->min_lead_time_hours)->toBe(12);
     expect($product->vehicle->passenger_capacity)->toBe(14);
