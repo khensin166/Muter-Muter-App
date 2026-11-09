@@ -12,6 +12,16 @@ enum TourType: string
 
     public function label(): string
     {
+        if (app()->getLocale() === 'en') {
+            return match ($this) {
+                self::ONE_DAY => 'One Day Trip',
+                self::MULTI_DAY => 'Multi-day Trip',
+                self::OPEN_TRIP => 'Open Trip (Shared)',
+                self::PRIVATE_TRIP => 'Private Trip',
+                self::CUSTOM_TRIP => 'Custom Trip',
+            };
+        }
+
         return match ($this) {
             self::ONE_DAY => 'One Day Trip',
             self::MULTI_DAY => 'Multi-day Trip',

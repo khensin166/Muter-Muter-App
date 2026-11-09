@@ -12,6 +12,16 @@ enum DestinationCluster: string
 
     public function label(): string
     {
+        if (app()->getLocale() === 'en') {
+            return match ($this) {
+                self::PARAPAT => 'Parapat (Main Gateway & Harbor)',
+                self::SAMOSIR_EAST => 'East Samosir (Tomok, Ambarita, Tuktuk)',
+                self::SAMOSIR_WEST => 'West Samosir (Pangururan & Holbung)',
+                self::MEREK_TONGGING => 'Merek & Tongging (Sipiso-piso & North Caldera)',
+                self::MEDAN_HUB => 'Medan Hub (Departure Point & Airport)',
+            };
+        }
+
         return match ($this) {
             self::PARAPAT => 'Parapat (Gerbang Utama & Pelabuhan)',
             self::SAMOSIR_EAST => 'Samosir Timur (Tomok, Ambarita, Tuktuk)',

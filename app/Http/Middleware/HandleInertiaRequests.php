@@ -48,6 +48,16 @@ class HandleInertiaRequests extends Middleware
                 'error' => fn () => $request->session()->get('error'),
             ],
             'locale' => fn () => app()->getLocale(),
+            'translations' => function () {
+                $locale = app()->getLocale();
+                $fallbackPath = lang_path('id.json');
+                $localePath = lang_path("{$locale}.json");
+
+                $fallback = is_file($fallbackPath) ? (json_decode(file_get_contents($fallbackPath), true) ?: []) : [];
+                $current = ($locale !== 'id' && is_file($localePath)) ? (json_decode(file_get_contents($localePath), true) ?: []) : [];
+
+                return array_replace($fallback, $current);
+            },
             'trace_id' => fn () => $request->attributes->get('trace_id'),
         ];
     }

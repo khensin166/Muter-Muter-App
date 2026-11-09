@@ -2,6 +2,9 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref } from 'vue';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t, locale } = useTrans();
 
 const props = defineProps({
   tours: Object,
@@ -38,15 +41,15 @@ const formatRupiah = (value) => {
 
 <template>
   <AppLayout>
-    <Head title="Paket Tour Wisata Danau Toba — Muter-Muter" />
+    <Head :title="t('tours.title')" />
 
     <!-- Header Banner -->
     <div class="bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto">
-        <span class="text-xs font-bold text-accent uppercase tracking-widest">Katalog Perjalanan</span>
-        <h1 class="text-3xl sm:text-4xl font-extrabold mt-1">Paket Wisata & Tour Danau Toba</h1>
+        <span class="text-xs font-bold text-accent uppercase tracking-widest">{{ t('tours.eyebrow') }}</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mt-1">{{ t('tours.title') }}</h1>
         <p class="text-sm text-slate-200 mt-2 max-w-2xl">
-          Pilihan open trip dan private tour terverifikasi. Seluruh paket mencakup penyeberangan kapal ferry Danau Toba resmi, transportasi privat, dan guide lokal berlisensi.
+          {{ t('tours.subtitle') }}
         </p>
 
         <!-- Search Bar -->
@@ -55,14 +58,14 @@ const formatRupiah = (value) => {
             v-model="search"
             @keyup.enter="applyFilters"
             type="text"
-            placeholder="Cari paket tour (misal: 3D2N, Samosir, Holbung)..."
+            :placeholder="t('tours.search_placeholder')"
             class="flex-1 bg-white text-slate-800 text-sm font-medium px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-accent shadow-lg"
           />
           <button
             @click="applyFilters"
             class="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-colors text-sm"
           >
-            Cari
+            {{ t('tours.search_btn') }}
           </button>
         </div>
       </div>
@@ -77,16 +80,16 @@ const formatRupiah = (value) => {
           :class="!selectedType ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
           class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
         >
-          Semua Jenis Trip ({{ tours.total }})
+          {{ t('tours.all_types', { total: tours.total }) }}
         </button>
         <button
-          v-for="t in tourTypes"
-          :key="t.value"
-          @click="setTourType(t.value)"
-          :class="selectedType === t.value ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
+          v-for="tt in tourTypes"
+          :key="tt.value"
+          @click="setTourType(tt.value)"
+          :class="selectedType === tt.value ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
           class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
         >
-          {{ t.label }}
+          {{ tt.label }}
         </button>
       </div>
 
@@ -101,10 +104,10 @@ const formatRupiah = (value) => {
             <img :src="tour.image_url" :alt="tour.name" class="w-full h-full object-cover" />
             <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
               <span class="bg-primary/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
-                {{ tour.duration_days }}H{{ tour.duration_nights }}M
+                {{ tour.duration_days }}{{ locale === 'en' ? 'D' : 'H' }}{{ tour.duration_nights }}{{ locale === 'en' ? 'N' : 'M' }}
               </span>
               <span v-if="tour.includes_ferry" class="bg-secondary/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm flex items-center gap-1">
-                🚢 Ferry Termasuk
+                {{ t('home.ferry_included') }}
               </span>
             </div>
           </div>
@@ -113,7 +116,7 @@ const formatRupiah = (value) => {
             <div>
               <div class="flex items-center justify-between text-xs text-text-muted mb-2">
                 <span>{{ tour.tour_type }}</span>
-                <span class="text-secondary font-semibold">Min. H-{{ tour.min_lead_time_hours / 24 }} Hari</span>
+                <span class="text-secondary font-semibold">{{ t('home.min_days_lead', { days: tour.min_lead_time_hours / 24 }) }}</span>
               </div>
               <h3 class="text-lg font-bold text-text-main leading-snug hover:text-primary transition-colors">
                 <Link :href="`/tours/${tour.slug}`">{{ tour.name }}</Link>
@@ -126,14 +129,14 @@ const formatRupiah = (value) => {
             <div class="mt-6 pt-4 border-t border-border">
               <div class="flex items-baseline justify-between">
                 <div>
-                  <span class="text-[10px] uppercase font-bold text-text-muted">Mulai Dari</span>
+                  <span class="text-[10px] uppercase font-bold text-text-muted">{{ t('home.starting_from') }}</span>
                   <div class="text-xl font-black text-primary">
                     {{ formatRupiah(tour.base_price) }}
-                    <span class="text-xs font-normal text-text-muted">/ orang</span>
+                    <span class="text-xs font-normal text-text-muted">{{ t('home.per_person') }}</span>
                   </div>
                 </div>
                 <div class="text-right">
-                  <span class="text-[10px] uppercase font-bold text-emerald-600 block">DP Cukup {{ tour.dp_percentage }}%</span>
+                  <span class="text-[10px] uppercase font-bold text-emerald-600 block">{{ t('home.dp_only', { dp: tour.dp_percentage }) }}</span>
                   <span class="text-xs font-bold text-slate-700">{{ formatRupiah(tour.base_price * (tour.dp_percentage / 100)) }}</span>
                 </div>
               </div>
@@ -142,7 +145,7 @@ const formatRupiah = (value) => {
                 :href="`/tours/${tour.slug}`"
                 class="mt-4 w-full bg-primary hover:bg-primary-dark text-white font-bold py-2.5 px-4 rounded-xl text-center text-sm transition-colors block"
               >
-                Detail & Jadwal Perjalanan
+                {{ t('home.tour_detail_btn') }}
               </Link>
             </div>
           </div>
@@ -152,13 +155,13 @@ const formatRupiah = (value) => {
       <!-- Empty State -->
       <div v-else class="text-center py-16 bg-surface rounded-2xl border border-border">
         <span class="text-4xl">🎒</span>
-        <h3 class="text-lg font-bold text-text-main mt-3">Tidak ada paket tour yang cocok</h3>
-        <p class="text-xs text-text-muted mt-1">Coba reset pencarian atau periksa kategori trip lainnya.</p>
+        <h3 class="text-lg font-bold text-text-main mt-3">{{ t('tours.empty_title') }}</h3>
+        <p class="text-xs text-text-muted mt-1">{{ t('tours.empty_desc') }}</p>
         <button
           @click="selectedType = ''; search = ''; applyFilters()"
           class="mt-4 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl"
         >
-          Reset Filter
+          {{ t('tours.reset_btn') }}
         </button>
       </div>
     </div>

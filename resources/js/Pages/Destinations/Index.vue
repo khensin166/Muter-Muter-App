@@ -2,6 +2,9 @@
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, watch } from 'vue';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t } = useTrans();
 
 const props = defineProps({
   destinations: Object,
@@ -41,15 +44,15 @@ const formatRupiah = (value) => {
 
 <template>
   <AppLayout>
-    <Head title="Eksplorasi Destinasi Danau Toba — Muter-Muter" />
+    <Head :title="t('destinations.title')" />
 
     <!-- Header Banner -->
     <div class="bg-gradient-to-r from-primary-dark via-primary to-primary-light text-white py-12 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto">
-        <span class="text-xs font-bold text-accent uppercase tracking-widest">Katalog Wisata</span>
-        <h1 class="text-3xl sm:text-4xl font-extrabold mt-1">Destinasi Wisata Danau Toba</h1>
+        <span class="text-xs font-bold text-accent uppercase tracking-widest">{{ t('destinations.eyebrow') }}</span>
+        <h1 class="text-3xl sm:text-4xl font-extrabold mt-1">{{ t('destinations.title') }}</h1>
         <p class="text-sm text-slate-200 mt-2 max-w-2xl">
-          Jelajahi keajaiban alam kaldera vulkanik, air terjun spektakuler, desa adat Batak bersejarah, dan spot pemandangan terbaik di 4 klaster kawasan Danau Toba.
+          {{ t('destinations.subtitle') }}
         </p>
 
         <!-- Search Bar -->
@@ -58,14 +61,14 @@ const formatRupiah = (value) => {
             v-model="search"
             @keyup.enter="applyFilters"
             type="text"
-            placeholder="Cari nama destinasi wisata (misal: Holbung, Sipiso-piso)..."
+            :placeholder="t('destinations.search_placeholder')"
             class="flex-1 bg-white text-slate-800 text-sm font-medium px-4 py-3 rounded-xl border-none focus:ring-2 focus:ring-accent shadow-lg"
           />
           <button
             @click="applyFilters"
             class="bg-accent hover:bg-accent-hover text-white font-bold px-6 py-3 rounded-xl shadow-lg transition-colors text-sm"
           >
-            Cari
+            {{ t('tours.search_btn') }}
           </button>
         </div>
       </div>
@@ -80,7 +83,7 @@ const formatRupiah = (value) => {
           :class="!selectedCluster ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
           class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
         >
-          Semua Klaster ({{ destinations.total }})
+          {{ t('destinations.all_clusters', { total: destinations.total }) }}
         </button>
         <button
           v-for="c in clusters"
@@ -110,7 +113,7 @@ const formatRupiah = (value) => {
 
           <div class="p-5 flex-1 flex flex-col justify-between">
             <div>
-              <span class="text-[11px] font-semibold text-secondary uppercase">{{ dest.category || 'Wisata Alam' }}</span>
+              <span class="text-[11px] font-semibold text-secondary uppercase">{{ dest.category || t('home.default_category') }}</span>
               <h3 class="text-base font-bold text-text-main mt-1 group-hover:text-primary transition-colors">
                 {{ dest.name }}
               </h3>
@@ -121,13 +124,13 @@ const formatRupiah = (value) => {
 
             <div class="mt-4 pt-4 border-t border-border flex items-center justify-between text-xs">
               <div class="text-text-muted">
-                <span class="block text-[10px] uppercase">Tiket Domestik</span>
+                <span class="block text-[10px] uppercase">{{ t('destinations.domestic_ticket') }}</span>
                 <span class="font-bold text-primary text-sm">
-                  {{ dest.ticket_price_domestic > 0 ? formatRupiah(dest.ticket_price_domestic) : 'Gratis' }}
+                  {{ dest.ticket_price_domestic > 0 ? formatRupiah(dest.ticket_price_domestic) : t('home.free') }}
                 </span>
               </div>
               <div class="text-right text-text-muted">
-                <span class="block text-[10px] uppercase">Jam Operasional</span>
+                <span class="block text-[10px] uppercase">{{ t('destinations.operating_hours') }}</span>
                 <span class="font-medium text-text-main text-xs">{{ dest.operating_hours || '24 Jam' }}</span>
               </div>
             </div>
@@ -138,13 +141,13 @@ const formatRupiah = (value) => {
       <!-- Empty State -->
       <div v-else class="text-center py-16 bg-surface rounded-2xl border border-border">
         <span class="text-4xl">🔍</span>
-        <h3 class="text-lg font-bold text-text-main mt-3">Tidak ada destinasi yang cocok</h3>
-        <p class="text-xs text-text-muted mt-1">Coba sesuaikan kata kunci pencarian atau pilih klaster lain.</p>
+        <h3 class="text-lg font-bold text-text-main mt-3">{{ t('destinations.empty_title') }}</h3>
+        <p class="text-xs text-text-muted mt-1">{{ t('destinations.empty_desc') }}</p>
         <button
           @click="selectedCluster = ''; search = ''; applyFilters()"
           class="mt-4 px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl"
         >
-          Reset Filter
+          {{ t('vehicles.reset_btn') }}
         </button>
       </div>
     </div>

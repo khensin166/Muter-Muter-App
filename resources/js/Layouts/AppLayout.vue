@@ -3,17 +3,19 @@ import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import { useTrans } from '@/Composables/useTrans';
 
 const showingNavigationDropdown = ref(false);
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
+const { t } = useTrans();
 </script>
 
 <template>
   <div class="min-h-screen bg-background text-text-main flex flex-col font-sans selection:bg-accent selection:text-white">
     <!-- Top Alert / Info Bar -->
     <div class="bg-primary-dark text-white text-xs py-1.5 px-4 text-center">
-      <span>Jelajahi keindahan Sumatera Utara dengan pemesanan terintegrasi, transparan, dan terpercaya.</span>
+      <span>{{ t('nav.top_banner') }}</span>
     </div>
 
     <!-- Main Navigation Bar -->
@@ -28,10 +30,10 @@ const user = page.props.auth ? page.props.auth.user : null;
 
             <!-- Desktop Nav Links -->
             <nav class="hidden md:flex items-center space-x-6 text-sm font-medium">
-              <Link href="/" class="text-text-main hover:text-primary transition-colors">Eksplor Destinasi</Link>
-              <Link href="/tours" class="text-text-main hover:text-primary transition-colors">Paket Wisata</Link>
-              <Link href="/vehicles" class="text-text-main hover:text-primary transition-colors">Rental Kendaraan</Link>
-              <Link href="/custom-trip" class="text-text-main hover:text-primary transition-colors">Custom Trip</Link>
+              <Link href="/" class="text-text-main hover:text-primary transition-colors">{{ t('nav.explore_destinations') }}</Link>
+              <Link href="/tours" class="text-text-main hover:text-primary transition-colors">{{ t('nav.tour_packages') }}</Link>
+              <Link href="/vehicles" class="text-text-main hover:text-primary transition-colors">{{ t('nav.vehicle_rentals') }}</Link>
+              <Link href="/custom-trip" class="text-text-main hover:text-primary transition-colors">{{ t('nav.custom_trip') }}</Link>
             </nav>
           </div>
 
@@ -45,20 +47,20 @@ const user = page.props.auth ? page.props.auth.user : null;
                 href="/admin"
                 class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition"
               >
-                Admin Panel
+                {{ t('nav.admin_panel') }}
               </Link>
               <Link
                 v-else-if="user.role === 'PARTNER'"
                 href="/partner"
                 class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition"
               >
-                Portal Mitra
+                {{ t('nav.partner_portal') }}
               </Link>
               <Link
                 :href="route('dashboard')"
                 class="text-sm font-medium text-text-main hover:text-primary transition"
               >
-                Dashboard
+                {{ t('nav.dashboard') }}
               </Link>
               <Link
                 :href="route('logout')"
@@ -66,7 +68,7 @@ const user = page.props.auth ? page.props.auth.user : null;
                 as="button"
                 class="text-sm font-medium text-text-muted hover:text-danger transition"
               >
-                Keluar
+                {{ t('nav.logout') }}
               </Link>
             </template>
             <template v-else>
@@ -74,13 +76,13 @@ const user = page.props.auth ? page.props.auth.user : null;
                 :href="route('login')"
                 class="text-sm font-medium text-text-main hover:text-primary transition"
               >
-                Masuk
+                {{ t('nav.login') }}
               </Link>
               <Link
                 :href="route('register')"
                 class="bg-accent hover:bg-accent-hover text-white text-sm font-semibold py-2 px-4 rounded-xl shadow-sm transition"
               >
-                Daftar
+                {{ t('nav.register') }}
               </Link>
             </template>
           </div>
@@ -116,18 +118,18 @@ const user = page.props.auth ? page.props.auth.user : null;
 
       <!-- Mobile Dropdown Menu -->
       <div v-show="showingNavigationDropdown" class="md:hidden border-b border-border bg-surface px-4 pt-2 pb-4 space-y-2">
-        <Link href="/" class="block py-2 text-sm font-medium text-text-main hover:text-primary">Eksplor Destinasi</Link>
-        <Link href="/tours" class="block py-2 text-sm font-medium text-text-main hover:text-primary">Paket Wisata</Link>
-        <Link href="/vehicles" class="block py-2 text-sm font-medium text-text-main hover:text-primary">Rental Kendaraan</Link>
-        <Link href="/custom-trip" class="block py-2 text-sm font-medium text-text-main hover:text-primary">Custom Trip</Link>
+        <Link href="/" class="block py-2 text-sm font-medium text-text-main hover:text-primary">{{ t('nav.explore_destinations') }}</Link>
+        <Link href="/tours" class="block py-2 text-sm font-medium text-text-main hover:text-primary">{{ t('nav.tour_packages') }}</Link>
+        <Link href="/vehicles" class="block py-2 text-sm font-medium text-text-main hover:text-primary">{{ t('nav.vehicle_rentals') }}</Link>
+        <Link href="/custom-trip" class="block py-2 text-sm font-medium text-text-main hover:text-primary">{{ t('nav.custom_trip') }}</Link>
         <div class="pt-3 border-t border-border flex flex-col gap-2">
           <template v-if="user">
-            <Link :href="route('dashboard')" class="block py-2 text-sm font-medium text-primary">Dashboard ({{ user.name }})</Link>
-            <Link :href="route('logout')" method="post" as="button" class="text-left py-2 text-sm text-danger font-medium">Keluar</Link>
+            <Link :href="route('dashboard')" class="block py-2 text-sm font-medium text-primary">{{ t('nav.dashboard') }} ({{ user.name }})</Link>
+            <Link :href="route('logout')" method="post" as="button" class="text-left py-2 text-sm text-danger font-medium">{{ t('nav.logout') }}</Link>
           </template>
           <template v-else>
-            <Link :href="route('login')" class="block py-2 text-sm font-medium text-text-main">Masuk</Link>
-            <Link :href="route('register')" class="block py-2 text-center bg-accent text-white rounded-lg font-semibold text-sm">Daftar Sekarang</Link>
+            <Link :href="route('login')" class="block py-2 text-sm font-medium text-text-main">{{ t('nav.login') }}</Link>
+            <Link :href="route('register')" class="block py-2 text-center bg-accent text-white rounded-lg font-semibold text-sm">{{ t('nav.register_now') }}</Link>
           </template>
         </div>
       </div>
@@ -146,44 +148,44 @@ const user = page.props.auth ? page.props.auth.user : null;
             <ApplicationLogo variant="white" className="h-10 w-auto" />
           </Link>
           <p class="text-sm text-slate-300 leading-relaxed">
-            Platform perjalanan wisata terintegrasi untuk menemukan pesona Sumatera Utara — Danau Toba, Bukit Lawang, Tangkahan, Berastagi, Medan, dan sekitarnya.
+            {{ t('footer.description') }}
           </p>
         </div>
         <div>
-          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Wilayah Wisata</h4>
+          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">{{ t('footer.regions_title') }}</h4>
           <ul class="space-y-2 text-sm text-slate-300">
-            <li><Link href="/destinations?cluster=TOBA" class="hover:text-white transition">Danau Toba & Samosir</Link></li>
-            <li><Link href="/destinations?cluster=BUKIT_LAWANG" class="hover:text-white transition">Bukit Lawang (Orangutan)</Link></li>
-            <li><Link href="/destinations?cluster=TANGKAHAN" class="hover:text-white transition">Tangkahan Eco-Park (Gajah)</Link></li>
-            <li><Link href="/destinations?cluster=BERASTAGI" class="hover:text-white transition">Berastagi & Dataran Tinggi Karo</Link></li>
-            <li><Link href="/destinations?cluster=MEDAN" class="hover:text-white transition">Medan City & Transit Hub</Link></li>
+            <li><Link href="/destinations?cluster=TOBA" class="hover:text-white transition">{{ t('footer.region_toba') }}</Link></li>
+            <li><Link href="/destinations?cluster=BUKIT_LAWANG" class="hover:text-white transition">{{ t('footer.region_bukit_lawang') }}</Link></li>
+            <li><Link href="/destinations?cluster=TANGKAHAN" class="hover:text-white transition">{{ t('footer.region_tangkahan') }}</Link></li>
+            <li><Link href="/destinations?cluster=BERASTAGI" class="hover:text-white transition">{{ t('footer.region_berastagi') }}</Link></li>
+            <li><Link href="/destinations?cluster=MEDAN" class="hover:text-white transition">{{ t('footer.region_medan') }}</Link></li>
           </ul>
         </div>
         <div>
-          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Layanan Kami</h4>
+          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">{{ t('footer.services_title') }}</h4>
           <ul class="space-y-2 text-sm text-slate-300">
-            <li><Link href="/tours" class="hover:text-white transition">Paket Tour (One-day & Open Trip)</Link></li>
-            <li><Link href="/vehicles" class="hover:text-white transition">Rental Mobil & Minibus</Link></li>
-            <li><Link href="/custom-trip" class="hover:text-white transition">Custom Trip & Rombongan</Link></li>
-            <li><Link :href="route('partner.register')" class="hover:text-white transition text-accent font-semibold">Gabung Jadi Mitra Vendor &rarr;</Link></li>
+            <li><Link href="/tours" class="hover:text-white transition">{{ t('footer.service_tours') }}</Link></li>
+            <li><Link href="/vehicles" class="hover:text-white transition">{{ t('footer.service_vehicles') }}</Link></li>
+            <li><Link href="/custom-trip" class="hover:text-white transition">{{ t('footer.service_custom') }}</Link></li>
+            <li><Link :href="route('partner.register')" class="hover:text-white transition text-accent font-semibold">{{ t('footer.join_partner') }}</Link></li>
           </ul>
         </div>
         <div>
-          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">Bantuan & Kontak</h4>
+          <h4 class="text-sm font-bold uppercase tracking-wider text-accent mb-3">{{ t('footer.help_title') }}</h4>
           <p class="text-sm text-slate-300 leading-relaxed mb-3">
-            Butuh konsultasi perjalanan atau bantuan reservasi?
+            {{ t('footer.help_desc') }}
           </p>
           <a
             href="https://wa.me/6281234567890"
             target="_blank"
             class="inline-flex items-center gap-2 bg-secondary hover:bg-secondary/90 text-white text-xs font-semibold py-2 px-3.5 rounded-lg transition"
           >
-            <span>💬 Konsultasi via WhatsApp</span>
+            <span>{{ t('footer.wa_consult') }}</span>
           </a>
         </div>
       </div>
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 pt-6 border-t border-white/10 text-center text-xs text-slate-400">
-        © 2026 BetaTudia - Platform Wisata Sumatera Utara. Hak Cipta Dilindungi.
+        {{ t('footer.copyright') }}
       </div>
     </footer>
   </div>

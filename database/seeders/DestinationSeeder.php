@@ -14,21 +14,21 @@ class DestinationSeeder extends Seeder
     {
         // 1. Categories
         $categories = [
-            'budaya-sejarah' => DestinationCategory::firstOrCreate(
+            'budaya-sejarah' => DestinationCategory::updateOrCreate(
                 ['slug' => 'budaya-sejarah'],
-                ['name' => 'Budaya & Sejarah', 'icon' => '🏛️']
+                ['name' => ['id' => 'Budaya & Sejarah', 'en' => 'Culture & History'], 'icon' => '🏛️']
             ),
-            'alam-viewpoint' => DestinationCategory::firstOrCreate(
+            'alam-viewpoint' => DestinationCategory::updateOrCreate(
                 ['slug' => 'alam-viewpoint'],
-                ['name' => 'Alam & Viewpoint', 'icon' => '⛰️']
+                ['name' => ['id' => 'Alam & Viewpoint', 'en' => 'Nature & Viewpoints'], 'icon' => '⛰️']
             ),
-            'air-terjun-curug' => DestinationCategory::firstOrCreate(
+            'air-terjun-curug' => DestinationCategory::updateOrCreate(
                 ['slug' => 'air-terjun-curug'],
-                ['name' => 'Air Terjun & Curug', 'icon' => '🌊']
+                ['name' => ['id' => 'Air Terjun & Curug', 'en' => 'Waterfalls'], 'icon' => '🌊']
             ),
-            'pelabuhan-danau' => DestinationCategory::firstOrCreate(
+            'pelabuhan-danau' => DestinationCategory::updateOrCreate(
                 ['slug' => 'pelabuhan-danau'],
-                ['name' => 'Pelabuhan & Danau', 'icon' => '🚢']
+                ['name' => ['id' => 'Pelabuhan & Danau', 'en' => 'Harbors & Lakes'], 'icon' => '🚢']
             ),
         ];
 
@@ -36,20 +36,28 @@ class DestinationSeeder extends Seeder
         $destinations = [
             // PARAPAT
             [
-                'name' => 'Pelabuhan Penyeberangan Ajibata',
+                'slug' => 'pelabuhan-penyeberangan-ajibata',
+                'name' => ['id' => 'Pelabuhan Penyeberangan Ajibata', 'en' => 'Ajibata Ferry Harbor'],
                 'category' => 'pelabuhan-danau',
                 'cluster' => DestinationCluster::PARAPAT,
-                'description' => 'Titik keberangkatan utama ferry penyeberangan kapal roro dan motor menuju Tomok dan Ambarita di Pulau Samosir.',
+                'description' => [
+                    'id' => 'Titik keberangkatan utama ferry penyeberangan kapal roro dan motor menuju Tomok dan Ambarita di Pulau Samosir.',
+                    'en' => 'Main departure harbor for Ro-Ro ferries and passenger boats heading to Tomok and Ambarita on Samosir Island.',
+                ],
                 'ticket_domestic' => 0,
                 'ticket_foreign' => 0,
                 'operating_hours' => '06:00 - 20:00 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Pantai Bebas Parapat',
+                'slug' => 'pantai-bebas-parapat',
+                'name' => ['id' => 'Pantai Bebas Parapat', 'en' => 'Parapat Free Beach Esplanade'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::PARAPAT,
-                'description' => 'Ruang terbuka publik ikonik di tepi Danau Toba dengan pemandangan terbuka menghadap Pulau Samosir.',
+                'description' => [
+                    'id' => 'Ruang terbuka publik ikonik di tepi Danau Toba dengan pemandangan terbuka menghadap Pulau Samosir.',
+                    'en' => 'Iconic lakeside public promenade on the shores of Lake Toba with panoramic views facing Samosir Island.',
+                ],
                 'ticket_domestic' => 5000,
                 'ticket_foreign' => 10000,
                 'operating_hours' => '24 Jam',
@@ -58,30 +66,42 @@ class DestinationSeeder extends Seeder
 
             // SAMOSIR EAST
             [
-                'name' => 'Desa Wisata Tomok & Makam Raja Sidabutar',
+                'slug' => 'desa-wisata-tomok-makam-raja-sidabutar',
+                'name' => ['id' => 'Desa Wisata Tomok & Makam Raja Sidabutar', 'en' => 'Tomok Cultural Village & King Sidabutar Tomb'],
                 'category' => 'budaya-sejarah',
                 'cluster' => DestinationCluster::SAMOSIR_EAST,
-                'description' => 'Situs bersejarah Batak dengan makam batu monolitik kuno Raja Sidabutar dan pertunjukan boneka Sigale-gale.',
+                'description' => [
+                    'id' => 'Situs bersejarah Batak dengan makam batu monolitik kuno Raja Sidabutar dan pertunjukan boneka Sigale-gale.',
+                    'en' => 'Historic Batak cultural site featuring ancient monolithic stone tombs of King Sidabutar and traditional Sigale-gale puppet dances.',
+                ],
                 'ticket_domestic' => 10000,
                 'ticket_foreign' => 20000,
                 'operating_hours' => '08:00 - 18:00 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Batu Kursi Parsidangan Siallagan (Ambarita)',
+                'slug' => 'batu-kursi-parsidangan-siallagan-ambarita',
+                'name' => ['id' => 'Batu Kursi Parsidangan Siallagan (Ambarita)', 'en' => 'Siallagan Stone Court Chairs (Ambarita)'],
                 'category' => 'budaya-sejarah',
                 'cluster' => DestinationCluster::SAMOSIR_EAST,
-                'description' => 'Situs persidangan batu zaman megalitikum suku Batak tempat pengadilan dan musyawarah para tetua adat.',
+                'description' => [
+                    'id' => 'Situs persidangan batu zaman megalitikum suku Batak tempat pengadilan dan musyawarah para tetua adat.',
+                    'en' => 'Megalithic Batak stone courtroom site where ancient tribal elders and kings held trials and council meetings.',
+                ],
                 'ticket_domestic' => 10000,
                 'ticket_foreign' => 25000,
                 'operating_hours' => '08:00 - 17:30 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Pesisir Pantai Tuktuk Siadong',
+                'slug' => 'pesisir-pantai-tuktuk-siadong',
+                'name' => ['id' => 'Pesisir Pantai Tuktuk Siadong', 'en' => 'Tuktuk Siadong Peninsula Coast'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::SAMOSIR_EAST,
-                'description' => 'Semenanjung wisata favorit wisatawan dengan deretan penginapan tepi danau, kafe, dan aktivitas water sport.',
+                'description' => [
+                    'id' => 'Semenanjung wisata favorit wisatawan dengan deretan penginapan tepi danau, kafe, dan aktivitas water sport.',
+                    'en' => 'Favorite resort peninsula lined with lakeside stays, cozy cafes, and water sport activities.',
+                ],
                 'ticket_domestic' => 0,
                 'ticket_foreign' => 0,
                 'operating_hours' => '24 Jam',
@@ -90,30 +110,42 @@ class DestinationSeeder extends Seeder
 
             // SAMOSIR WEST
             [
-                'name' => 'Bukit Holbung (Bukit Teletubbies Samosir)',
+                'slug' => 'bukit-holbung-bukit-teletubbies-samosir',
+                'name' => ['id' => 'Bukit Holbung (Bukit Teletubbies Samosir)', 'en' => 'Holbung Hill (Samosir Teletubbies Hill)'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::SAMOSIR_WEST,
-                'description' => 'Perbukitan savana hijau yang luas dengan panorama menakjubkan 360 derajat menghadap hamparan Danau Toba.',
+                'description' => [
+                    'id' => 'Perbukitan savana hijau yang luas dengan panorama menakjubkan 360 derajat menghadap hamparan Danau Toba.',
+                    'en' => 'Rolling green savanna hills offering breathtaking 360-degree panoramic views over Lake Toba.',
+                ],
                 'ticket_domestic' => 10000,
                 'ticket_foreign' => 20000,
                 'operating_hours' => '06:00 - 18:00 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Menara Pandang Tele',
+                'slug' => 'menara-pandang-tele',
+                'name' => ['id' => 'Menara Pandang Tele', 'en' => 'Tele Viewing Tower'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::SAMOSIR_WEST,
-                'description' => 'Titik tertinggi jalur darat penghubung Samosir dengan pulau Sumatra dengan sudut pandang seluruh kaldera.',
+                'description' => [
+                    'id' => 'Titik tertinggi jalur darat penghubung Samosir dengan pulau Sumatra dengan sudut pandang seluruh kaldera.',
+                    'en' => 'Highest mainland viewpoint connecting Samosir to Sumatra with sweeping vistas of the entire volcanic caldera.',
+                ],
                 'ticket_domestic' => 7000,
                 'ticket_foreign' => 15000,
                 'operating_hours' => '07:00 - 18:00 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Aek Rangat Pangururan',
+                'slug' => 'aek-rangat-pangururan',
+                'name' => ['id' => 'Aek Rangat Pangururan', 'en' => 'Aek Rangat Pangururan Hot Springs'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::SAMOSIR_WEST,
-                'description' => 'Pemandian air panas belerang alami di kaki Gunung Pusuk Buhit yang melegenda sebagai asal-muasal suku Batak.',
+                'description' => [
+                    'id' => 'Pemandian air panas belerang alami di kaki Gunung Pusuk Buhit yang melegenda sebagai asal-muasal suku Batak.',
+                    'en' => 'Natural sulfur hot springs at the foot of sacred Mount Pusuk Buhit, legendary birthplace of the Batak people.',
+                ],
                 'ticket_domestic' => 10000,
                 'ticket_foreign' => 15000,
                 'operating_hours' => '06:00 - 22:00 WIB',
@@ -122,20 +154,28 @@ class DestinationSeeder extends Seeder
 
             // MEREK & TONGGING
             [
-                'name' => 'Air Terjun Sipiso-piso',
+                'slug' => 'air-terjun-sipiso-piso',
+                'name' => ['id' => 'Air Terjun Sipiso-piso', 'en' => 'Sipiso-piso Waterfall'],
                 'category' => 'air-terjun-curug',
                 'cluster' => DestinationCluster::MEREK_TONGGING,
-                'description' => 'Air terjun megah setinggi 120 meter yang mengalir deras dari celah tebing jurang kaldera menuju ke tepian Danau Toba.',
+                'description' => [
+                    'id' => 'Air terjun megah setinggi 120 meter yang mengalir deras dari celah tebing jurang kaldera menuju ke tepian Danau Toba.',
+                    'en' => 'Majestic 120-meter waterfall plunging from a subterranean river cave in the caldera cliff towards Lake Toba.',
+                ],
                 'ticket_domestic' => 10000,
                 'ticket_foreign' => 25000,
                 'operating_hours' => '07:00 - 18:00 WIB',
                 'is_featured' => true,
             ],
             [
-                'name' => 'Desa Tongging & Danau Utara',
+                'slug' => 'desa-tongging-danau-utara',
+                'name' => ['id' => 'Desa Tongging & Danau Utara', 'en' => 'Tongging Village & Northern Lake'],
                 'category' => 'alam-viewpoint',
                 'cluster' => DestinationCluster::MEREK_TONGGING,
-                'description' => 'Desa lembah tepi danau di bawah Air Terjun Sipiso-piso dengan sentra ikan bakar nila segar dan pemandangan tenang.',
+                'description' => [
+                    'id' => 'Desa lembah tepi danau di bawah Air Terjun Sipiso-piso dengan sentra ikan bakar nila segar dan pemandangan tenang.',
+                    'en' => 'Serene lakeside valley village below Sipiso-piso Waterfall, famous for fresh grilled tilapia and tranquil waters.',
+                ],
                 'ticket_domestic' => 0,
                 'ticket_foreign' => 0,
                 'operating_hours' => '24 Jam',
@@ -144,8 +184,8 @@ class DestinationSeeder extends Seeder
         ];
 
         foreach ($destinations as $d) {
-            Destination::firstOrCreate(
-                ['slug' => Str::slug($d['name'])],
+            Destination::updateOrCreate(
+                ['slug' => $d['slug']],
                 [
                     'category_id' => $categories[$d['category']]->id,
                     'name' => $d['name'],

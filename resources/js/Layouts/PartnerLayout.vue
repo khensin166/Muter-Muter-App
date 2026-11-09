@@ -3,10 +3,12 @@ import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import { useTrans } from '@/Composables/useTrans';
 
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
 const isSidebarOpen = ref(false);
+const { t } = useTrans();
 </script>
 
 <template>
@@ -25,19 +27,19 @@ const isSidebarOpen = ref(false);
           </button>
           <div class="flex items-center gap-3">
             <ApplicationLogo className="h-8 w-auto" />
-            <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md">Mitra Vendor</span>
-            <span class="text-sm font-semibold text-text-main hidden sm:inline">Portal Operasional Mitra Wisata</span>
+            <span class="text-xs font-bold uppercase tracking-wider px-2 py-1 bg-emerald-100 text-emerald-800 rounded-md">{{ t('partner.badge') }}</span>
+            <span class="text-sm font-semibold text-text-main hidden sm:inline">{{ t('partner.portal_title') }}</span>
           </div>
         </div>
 
         <div class="flex items-center gap-4">
           <LanguageSwitcher />
           <Link href="/" class="text-xs font-medium text-text-muted hover:text-primary hidden sm:inline">
-            ← Ke Marketplace
+            {{ t('nav.back_to_marketplace') }}
           </Link>
           <div class="text-right">
             <div class="text-sm font-bold text-text-main">{{ user?.name || 'Mitra' }}</div>
-            <div class="text-xs text-text-muted">Status: Terverifikasi</div>
+            <div class="text-xs text-text-muted">{{ t('partner.status_verified') }}</div>
           </div>
           <Link
             :href="route('logout')"
@@ -45,7 +47,7 @@ const isSidebarOpen = ref(false);
             as="button"
             class="text-xs font-semibold px-3 py-1.5 rounded-lg border border-border text-text-muted hover:text-danger hover:border-danger/30 transition"
           >
-            Keluar
+            {{ t('nav.logout') }}
           </Link>
         </div>
       </div>
@@ -61,14 +63,14 @@ const isSidebarOpen = ref(false);
         ]"
       >
         <div class="text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Operasional
+          {{ t('partner.section_ops') }}
         </div>
         <Link
           href="/partner"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>📊</span>
-          <span>Ringkasan & SLA</span>
+          <span>{{ t('partner.menu_summary') }}</span>
         </Link>
         <Link
           href="/partner/bookings"
@@ -76,7 +78,7 @@ const isSidebarOpen = ref(false);
         >
           <div class="flex items-center gap-3">
             <span>📥</span>
-            <span>Permintaan Booking</span>
+            <span>{{ t('partner.menu_bookings') }}</span>
           </div>
           <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">24h SLA</span>
         </Link>
@@ -85,50 +87,50 @@ const isSidebarOpen = ref(false);
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🗓️</span>
-          <span>Jadwal Harian & Armada</span>
+          <span>{{ t('partner.menu_schedule') }}</span>
         </Link>
 
         <div class="pt-4 text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Katalog Produk
+          {{ t('partner.section_catalog') }}
         </div>
         <Link
           href="/partner/products"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🏷️</span>
-          <span>Semua Produk</span>
+          <span>{{ t('partner.menu_all_products') }}</span>
         </Link>
         <Link
           href="/partner/products?type=TOUR"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🎒</span>
-          <span>Paket Wisata</span>
+          <span>{{ t('partner.menu_tours') }}</span>
         </Link>
         <Link
           href="/partner/products?type=VEHICLE"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🚐</span>
-          <span>Armada Rental</span>
+          <span>{{ t('partner.menu_vehicles') }}</span>
         </Link>
 
         <div class="pt-4 text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Manajemen Usaha
+          {{ t('partner.section_business') }}
         </div>
         <Link
           href="/partner/staff"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>👥</span>
-          <span>Staf & Hak Akses</span>
+          <span>{{ t('partner.menu_staff') }}</span>
         </Link>
         <Link
           href="/partner/settlements"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>💰</span>
-          <span>Pencairan & Settlement</span>
+          <span>{{ t('partner.menu_settlements') }}</span>
         </Link>
       </aside>
 

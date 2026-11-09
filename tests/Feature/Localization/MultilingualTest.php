@@ -77,3 +77,19 @@ test('single translation api endpoint returns translated string', function () {
     $response->assertJson(['success' => true]);
     expect($response->json('translated'))->toContain('Toba');
 });
+
+test('static translation json dictionaries exist and contain matching keys', function () {
+    $idPath = lang_path('id.json');
+    $enPath = lang_path('en.json');
+
+    expect(file_exists($idPath))->toBeTrue();
+    expect(file_exists($enPath))->toBeTrue();
+
+    $idDict = json_decode(file_get_contents($idPath), true);
+    $enDict = json_decode(file_get_contents($enPath), true);
+
+    expect($idDict)->toBeArray()->not->toBeEmpty();
+    expect($enDict)->toBeArray()->not->toBeEmpty();
+    expect($idDict['nav.tours'])->toBe('Paket Wisata');
+    expect($enDict['nav.tours'])->toBe('Tour Packages');
+});

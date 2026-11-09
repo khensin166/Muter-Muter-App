@@ -16,10 +16,20 @@ createInertiaApp({
             import.meta.glob('./Pages/**/*.vue'),
         ),
     setup({ el, App, props, plugin }) {
-        return createApp({ render: () => h(App, props) })
+        const app = createApp({ render: () => h(App, props) })
             .use(plugin)
-            .use(ZiggyVue)
-            .mount(el);
+            .use(ZiggyVue);
+
+        app.config.globalProperties.$t = (key, replacements = {}) => {
+            const dict = props.initialPage?.props?.translations || {};
+            let text = dict[key] ?? key;
+            Object.entries(replacements).forEach(([placeholder, val]) => {
+                text = text.replace(new RegExp(`:${placeholder}`, 'g'), String(val));
+            });
+            return text;
+        };
+
+        return app.mount(el);
     },
     progress: {
         color: '#4B5563',

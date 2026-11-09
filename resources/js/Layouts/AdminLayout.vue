@@ -3,10 +3,12 @@ import { ref } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
+import { useTrans } from '@/Composables/useTrans';
 
 const page = usePage();
 const user = page.props.auth ? page.props.auth.user : null;
 const isSidebarOpen = ref(false);
+const { t } = useTrans();
 </script>
 
 <template>
@@ -26,14 +28,14 @@ const isSidebarOpen = ref(false);
           <div class="flex items-center gap-3">
             <ApplicationLogo variant="white" className="h-7 w-auto" />
             <span class="text-xs font-black uppercase tracking-wider px-2 py-0.5 bg-accent text-white rounded">ADMIN</span>
-            <span class="text-sm font-bold tracking-tight hidden sm:inline">Platform Operations Console</span>
+            <span class="text-sm font-bold tracking-tight hidden sm:inline">{{ t('admin.console_title') }}</span>
           </div>
         </div>
 
         <div class="flex items-center gap-4">
           <LanguageSwitcher />
           <Link href="/" class="text-xs font-medium text-slate-300 hover:text-white hidden sm:inline">
-            ← Marketplace
+            {{ t('nav.back_to_marketplace') }}
           </Link>
           <div class="text-right">
             <div class="text-sm font-bold">{{ user?.name || 'Administrator' }}</div>
@@ -45,7 +47,7 @@ const isSidebarOpen = ref(false);
             as="button"
             class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-white/10 hover:bg-danger text-white transition"
           >
-            Keluar
+            {{ t('nav.logout') }}
           </Link>
         </div>
       </div>
@@ -61,14 +63,14 @@ const isSidebarOpen = ref(false);
         ]"
       >
         <div class="text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Pusat Operasional
+          {{ t('admin.section_ops') }}
         </div>
         <Link
           href="/admin"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>📈</span>
-          <span>Dashboard Utama</span>
+          <span>{{ t('admin.menu_dashboard') }}</span>
         </Link>
         <Link
           href="/admin/sla-monitoring"
@@ -76,13 +78,13 @@ const isSidebarOpen = ref(false);
         >
           <div class="flex items-center gap-3">
             <span>🚨</span>
-            <span>Intervensi SLA</span>
+            <span>{{ t('admin.menu_sla') }}</span>
           </div>
           <span class="bg-rose-100 text-danger text-xs px-2 py-0.5 rounded-full font-bold">Manual</span>
         </Link>
 
         <div class="pt-4 text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Verifikasi & Transaksi
+          {{ t('admin.section_verification') }}
         </div>
         <Link
           href="/admin/payments"
@@ -90,7 +92,7 @@ const isSidebarOpen = ref(false);
         >
           <div class="flex items-center gap-3">
             <span>💳</span>
-            <span>Bukti Bayar DP</span>
+            <span>{{ t('admin.menu_payments') }}</span>
           </div>
           <span class="bg-amber-100 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">Review</span>
         </Link>
@@ -99,43 +101,43 @@ const isSidebarOpen = ref(false);
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🏢</span>
-          <span>Verifikasi Mitra (KYC)</span>
+          <span>{{ t('admin.menu_partners') }}</span>
         </Link>
         <Link
           href="/admin/products"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🏷️</span>
-          <span>Moderasi Produk & DP</span>
+          <span>{{ t('admin.menu_products') }}</span>
         </Link>
 
         <div class="pt-4 text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Keuangan & Settlement
+          {{ t('admin.section_finance') }}
         </div>
         <Link
           href="/admin/settlements"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>💸</span>
-          <span>Settlement Vendor (10%)</span>
+          <span>{{ t('admin.menu_settlements') }}</span>
         </Link>
         <Link
           href="/admin/refunds"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>🔄</span>
-          <span>Antrean Refund</span>
+          <span>{{ t('admin.menu_refunds') }}</span>
         </Link>
 
         <div class="pt-4 text-xs font-bold uppercase tracking-wider text-text-muted px-3 py-2">
-          Master Data
+          {{ t('admin.section_master') }}
         </div>
         <Link
           href="/admin/destinations"
           class="flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium hover:bg-surface-muted text-text-main transition"
         >
           <span>📍</span>
-          <span>Destinasi Danau Toba</span>
+          <span>{{ t('admin.menu_destinations') }}</span>
         </Link>
       </aside>
 

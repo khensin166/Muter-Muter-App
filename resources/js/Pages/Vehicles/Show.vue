@@ -2,6 +2,9 @@
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, computed } from 'vue';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t } = useTrans();
 
 const props = defineProps({
   product: Object,
@@ -47,9 +50,9 @@ const formatRupiah = (value) => {
     <!-- Breadcrumb -->
     <div class="bg-surface-muted border-b border-border py-4 px-4 sm:px-6 lg:px-8">
       <div class="max-w-7xl mx-auto flex items-center gap-2 text-xs text-text-muted">
-        <Link href="/" class="hover:text-primary">Beranda</Link>
+        <Link href="/" class="hover:text-primary">{{ t('nav.home') }}</Link>
         <span>/</span>
-        <Link href="/vehicles" class="hover:text-primary">Rental Kendaraan</Link>
+        <Link href="/vehicles" class="hover:text-primary">{{ t('nav.vehicle_rentals') }}</Link>
         <span>/</span>
         <span class="text-text-main font-semibold truncate">{{ product.name }}</span>
       </div>
@@ -75,7 +78,7 @@ const formatRupiah = (value) => {
                 {{ product.vehicle.brand }} {{ product.vehicle.model }} ({{ product.vehicle.manufacturing_year }})
               </span>
               <span class="bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full">
-                {{ product.vehicle.with_driver ? 'Termasuk Driver Berpengalaman' : 'Lepas Kunci' }}
+                {{ product.vehicle.with_driver ? t('home.with_driver') : t('home.self_drive') }}
               </span>
               <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full border border-emerald-200">
                 Plat: {{ product.vehicle.license_plate }}
@@ -85,7 +88,7 @@ const formatRupiah = (value) => {
               {{ product.name }}
             </h1>
             <p class="text-xs text-text-muted mt-2">
-              Disediakan oleh mitra transportasi terdaftar: <span class="font-bold text-text-main">{{ product.partner.name }}</span> ({{ product.partner.city }})
+              {{ t('tours.provided_by') }} <span class="font-bold text-text-main">{{ product.partner.name }}</span> ({{ product.partner.city }})
             </p>
           </div>
 
@@ -93,32 +96,32 @@ const formatRupiah = (value) => {
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
             <div class="p-4 bg-surface rounded-2xl border border-border text-center">
               <span class="text-2xl block mb-1">👥</span>
-              <span class="text-[11px] text-text-muted block">Kapasitas</span>
-              <strong class="text-sm text-text-main">{{ product.vehicle.passenger_capacity }} Penumpang</strong>
+              <span class="text-[11px] text-text-muted block">{{ t('vehicles.spec_capacity') }}</span>
+              <strong class="text-sm text-text-main">{{ t('vehicles.spec_passengers', { count: product.vehicle.passenger_capacity }) }}</strong>
             </div>
 
             <div class="p-4 bg-surface rounded-2xl border border-border text-center">
               <span class="text-2xl block mb-1">🧳</span>
-              <span class="text-[11px] text-text-muted block">Bagasi</span>
-              <strong class="text-sm text-text-main">{{ product.vehicle.luggage_capacity }} Koper</strong>
+              <span class="text-[11px] text-text-muted block">{{ t('vehicles.spec_luggage') }}</span>
+              <strong class="text-sm text-text-main">{{ product.vehicle.luggage_capacity }} {{ t('home.suitcases') }}</strong>
             </div>
 
             <div class="p-4 bg-surface rounded-2xl border border-border text-center">
               <span class="text-2xl block mb-1">⚙️</span>
-              <span class="text-[11px] text-text-muted block">Transmisi</span>
+              <span class="text-[11px] text-text-muted block">{{ t('vehicles.spec_transmission') }}</span>
               <strong class="text-sm text-text-main">{{ product.vehicle.transmission }}</strong>
             </div>
 
             <div class="p-4 bg-surface rounded-2xl border border-border text-center">
               <span class="text-2xl block mb-1">📅</span>
-              <span class="text-[11px] text-text-muted block">Tahun Armada</span>
+              <span class="text-[11px] text-text-muted block">{{ t('vehicles.spec_year') }}</span>
               <strong class="text-sm text-text-main">{{ product.vehicle.manufacturing_year }}</strong>
             </div>
           </div>
 
           <!-- Description -->
           <div class="bg-surface p-6 rounded-2xl border border-border shadow-card">
-            <h2 class="text-base font-bold text-text-main mb-3">Informasi & Kondisi Kendaraan</h2>
+            <h2 class="text-base font-bold text-text-main mb-3">{{ t('vehicles.info_title') }}</h2>
             <p class="text-sm text-text-muted leading-relaxed whitespace-pre-line">
               {{ product.full_description }}
             </p>
@@ -126,7 +129,7 @@ const formatRupiah = (value) => {
 
           <!-- Policy & Pickup locations -->
           <div class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-4">
-            <h3 class="text-base font-bold text-text-main">Titik Penjemputan & Kebijakan Rental</h3>
+            <h3 class="text-base font-bold text-text-main">{{ t('vehicles.pickup_policy_title') }}</h3>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
               <div class="p-3.5 bg-surface-muted rounded-xl border border-border">
@@ -154,16 +157,16 @@ const formatRupiah = (value) => {
         <div>
           <div class="sticky top-20 bg-surface p-6 rounded-2xl border border-border shadow-xl space-y-5">
             <div>
-              <span class="text-xs text-text-muted uppercase font-bold block">Tarif Sewa</span>
+              <span class="text-xs text-text-muted uppercase font-bold block">{{ t('home.rental_rate') }}</span>
               <div class="text-2xl font-black text-primary">
                 {{ formatRupiah(product.base_price) }}
-                <span class="text-xs font-normal text-text-muted">/ hari</span>
+                <span class="text-xs font-normal text-text-muted">{{ t('home.per_day') }}</span>
               </div>
             </div>
 
             <!-- Rental Days Counter -->
             <div>
-              <label class="block text-xs font-bold text-text-muted uppercase mb-1.5">Durasi Sewa (Hari)</label>
+              <label class="block text-xs font-bold text-text-muted uppercase mb-1.5">{{ t('vehicles.rental_duration_label') }}</label>
               <div class="flex items-center gap-3">
                 <button
                   @click="decrementDays"
@@ -171,7 +174,7 @@ const formatRupiah = (value) => {
                 >
                   -
                 </button>
-                <span class="flex-1 text-center font-bold text-base text-text-main">{{ rentalDays }} Hari</span>
+                <span class="flex-1 text-center font-bold text-base text-text-main">{{ t('vehicles.days_unit', { days: rentalDays }) }}</span>
                 <button
                   @click="incrementDays"
                   class="w-10 h-10 rounded-xl border border-border hover:bg-surface-muted font-bold text-lg flex items-center justify-center"
@@ -184,15 +187,15 @@ const formatRupiah = (value) => {
             <!-- Price Breakdown -->
             <div class="p-4 bg-surface-muted rounded-xl border border-border space-y-2 text-xs">
               <div class="flex justify-between">
-                <span class="text-text-muted">Total Biaya Sewa ({{ rentalDays }} Hari):</span>
+                <span class="text-text-muted">{{ t('tours.total_estimate') }}</span>
                 <span class="font-bold text-text-main">{{ formatRupiah(totalPrice) }}</span>
               </div>
               <div class="flex justify-between text-emerald-700 font-bold pt-2 border-t border-border">
-                <span>Wajib DP ({{ product.dp_percentage }}%):</span>
+                <span>{{ t('tours.required_dp', { dp: product.dp_percentage }) }}</span>
                 <span>{{ formatRupiah(dpAmount) }}</span>
               </div>
               <div class="flex justify-between text-text-muted text-[11px]">
-                <span>Pelunasan Hari Pertama:</span>
+                <span>{{ t('tours.remaining_payment') }}</span>
                 <span>{{ formatRupiah(remainingAmount) }}</span>
               </div>
             </div>
@@ -201,7 +204,7 @@ const formatRupiah = (value) => {
             <div class="text-[11px] text-text-muted space-y-1">
               <div class="flex items-center gap-1.5">
                 <span>⏱️</span>
-                <span>Minimum lead-time: <strong class="text-text-main">H-12 Jam sebelum jadwal</strong></span>
+                <span>Minimum lead-time: <strong class="text-text-main">H-12 Jam</strong></span>
               </div>
               <div class="flex items-center gap-1.5">
                 <span>⚡</span>
@@ -214,7 +217,7 @@ const formatRupiah = (value) => {
               :href="`/checkout?product_id=${product.id}&rental_days=${rentalDays}`"
               class="w-full bg-accent hover:bg-accent-hover text-white font-bold py-3.5 px-4 rounded-xl text-center text-sm transition-colors shadow-lg block"
             >
-              Ajukan Sewa Kendaraan →
+              {{ t('vehicles.book_now_btn') }}
             </Link>
           </div>
         </div>
