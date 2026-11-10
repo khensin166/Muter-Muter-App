@@ -183,6 +183,20 @@ class DestinationSeeder extends Seeder
             ],
         ];
 
+        // Approximate GPS coordinates (WGS84) for Google Maps itinerary rendering
+        $coordinates = [
+            'pelabuhan-penyeberangan-ajibata' => [2.6603, 98.9369],
+            'pantai-bebas-parapat' => [2.6662, 98.9354],
+            'desa-wisata-tomok-makam-raja-sidabutar' => [2.6539, 98.8559],
+            'batu-kursi-parsidangan-siallagan-ambarita' => [2.6797, 98.8236],
+            'pesisir-pantai-tuktuk-siadong' => [2.6627, 98.8452],
+            'bukit-holbung-bukit-teletubbies-samosir' => [2.5426, 98.6898],
+            'menara-pandang-tele' => [2.5487, 98.6006],
+            'aek-rangat-pangururan' => [2.6203, 98.6826],
+            'air-terjun-sipiso-piso' => [2.9174, 98.5194],
+            'desa-tongging-danau-utara' => [2.8967, 98.5303],
+        ];
+
         foreach ($destinations as $d) {
             Destination::updateOrCreate(
                 ['slug' => $d['slug']],
@@ -191,6 +205,8 @@ class DestinationSeeder extends Seeder
                     'name' => $d['name'],
                     'cluster' => $d['cluster'],
                     'description' => $d['description'],
+                    'latitude' => $coordinates[$d['slug']][0] ?? null,
+                    'longitude' => $coordinates[$d['slug']][1] ?? null,
                     'ticket_price_domestic' => $d['ticket_domestic'],
                     'ticket_price_foreign' => $d['ticket_foreign'],
                     'operating_hours' => $d['operating_hours'],

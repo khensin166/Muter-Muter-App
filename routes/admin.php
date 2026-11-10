@@ -1,10 +1,13 @@
 <?php
 
 use App\Http\Controllers\Admin\AdminDashboardController;
+use App\Http\Controllers\Admin\AdminDestinationClusterController;
+use App\Http\Controllers\Admin\AdminDestinationController;
 use App\Http\Controllers\Admin\AdminPaymentController;
 use App\Http\Controllers\Admin\AdminRefundController;
 use App\Http\Controllers\Admin\AdminSettlementController;
 use App\Http\Controllers\Admin\AdminSlaController;
+use App\Http\Controllers\Admin\AdminTourController;
 use App\Http\Controllers\Admin\PartnerVerificationController;
 use App\Http\Controllers\Admin\ProductModerationController;
 use Illuminate\Support\Facades\Route;
@@ -12,6 +15,25 @@ use Inertia\Inertia;
 
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'admin'])->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    // Master Destinations Management (Full Enterprise CRUD & Active Toggle)
+    Route::get('destinations', [AdminDestinationController::class, 'index'])->name('destinations.index');
+    Route::post('destinations', [AdminDestinationController::class, 'store'])->name('destinations.store');
+    Route::post('destinations/{id}', [AdminDestinationController::class, 'update'])->name('destinations.update');
+    Route::delete('destinations/{id}', [AdminDestinationController::class, 'destroy'])->name('destinations.destroy');
+    Route::patch('destinations/{id}/toggle', [AdminDestinationController::class, 'toggleStatus'])->name('destinations.toggle');
+
+    // Master Destination Clusters Management (Dynamic Regional Clusters CRUD)
+    Route::get('destination-clusters', [AdminDestinationClusterController::class, 'index'])->name('destination-clusters.index');
+    Route::post('destination-clusters', [AdminDestinationClusterController::class, 'store'])->name('destination-clusters.store');
+    Route::post('destination-clusters/{id}', [AdminDestinationClusterController::class, 'update'])->name('destination-clusters.update');
+    Route::delete('destination-clusters/{id}', [AdminDestinationClusterController::class, 'destroy'])->name('destination-clusters.destroy');
+    Route::patch('destination-clusters/{id}/toggle', [AdminDestinationClusterController::class, 'toggleStatus'])->name('destination-clusters.toggle');
+
+    // Platform-Curated Tour Package Creator & Booking Dispatching
+    Route::get('tours/create', [AdminTourController::class, 'create'])->name('tours.create');
+    Route::post('tours', [AdminTourController::class, 'store'])->name('tours.store');
+    Route::post('bookings/{id}/dispatch', [AdminTourController::class, 'dispatchBooking'])->name('bookings.dispatch');
 
     // Partner KYC & Verification
     Route::get('partners', [PartnerVerificationController::class, 'index'])->name('partners.index');

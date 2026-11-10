@@ -68,6 +68,10 @@ class MarkCompletedTripsCommand extends Command
                         'eligible_at' => now(),
                     ]);
 
+                if ($booking->partner_id) {
+                    $booking->partner()->increment('completed_trips_count');
+                }
+
                 AuditLog::create([
                     'user_id' => null,
                     'action' => 'TRIP_COMPLETED',

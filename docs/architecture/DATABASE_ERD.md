@@ -1,6 +1,6 @@
 # Database Entity-Relationship Diagram (ERD) — Lake Toba Travel Marketplace
 
-- **Document Version:** 1.0
+- **Document Version:** 1.2
 - **Database Engine:** PostgreSQL 15+
 - **Primary Keys:** UUID v4 across all tables
 - **Monetary Units:** `NUMERIC(14,2)`
@@ -12,61 +12,66 @@
 ```mermaid
 erDiagram
     %% Identity Domain
-    users ||--o{ partner_members : "belongs to"
-    users ||--o{ bookings : "creates"
-    users ||--o{ audit_logs : "triggers"
-    users ||--o{ payment_proofs : "verifies"
+    users ||--o{ partner_members : employs
+    users ||--o{ bookings : creates
+    users ||--o{ audit_logs : triggers
+    users ||--o{ payment_proofs : verifies
+    users ||--o{ reviews : writes
 
     %% Partner Domain
-    partners ||--o{ partner_members : "employs"
-    partners ||--o{ partner_documents : "submits"
-    partners ||--o{ products : "owns"
-    partners ||--o{ vendor_settlements : "receives"
+    partners ||--o{ partner_members : employs
+    partners ||--o{ partner_documents : submits
+    partners ||--o{ products : owns
+    partners ||--o{ vendor_settlements : receives
+    partners ||--o{ reviews : receives
 
     %% Destination Domain
-    destination_categories ||--o{ destinations : "categorizes"
-    destinations ||--o{ destination_media : "contains"
-    destinations ||--o{ tour_itinerary_stops : "visited in"
+    destination_categories ||--o{ destinations : categorizes
+    destinations ||--o{ destination_media : contains
+    destinations ||--o{ tour_itinerary_stops : visited_in
 
     %% Product Catalog Domain
-    products ||--o| tour_packages : "specializes as"
-    products ||--o| vehicles : "specializes as"
-    products ||--o{ product_media : "has"
-    products ||--o{ product_approval_logs : "audited by"
-    products ||--o{ bookings : "booked in"
+    products ||--o| tour_packages : specializes_as
+    products ||--o| vehicles : specializes_as
+    products ||--o{ product_media : has
+    products ||--o{ product_approval_logs : audited_by
+    products ||--o{ bookings : booked_in
+    products ||--o{ reviews : receives
 
     %% Itinerary Domain
-    tour_packages ||--o{ tour_itinerary_days : "structured into"
-    tour_itinerary_days ||--o{ tour_itinerary_stops : "stops at"
-    tour_packages ||--o{ tour_departures : "schedules"
+    tour_packages ||--o{ tour_itinerary_days : structured_into
+    tour_itinerary_days ||--o{ tour_itinerary_stops : stops_at
+    tour_packages ||--o{ tour_departures : schedules
 
     %% Inventory Domain
-    tour_departures ||--o{ inventory_holds : "held for"
-    vehicles ||--o{ inventory_holds : "held for"
-    vehicles ||--o{ vehicle_unavailabilities : "blocked by"
+    tour_departures ||--o{ inventory_holds : held_for
+    vehicles ||--o{ inventory_holds : held_for
+    vehicles ||--o{ vehicle_unavailabilities : blocked_by
 
     %% Booking Domain
-    bookings ||--o| booking_tour_details : "stores tour specs"
-    bookings ||--o| booking_vehicle_details : "stores vehicle specs"
-    bookings ||--o{ booking_status_histories : "logs status transitions"
-    bookings ||--o{ inventory_holds : "reserves"
-    bookings ||--o{ payments : "paid via"
-    bookings ||--o{ refunds : "refunded via"
-    bookings ||--o| vendor_settlements : "settled in"
+    bookings ||--o| booking_tour_details : stores_tour_specs
+    bookings ||--o| booking_vehicle_details : stores_vehicle_specs
+    bookings ||--o{ booking_status_histories : logs_status
+    bookings ||--o{ inventory_holds : reserves
+    bookings ||--o{ payments : paid_via
+    bookings ||--o{ refunds : refunded_via
+    bookings ||--o| vendor_settlements : settled_in
+    bookings ||--o| reviews : generates
 
     %% Payment Domain
-    payments ||--o{ payment_proofs : "supported by"
+    payments ||--o{ payment_proofs : supported_by
 
     %% Table Definitions
     users {
         uuid id PK
         string name
-        string email UK
+        string email
         string phone
         string password
-        string role "ADMIN, CUSTOMER, PARTNER"
+        string role
         timestamp email_verified_at
-        timestamps created_at_updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
     partners {
@@ -75,39 +80,45 @@ erDiagram
         string brand_name
         string pic_name
         string pic_phone
-        string email UK
+        string email
         string address
         string city
-        string status "PENDING, APPROVED, SUSPENDED, REJECTED"
+        string status
         string bank_name
         string bank_account_number
         string bank_account_holder
-        timestamps created_at_updated_at
+        decimal average_rating
+        integer total_reviews_count
+        integer completed_trips_count
+        timestamp created_at
+        timestamp updated_at
     }
 
     partner_members {
         uuid id PK
         uuid partner_id FK
         uuid user_id FK
-        string role "OWNER, STAFF"
+        string role
         boolean is_active
-        timestamps created_at_updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
     partner_documents {
         uuid id PK
         uuid partner_id FK
-        string document_type "KTP, NIB, FLEET_PHOTO"
+        string document_type
         string file_path
-        string verification_status "PENDING, VERIFIED, REJECTED"
+        string verification_status
         text rejection_reason
-        timestamps created_at_updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
     destination_categories {
         uuid id PK
         string name
-        string slug UK
+        string slug
         string icon
     }
 
@@ -115,8 +126,8 @@ erDiagram
         uuid id PK
         uuid category_id FK
         string name
-        string slug UK
-        string cluster "PARAPAT, SAMOSIR_EAST, SAMOSIR_WEST, MEREK, MEDAN"
+        string slug
+        string cluster
         text description
         decimal latitude
         decimal longitude
@@ -126,28 +137,39 @@ erDiagram
         boolean is_featured
     }
 
+    destination_media {
+        uuid id PK
+        uuid destination_id FK
+        string media_type
+        string media_url
+        string caption
+        boolean is_primary
+        integer sort_order
+    }
+
     products {
         uuid id PK
-        uuid partner_id FK "nullable for INTERNAL"
-        string ownership_type "INTERNAL, PARTNER"
-        string product_type "TOUR, VEHICLE, TRANSFER"
+        uuid partner_id FK
+        string ownership_type
+        string product_type
         string name
-        string slug UK
+        string slug
         text short_description
         text full_description
         numeric base_price
-        string pricing_type "PER_PERSON, PER_VEHICLE, PER_GROUP"
-        numeric dp_percentage "default 30.00"
-        string status "DRAFT, PUBLISHED, ARCHIVED, SUSPENDED"
-        string approval_status "DRAFT, PENDING_REVIEW, APPROVED, REJECTED"
-        integer min_lead_time_hours "24 for tour, 12 for vehicle"
-        timestamps created_at_updated_at
+        string pricing_type
+        numeric dp_percentage
+        string status
+        string approval_status
+        integer min_lead_time_hours
+        timestamp created_at
+        timestamp updated_at
     }
 
     tour_packages {
         uuid id PK
         uuid product_id FK
-        string tour_type "ONE_DAY, MULTI_DAY, OPEN_TRIP, PRIVATE_TRIP"
+        string tour_type
         integer duration_days
         integer duration_nights
         integer min_participants
@@ -157,67 +179,108 @@ erDiagram
         text terms_conditions
     }
 
+    tour_itinerary_days {
+        uuid id PK
+        uuid tour_package_id FK
+        integer day_number
+        string title
+        text description
+    }
+
+    tour_itinerary_stops {
+        uuid id PK
+        uuid tour_itinerary_day_id FK
+        uuid destination_id FK
+        integer stop_order
+        string activity_title
+        string time_schedule
+        text description
+    }
+
+    tour_departures {
+        uuid id PK
+        uuid tour_package_id FK
+        date departure_date
+        integer quota_total
+        integer quota_booked
+        integer quota_held
+        string status
+    }
+
     vehicles {
         uuid id PK
         uuid product_id FK
-        string vehicle_type "CAR, MINIBUS, BUS, BOAT"
+        string vehicle_type
         string brand
         string model
         integer manufacturing_year
         integer passenger_capacity
         integer luggage_capacity
-        string transmission "MANUAL, AUTOMATIC"
+        string transmission
         boolean with_driver
         string license_plate
     }
 
+    vehicle_unavailabilities {
+        uuid id PK
+        uuid vehicle_id FK
+        date start_date
+        date end_date
+        string reason
+    }
+
     bookings {
         uuid id PK
-        string booking_code UK "BOOK-2026-XXXX"
+        string booking_code
         uuid user_id FK
         uuid product_id FK
-        uuid partner_id FK "nullable"
-        string booking_status "PENDING_APPROVAL, MANUAL_REVIEW, AWAITING_PAYMENT, PAYMENT_REVIEW, CONFIRMED, IN_PROGRESS, COMPLETED, CANCELLED, EXPIRED, REFUND_PENDING, REFUNDED"
-        string payment_status "UNPAID, PARTIALLY_PAID, PAYMENT_REVIEW, PAID, OVERDUE, REFUND_PENDING, REFUNDED"
-        string inventory_status "NONE, HELD, ALLOCATED, RELEASED"
+        uuid partner_id FK
+        string booking_status
+        string payment_status
+        string inventory_status
         date service_start_date
         date service_end_date
         time service_start_time
         numeric total_price
         numeric dp_amount
         numeric total_paid
-        numeric commission_percentage "default 10.00"
+        numeric commission_percentage
         numeric platform_commission_amount
         numeric partner_payout_amount
+        boolean contact_unmasked
+        string assigned_driver_name
+        string assigned_vehicle_plate
         jsonb product_snapshot
         jsonb pricing_breakdown
         jsonb cancellation_policy_snapshot
         timestamp vendor_sla_deadline
-        timestamps created_at_updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
     inventory_holds {
         uuid id PK
         uuid booking_id FK
         uuid product_id FK
-        uuid tour_departure_id FK "nullable"
-        uuid vehicle_id FK "nullable"
+        uuid tour_departure_id FK
+        uuid vehicle_id FK
         integer held_quantity
         timestamp held_at
         timestamp expires_at
-        string status "ACTIVE, RELEASED, CONVERTED"
+        string status
     }
 
     payments {
         uuid id PK
         uuid booking_id FK
-        string payment_code UK "PAY-XXXX"
-        string payment_type "DOWN_PAYMENT, BALANCE_SETTLEMENT, FULL_PAYMENT"
-        string payment_method "MANUAL_BANK_TRANSFER"
+        string payment_code
+        string payment_type
+        string payment_method
         numeric amount
-        string status "AWAITING_PAYMENT, PAYMENT_REVIEW, VERIFIED, REJECTED"
+        string status
         timestamp paid_at
-        timestamps created_at_updated_at
+        timestamp created_at
+        timestamp updated_at
     }
 
     payment_proofs {
@@ -242,7 +305,7 @@ erDiagram
         string bank_name
         string bank_account_number
         string bank_account_holder
-        string status "PENDING, APPROVED, PROCESSED, REJECTED"
+        string status
         uuid processed_by FK
         timestamp processed_at
     }
@@ -254,10 +317,38 @@ erDiagram
         numeric gross_amount
         numeric commission_amount
         numeric net_payout_amount
-        string status "PENDING, ELIGIBLE, PROCESSING, PAID, ON_HOLD"
+        string status
         string bank_reference
         timestamp eligible_at
         timestamp paid_at
     }
+
+    reviews {
+        uuid id PK
+        uuid booking_id FK
+        uuid user_id FK
+        uuid partner_id FK
+        uuid product_id FK
+        integer rating
+        integer driver_rating
+        integer vehicle_rating
+        text comment
+        boolean is_published
+        timestamp created_at
+        timestamp updated_at
+    }
 ```
 
+---
+
+## 2. Relasi Domain Utama
+
+1. **Destinasi ke Rute Tur (`destinations` 1 : N `tour_itinerary_stops`)**:
+   - Menghubungkan titik perhentian rencana perjalanan harian langsung ke katalog objek wisata Danau Toba / Sumatera Utara.
+   - Mengizinkan platform melakukan auto-agregasi galeri foto dari seluruh destinasi yang dikunjungi ke dalam halaman detail paket tur.
+
+2. **Mitra & Driver Anti-Bypass (`bookings.contact_unmasked`, `assigned_driver_name`, `assigned_vehicle_plate`)**:
+   - Menjamin nomor kontak mitra/driver hanya terbuka secara otomatis H-12 jam sebelum jadwal layanan aktif via WhatsApp gateway & portal customer.
+
+3. **Indeks & Anti-Race Condition**:
+   - `inventory_holds` diindeks komposit `(vehicle_id, status, expires_at)` dan `(tour_departure_id, status, expires_at)` untuk transaksi hold dan cron pembersihan kuota.

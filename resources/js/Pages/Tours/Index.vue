@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref } from 'vue';
@@ -30,13 +31,6 @@ const setTourType = (typeVal) => {
   applyFilters();
 };
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 </script>
 
 <template>
@@ -124,6 +118,24 @@ const formatRupiah = (value) => {
               <p class="text-xs text-text-muted mt-2 line-clamp-2">
                 {{ tour.short_description }}
               </p>
+
+              <!-- Bound Destinations Locations Pill -->
+              <div v-if="tour.bound_destinations && tour.bound_destinations.length > 0" class="mt-3 flex flex-wrap items-center gap-1.5">
+                <span
+                  v-for="(destName, dIdx) in tour.bound_destinations.slice(0, 3)"
+                  :key="dIdx"
+                  class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-700 text-[10px] font-semibold"
+                >
+                  <span>📍</span>
+                  <span>{{ destName }}</span>
+                </span>
+                <span
+                  v-if="tour.bound_destinations.length > 3"
+                  class="px-1.5 py-0.5 rounded-md bg-primary/10 text-primary text-[10px] font-bold"
+                >
+                  +{{ tour.bound_destinations.length - 3 }} lokasi
+                </span>
+              </div>
             </div>
 
             <div class="mt-6 pt-4 border-t border-border">

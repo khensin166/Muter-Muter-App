@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Public;
 
-use App\Enums\DestinationCluster;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
 use App\Models\DestinationCategory;
+use App\Models\DestinationCluster;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -21,9 +21,12 @@ class DestinationController extends Controller
         $selectedCategory = $request->query('category');
         $search = $request->query('search');
 
+        $clusters = DestinationCluster::activeOptions();
+        $validClusters = $clusters->pluck('value')->all();
+
         $query = Destination::query()->with(['category', 'media']);
 
-        if ($selectedCluster && in_array($selectedCluster, array_column(DestinationCluster::cases(), 'value'))) {
+        if ($selectedCluster && in_array($selectedCluster, $validClusters, true)) {
             $query->where('cluster', $selectedCluster);
         }
 
@@ -50,11 +53,6 @@ class DestinationController extends Controller
             'ticket_price_foreign' => (float) $d->ticket_price_foreign,
             'operating_hours' => $d->operating_hours,
             'image_url' => $d->media->first()?->media_url ?? 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?auto=format&fit=crop&w=800&q=80',
-        ]);
-
-        $clusters = collect(DestinationCluster::cases())->map(fn ($c) => [
-            'value' => $c->value,
-            'label' => $c->label(),
         ]);
 
         $categories = DestinationCategory::all()->map(fn ($cat) => [
@@ -115,6 +113,28 @@ class DestinationController extends Controller
                 'duration_days' => $p->tourPackage?->duration_days ?? 1,
             ]);
 
+        $mediaList = $destination->media->map(fn ($m) => [
+            'id' => $m->id,
+            'url' => $m->media_url,
+            'caption' => $m->caption,
+            'is_primary' => (bool) $m->is_primary,
+        ])->values()->all();
+
+        if (empty($mediaList)) {
+            $defaultPhotos = [
+                'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=1200&q=80',
+                'https://images.unsplash.com/photo-1518684079-3c830dcef090?auto=format&fit=crop&w=1200&q=80',
+            ];
+            $mediaList = collect($defaultPhotos)->map(fn ($url, $idx) => [
+                'id' => 'default-' . $idx,
+                'url' => $url,
+                'caption' => $destination->name,
+                'is_primary' => $idx === 0,
+            ])->all();
+        }
+
         return Inertia::render('Destinations/Show', [
             'destination' => [
                 'id' => $destination->id,
@@ -129,11 +149,7 @@ class DestinationController extends Controller
                 'ticket_price_domestic' => (float) $destination->ticket_price_domestic,
                 'ticket_price_foreign' => (float) $destination->ticket_price_foreign,
                 'operating_hours' => $destination->operating_hours,
-                'media' => $destination->media->map(fn ($m) => [
-                    'id' => $m->id,
-                    'url' => $m->media_url,
-                    'is_primary' => $m->is_primary,
-                ]),
+                'media' => $mediaList,
             ],
             'nearbyDestinations' => $nearbyDestinations,
             'relatedTours' => $relatedTours,

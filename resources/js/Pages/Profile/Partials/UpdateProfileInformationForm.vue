@@ -19,6 +19,7 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    phone: user.phone || '',
 });
 </script>
 
@@ -52,6 +53,21 @@ const form = useForm({
                 />
 
                 <InputError class="mt-2" :message="form.errors.name" />
+            </div>
+
+            <div>
+                <InputLabel for="phone" value="WhatsApp / Nomor Telepon" />
+
+                <TextInput
+                    id="phone"
+                    type="tel"
+                    class="mt-1 block w-full"
+                    v-model="form.phone"
+                    placeholder="08123456789"
+                    autocomplete="tel"
+                />
+
+                <InputError class="mt-2" :message="form.errors.phone" />
             </div>
 
             <div>

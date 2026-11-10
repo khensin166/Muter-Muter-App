@@ -125,12 +125,18 @@ class AdminPaymentController extends Controller
     {
         $admin = $request->user();
         $payment = Payment::with(['booking', 'latestProof'])->findOrFail($id);
-        $booking = $payment->booking;
+        $booking = null;
 
-        $prevBookingStatus = $booking->booking_status->value;
-        $prevPaymentStatus = $booking->payment_status->value;
+        DB::transaction(function () use ($payment, $admin, &$booking) {
+            // Pessimistic Locking to avoid race conditions with hold expiration or concurrent approval
+            $booking = Booking::where('id', $payment->booking_id)->lockForUpdate()->firstOrFail();
 
-        DB::transaction(function () use ($payment, $booking, $admin, $prevBookingStatus, $prevPaymentStatus) {
+            if ($booking->booking_status === BookingStatus::CONFIRMED && $payment->status === 'VERIFIED') {
+                return; // Idempotent safe return
+            }
+
+            $prevBookingStatus = $booking->booking_status->value;
+
             $payment->status = 'VERIFIED';
             $payment->paid_at = now();
             $payment->save();

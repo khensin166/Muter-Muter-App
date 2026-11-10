@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\DestinationCluster;
+use App\Casts\DestinationClusterCast;
 use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -32,18 +32,25 @@ class Destination extends Model
         'ticket_price_foreign',
         'operating_hours',
         'is_featured',
+        'is_active',
     ];
 
     protected function casts(): array
     {
         return [
-            'cluster' => DestinationCluster::class,
+            'cluster' => DestinationClusterCast::class,
             'is_featured' => 'boolean',
+            'is_active' => 'boolean',
             'ticket_price_domestic' => 'decimal:2',
             'ticket_price_foreign' => 'decimal:2',
             'latitude' => 'decimal:7',
             'longitude' => 'decimal:7',
         ];
+    }
+
+    public function clusterRecord()
+    {
+        return $this->belongsTo(DestinationCluster::class, 'cluster', 'code');
     }
 
     public function category()

@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ref } from 'vue';
@@ -9,13 +10,18 @@ const props = defineProps({
 
 const isRejectModalOpen = ref(false);
 
+const approveForm = useForm({
+  base_price: props.product.base_price || 850000,
+  dp_percentage: props.product.dp_percentage || 30,
+});
+
 const rejectForm = useForm({
   reason: '',
 });
 
 const submitApprove = () => {
-  if (confirm(`Setujui produk "${props.product.name}" untuk tayang di katalog marketplace?`)) {
-    useForm({}).post(route('admin.products.approve', props.product.id));
+  if (confirm(`Setujui produk "${props.product.name}" dengan tarif resmi ${formatRupiah(approveForm.base_price)}?`)) {
+    approveForm.post(route('admin.products.approve', props.product.id));
   }
 };
 
@@ -27,13 +33,6 @@ const submitReject = () => {
   });
 };
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 </script>
 
 <template>
@@ -178,24 +177,51 @@ const formatRupiah = (value) => {
 
       <!-- Right Column: Partner & Moderation Actions (1 Col) -->
       <div class="space-y-6">
-        <!-- Moderation Action Panel -->
+        <!-- Moderation Action & Centralized Pricing Panel -->
         <div class="bg-surface rounded-2xl border border-border p-6 shadow-xs space-y-4">
-          <h3 class="text-base font-bold text-text-main border-b border-border pb-3">Aksi Moderasi Admin</h3>
+          <h3 class="text-base font-bold text-text-main border-b border-border pb-3">Standar Harga & Moderasi Admin</h3>
 
-          <div class="space-y-3">
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="block font-bold text-text-main mb-1">Tarif Resmi Platform (IDR)</label>
+              <input
+                v-model.number="approveForm.base_price"
+                type="number"
+                step="10000"
+                min="0"
+                class="w-full rounded-xl border-border text-xs font-bold focus:border-primary focus:ring-primary"
+              />
+              <span class="text-[11px] text-text-muted mt-1 block">
+                Tarif standar terpusat agar seragam di seluruh mitra penyedia.
+              </span>
+            </div>
+
+            <div>
+              <label class="block font-bold text-text-main mb-1">Persentase Down Payment (%)</label>
+              <input
+                v-model.number="approveForm.dp_percentage"
+                type="number"
+                min="10"
+                max="100"
+                class="w-full rounded-xl border-border text-xs font-bold focus:border-primary focus:ring-primary"
+              />
+            </div>
+
             <button
-              v-if="product.approval_status !== 'APPROVED'"
+              type="button"
               @click="submitApprove"
-              class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2"
+              :disabled="approveForm.processing"
+              class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>✅</span>
-              <span>Setujui & Publikasikan Produk</span>
+              <span>{{ product.approval_status === 'APPROVED' ? 'Simpan Perubahan Tarif Resmi' : 'Setujui Tarif & Publikasikan Produk' }}</span>
             </button>
 
             <button
               v-if="product.approval_status !== 'REJECTED'"
+              type="button"
               @click="isRejectModalOpen = true"
-              class="w-full bg-danger hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2"
+              class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-4 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer"
             >
               <span>❌</span>
               <span>Tolak Produk (Berikan Alasan)</span>

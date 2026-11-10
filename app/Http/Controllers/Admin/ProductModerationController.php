@@ -169,16 +169,28 @@ class ProductModerationController extends Controller
     }
 
     /**
-     * Approve a product for public marketplace listing.
+     * Approve a product for public marketplace listing (and optionally set/update standardized platform price).
      */
     public function approve(Request $request, string $id): RedirectResponse
     {
+        $validated = $request->validate([
+            'base_price' => ['nullable', 'numeric', 'min:0'],
+            'dp_percentage' => ['nullable', 'numeric', 'min:0', 'max:100'],
+        ]);
+
         $admin = $request->user();
         $product = Product::findOrFail($id);
 
         $prevStatus = $product->approval_status->value;
+        $prevPrice = (float) $product->base_price;
 
-        DB::transaction(function () use ($product, $admin, $prevStatus) {
+        DB::transaction(function () use ($product, $admin, $prevStatus, $prevPrice, $validated) {
+            if (isset($validated['base_price'])) {
+                $product->base_price = $validated['base_price'];
+            }
+            if (isset($validated['dp_percentage'])) {
+                $product->dp_percentage = $validated['dp_percentage'];
+            }
             $product->approval_status = ApprovalStatus::APPROVED;
             $product->status = ProductStatus::PUBLISHED;
             $product->save();
@@ -188,7 +200,7 @@ class ProductModerationController extends Controller
                 'admin_id' => $admin->id,
                 'previous_status' => $prevStatus,
                 'new_status' => ApprovalStatus::APPROVED->value,
-                'reason' => 'Disetujui untuk tayang di katalog publik marketplace.',
+                'reason' => 'Disetujui untuk tayang di katalog publik marketplace (Tarif: Rp ' . number_format((float) $product->base_price, 0, ',', '.') . ').',
             ]);
 
             AuditLog::create([
@@ -196,14 +208,14 @@ class ProductModerationController extends Controller
                 'action' => 'PRODUCT_APPROVED',
                 'entity_type' => Product::class,
                 'entity_id' => $product->id,
-                'old_values' => ['approval_status' => $prevStatus],
-                'new_values' => ['approval_status' => ApprovalStatus::APPROVED->value],
+                'old_values' => ['approval_status' => $prevStatus, 'base_price' => $prevPrice],
+                'new_values' => ['approval_status' => ApprovalStatus::APPROVED->value, 'base_price' => (float) $product->base_price],
                 'ip_address' => request()->ip(),
             ]);
         });
 
         return redirect()->route('admin.products.index')
-            ->with('success', "Produk \"{$product->name}\" berhasil disetujui dan kini aktif di katalog publik.");
+            ->with('success', "Produk \"{$product->name}\" berhasil disetujui dengan tarif resmi dan kini aktif di katalog publik.");
     }
 
     /**

@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 import { ref } from 'vue';
@@ -34,13 +35,6 @@ const submitPayout = () => {
   });
 };
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 
 const statusTabs = [
   { key: 'ELIGIBLE', label: 'Siap Dicairkan', count: props.counts.eligible, color: 'text-primary bg-primary/10' },

@@ -42,7 +42,7 @@ class UserDashboardController extends Controller
                 ->where('service_start_date', '>=', now()->toDateString())
                 ->count(),
             'pending_payment' => (clone $userBookings)
-                ->whereIn('payment_status', [PaymentStatus::UNPAID, PaymentStatus::DOWN_PAYMENT_PENDING])
+                ->whereIn('payment_status', [PaymentStatus::UNPAID, PaymentStatus::PAYMENT_REVIEW])
                 ->whereNotIn('booking_status', [BookingStatus::CANCELLED, BookingStatus::EXPIRED, BookingStatus::REJECTED])
                 ->count(),
             'completed_trips' => (clone $userBookings)
@@ -53,7 +53,7 @@ class UserDashboardController extends Controller
 
         // Action Required: Bookings waiting for payment proof upload
         $actionRequired = Booking::where('user_id', $user->id)
-            ->whereIn('payment_status', [PaymentStatus::UNPAID, PaymentStatus::DOWN_PAYMENT_PENDING])
+            ->whereIn('payment_status', [PaymentStatus::UNPAID, PaymentStatus::PAYMENT_REVIEW])
             ->whereNotIn('booking_status', [BookingStatus::CANCELLED, BookingStatus::EXPIRED, BookingStatus::REJECTED])
             ->with(['product', 'partner'])
             ->orderBy('created_at', 'desc')
@@ -122,7 +122,7 @@ class UserDashboardController extends Controller
                 'name' => $d->name,
                 'slug' => $d->slug,
                 'cluster' => $d->cluster->label(),
-                'image' => $d->media->first()?->file_path ?? null,
+                'image' => $d->media->first()?->media_url ?? null,
                 'ticket_price' => (float) $d->ticket_price_domestic,
             ]);
 
@@ -138,10 +138,22 @@ class UserDashboardController extends Controller
                 'slug' => $t->slug,
                 'partner_name' => $t->partner?->business_name,
                 'base_price' => (float) $t->base_price,
-                'image' => $t->media->first()?->file_path ?? null,
+                'image' => $t->media->first()?->media_url ?? null,
             ]);
 
+        $userProfile = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'phone' => $user->phone,
+            'role' => $user->role->value,
+            'role_label' => 'Wisatawan Terverifikasi',
+            'joined_at' => $user->created_at ? $user->created_at->format('d M Y') : 'Baru bergabung',
+            'email_verified' => (bool) $user->email_verified_at,
+        ];
+
         return Inertia::render('Dashboard', [
+            'userProfile' => $userProfile,
             'metrics' => $metrics,
             'actionRequired' => $actionRequired,
             'upcomingTrips' => $upcomingTrips,

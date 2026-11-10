@@ -37,6 +37,10 @@ class Booking extends Model
         'pricing_breakdown',
         'cancellation_policy_snapshot',
         'vendor_sla_deadline',
+        'contact_unmasked',
+        'assigned_driver_name',
+        'assigned_driver_phone',
+        'assigned_vehicle_plate',
     ];
 
     protected function casts(): array
@@ -48,6 +52,7 @@ class Booking extends Model
             'service_start_date' => 'date',
             'service_end_date' => 'date',
             'vendor_sla_deadline' => 'datetime',
+            'contact_unmasked' => 'boolean',
             'total_price' => 'decimal:2',
             'dp_amount' => 'decimal:2',
             'total_paid' => 'decimal:2',
@@ -108,6 +113,11 @@ class Booking extends Model
     public function settlement()
     {
         return $this->hasOne(VendorSettlement::class);
+    }
+
+    public function review()
+    {
+        return $this->hasOne(Review::class);
     }
 }
 

@@ -44,53 +44,9 @@ test('partner can view their products list', function () {
     $response->assertStatus(200);
 });
 
-test('partner can render create tour page', function () {
-    $response = $this->actingAs($this->owner)->get(route('partner.tours.create'));
-
-    $response->assertStatus(200);
-});
-
-test('partner can create tour package with itinerary and ferry inclusion', function () {
-    $response = $this->actingAs($this->owner)->post(route('partner.tours.store'), [
-        'name' => 'Tour 2D1N Pulau Samosir Heritage',
-        'short_description' => 'Paket hemat keliling Samosir',
-        'full_description' => 'Deskripsi lengkap',
-        'tour_type' => 'PRIVATE_TRIP',
-        'base_price' => 850000,
-        'pricing_type' => 'PER_PERSON',
-        'duration_days' => 2,
-        'duration_nights' => 1,
-        'min_participants' => 2,
-        'max_participants' => 8,
-        'includes_ferry' => true,
-        'inclusions' => 'Tiket ferry, mobil, supir',
-        'exclusions' => 'Pengeluaran pribadi',
-        'terms_conditions' => 'DP 30%',
-        'itinerary' => [
-            [
-                'day_number' => 1,
-                'title' => 'Menyeberang ke Tomok',
-                'description' => 'Naik kapal ferry dari Parapat',
-                'stops' => [
-                    [
-                        'title' => 'Makam Raja Sidabutar',
-                        'activity_description' => 'Wisata sejarah',
-                        'estimated_minutes' => 60,
-                    ],
-                ],
-            ],
-        ],
-    ]);
-
-    $response->assertRedirect(route('partner.products.index'));
-
-    $product = Product::where('partner_id', $this->partner->id)->first();
-    expect($product)->not->toBeNull();
-    expect($product->approval_status)->toBe(ApprovalStatus::PENDING_REVIEW);
-    expect($product->min_lead_time_hours)->toBe(24);
-    expect($product->tourPackage->includes_ferry)->toBeTrue();
-    expect($product->tourPackage->itineraryDays)->toHaveCount(1);
-});
+test('partner cannot access tour creation as tours are curated by super admin', function () {
+    expect(route('partner.tours.create', [], false))->toBeNull();
+})->throws(\Symfony\Component\Routing\Exception\RouteNotFoundException::class);
 
 test('partner can render create vehicle page', function () {
     $response = $this->actingAs($this->owner)->get(route('partner.vehicles.create'));
@@ -98,7 +54,7 @@ test('partner can render create vehicle page', function () {
     $response->assertStatus(200);
 });
 
-test('partner can create vehicle rental unit', function () {
+test('partner can create vehicle rental unit with centralized platform pricing', function () {
     $response = $this->actingAs($this->owner)->post(route('partner.vehicles.store'), [
         'name' => 'Toyota HiAce 14 Penumpang',
         'short_description' => 'Minibus luas untuk keluarga',
@@ -112,8 +68,6 @@ test('partner can create vehicle rental unit', function () {
         'transmission' => 'MANUAL',
         'with_driver' => true,
         'license_plate' => 'BK 9999 TO',
-        'base_price' => 1200000,
-        'pricing_type' => 'PER_VEHICLE',
     ]);
 
     $response->assertRedirect(route('partner.products.index'));
@@ -121,6 +75,7 @@ test('partner can create vehicle rental unit', function () {
     $product = Product::where('partner_id', $this->partner->id)->first();
     expect($product)->not->toBeNull();
     expect($product->getTranslation('name', 'id'))->toBe('Toyota HiAce 14 Penumpang');
+    expect((float) $product->base_price)->toBe(1350000.0);
     expect($product->approval_status)->toBe(ApprovalStatus::PENDING_REVIEW);
     expect($product->min_lead_time_hours)->toBe(12);
     expect($product->vehicle->passenger_capacity)->toBe(14);

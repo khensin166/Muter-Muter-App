@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
 
@@ -15,13 +16,6 @@ const statusTabs = [
   { key: 'ALL', label: 'Semua Produk', count: props.counts.all, color: '' },
 ];
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 </script>
 
 <template>
@@ -38,9 +32,12 @@ const formatRupiah = (value) => {
       </div>
 
       <div class="flex items-center gap-3">
-        <span class="text-xs font-bold px-3 py-1.5 rounded-xl bg-purple-50 text-purple-800 border border-purple-200">
-          Katalog Quality Control
-        </span>
+        <Link
+          href="/admin/tours/create"
+          class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-primary hover:bg-primary-dark text-white text-xs font-bold shadow-xs transition"
+        >
+          <span>+ Buat Paket Wisata Resmi</span>
+        </Link>
       </div>
     </div>
 

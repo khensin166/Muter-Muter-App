@@ -47,8 +47,9 @@ sequenceDiagram
     A->>W: Admin inspects bank mutation & verifies receipt
     alt Payment is Valid
         W->>DB: Booking: CONFIRMED, Payment: PARTIALLY_PAID (or PAID), Inventory: ALLOCATED
-        DB->>WA: Dispatch confirmation & Voucher
-        WA-->>C: Send WA: "Payment Verified! Booking CONFIRMED. Voucher attached."
+        Note over W,DB: Contact details remain MASKED to prevent leakage
+        DB->>WA: Dispatch confirmation & Voucher (Masked Contact)
+        WA-->>C: Send WA: "Payment Verified! Booking CONFIRMED. Driver contact will unlock at H-1."
     else Payment is Invalid / Fake
         W->>DB: Status -> AWAITING_PAYMENT (Reason recorded)
         DB->>WA: Notify Customer
@@ -155,11 +156,154 @@ sequenceDiagram
     V->>W: Mark Service Fulfillments as Done
     W->>DB: Booking Status -> COMPLETED
     W->>DB: Create vendor_settlement (Status: ELIGIBLE)
-    Note over DB: Entitlement = Total Price - 10% Platform Commission
+    Note over DB: Entitlement = Total Price - Platform Commission (default baseline 10%, configurable by terms)
 
     A->>W: Admin reviews Weekly Settlement Ledger
     A->>V: Transfer net payout to Partner verified bank account
     A->>W: Input Bank Reference & set Settlement Status -> PAID
     W->>DB: Settlement Status: PAID
 ```
+
+---
+
+## 6. Admin Platform-Curated Tour Package Creation Flow
+
+```mermaid
+flowchart TD
+    Admin["Super Admin Opens Admin Console"] --> CreateTour["Navigate to: Admin > Tour Packages > Create Master Package"]
+    CreateTour --> MetaInfo["Input Title, Summary, Cluster, Pricing Type & Base Rate"]
+    MetaInfo --> PresetInclusions["Select North Sumatra Inclusions:<br/>• BBM Pulang-Pergi<br/>• Driver & Guide Lokal<br/>• Makan & Uang Rokok Supir<br/>• Dokumentasi Foto/Video/Drone<br/>• Tiket Ferry Danau Toba PP"]
+    PresetInclusions --> DayStructure["Define Multi-Day Itinerary (Day 1 to Day N):<br/>• Day Title & Description<br/>• Itinerary Stops from Master Destinations<br/>• Estimated visit duration (minutes)"]
+    DayStructure --> AutoTranslate["Click: Auto-Translate (LibreTranslate ID ↔ EN)"]
+    AutoTranslate --> PublishMaster["Save & Publish Package (Ownership: INTERNAL, Status: PUBLISHED)"]
+    PublishMaster --> LivePublic["Instantly Available in Public Marketplace"]
+```
+
+---
+
+## 7. Booking Dispatching & Partner Assignment Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Customer
+    participant W as Web Application
+    participant DB as Database
+    actor A as Super Admin
+    actor V as Partner (Transporter / Fleet Owner)
+    actor D as Driver (Partner Staff)
+
+    C->>W: Books Platform-Curated Package (e.g. 6D5N Famtrip Sumut)
+    W->>DB: Create Booking (Ownership: INTERNAL, Status: PENDING_APPROVAL)
+    W->>A: Alert on Admin Console: New Curated Booking Needs Dispatch
+    A->>W: Admin views Dispatch Interface (Filtered by cluster, capacity & rating)
+    Note over A,W: Admin selects e.g. "CV Horas Samosir (Rating ★ 4.9, 34 Trips)"
+    A->>W: Admin dispatches booking to Partner
+    W->>DB: Update booking.partner_id & starts 24h Partner SLA
+    DB->>V: Dispatch WA & in-portal alert to Partner Owner
+
+    alt Partner accepts within 24h
+        V->>W: Partner Owner accepts dispatch
+        V->>W: Partner assigns Vehicle (Innova BK-1234) & Driver (Ucok Siregar)
+        W->>DB: Booking -> AWAITING_PAYMENT, Hold 24h active
+        W->>C: Notify Customer: Booking Confirmed by Partner! Pay DP 30%
+        W->>D: Driver sees passenger manifest & pickup time on Partner Portal
+    else Partner rejects or SLA expires (24h)
+        W->>DB: Status -> MANUAL_REVIEW
+        W->>A: Alert Admin: Partner did not accept dispatch
+        A->>W: Admin re-dispatches to alternate qualified partner
+    end
+```
+
+---
+
+## 8. Customer Review, Rating & Partner Trip Counter Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Customer
+    participant W as Web Application
+    participant DB as Database
+    actor V as Partner
+    actor A as Super Admin
+
+    Note over C,V: Trip finishes safely. Booking status transitions to COMPLETED.
+    DB->>DB: Increment partner.completed_trips_count by +1
+    W->>C: Display prompt on Dashboard / My Bookings: "Beri Ulasan Perjalanan Anda"
+    C->>W: Customer rates trip (1-5 Stars overall, vehicle condition, driver hospitality) + Review comment
+    W->>DB: Insert into `reviews` (Unique per booking)
+    DB->>DB: Recalculate partner.average_rating & total_reviews_count
+    
+    W->>V: Review published to Partner Dashboard (Reputation boost)
+    W->>A: Review visible in Admin Console partner profile
+    W->>W: Rating & completed trip badges visible on Public Marketplace & Checkout
+```
+
+---
+
+## 9. Emergency Vehicle Replacement & Breakdown Guarantee Flow
+
+This flow illustrates the platform's value guarantee in the event of mechanical breakdown in remote mountain/caldera terrain (e.g. Tele, Sibea-bea, Tongging, Bukit Lawang). Solo offline drivers cannot provide this network guarantee.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor C as Customer
+    actor D1 as Assigned Driver (Partner A)
+    participant W as Web Application / Operations
+    actor A as Operations Super Admin
+    actor D2 as Replacement Driver (Partner B)
+
+    Note over C,D1: Trip is IN_PROGRESS on steep caldera route (e.g., Menara Pandang Tele)
+    D1->>D1: Vehicle encounters mechanical failure / flat tire / radiator overheat
+    D1->>W: Driver flags "EMERGENCY_BREAKDOWN" via Partner Portal / WA Hotlink
+    W->>A: Immediate High-Priority Emergency Alert triggered on Admin Console
+    
+    A->>W: Admin views active partner fleet within 20km radius of incident GPS
+    Note over A,W: Platform SLA: Replacement unit arrives within 1–2 Hours
+    A->>W: Admin dispatches Emergency Backup Request to nearest qualified Partner B
+    W->>D2: Alert to Replacement Driver with exact GPS pin & passenger count
+    D2->>W: Accepts emergency backup assignment
+    
+    D2->>C: Arrives at breakdown location within SLA window (< 2 hours)
+    D2->>C: Transshipment of passengers & luggage to fresh vehicle
+    Note over C,D2: Trip continues smoothly according to itinerary
+    
+    A->>W: System records Incident Log & splits/adjusts settlement fairly
+    W->>C: WA message: "Kami pastikan perjalanan Anda aman. Garansi pergantian unit Muter-Muter sukses."
+```
+
+---
+
+## 10. Timed Contact Release & Airport Pickup Sync Flow (H-1 Departure)
+
+To eliminate off-platform leakage while guaranteeing seamless coordination upon arrival at Kualanamu (KNO) or Silangit (DTB) Airport, direct contacts are released precisely 24 hours prior to scheduled departure.
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant S as Laravel Scheduler (Cron)
+    participant DB as Database
+    participant WA as Go WA Gateway
+    actor C as Customer
+    actor D as Assigned Driver
+
+    Note over S,DB: Cron runs every hour checking confirmed bookings
+    S->>DB: Query bookings WHERE status = 'CONFIRMED' AND departure_time <= NOW() + 24 HOURS AND contact_unmasked = FALSE
+    
+    loop For each booking reaching H-1
+        DB->>DB: Set contact_unmasked = TRUE
+        DB->>WA: Queue automated WhatsApp Voucher to Customer
+        WA-->>C: Send WA: "Halo! Trip Anda besok. Driver Anda: Bpk Ucok (0812-xxxx-xxxx), Mobil Innova BK-1234-XX. Siap jemput di Gate Kedatangan KNO."
+        
+        DB->>WA: Queue Passenger Manifest to Driver
+        WA-->>D: Send WA: "Tugas Besok! Tamu: Bpk/Ibu Budi (0813-xxxx-xxxx), Pax: 4 orang, Flight: Citilink QG-123 Tiba 14.30 WIB di KNO."
+    end
+
+    Note over C,D: Customer & Driver coordinate directly on H-1 for flight gate sync
+    C->>D: "Pak, kami landing di Gate 2 KNO"
+    D->>C: "Baik Pak, mobil sudah stand by di pick-up zone"
+```
+
 

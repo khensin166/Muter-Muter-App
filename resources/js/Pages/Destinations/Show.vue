@@ -1,7 +1,10 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import ItineraryMap from '@/Components/ItineraryMap.vue';
 import { useTrans } from '@/Composables/useTrans';
+import { ref, computed } from 'vue';
 
 const { t } = useTrans();
 
@@ -11,13 +14,39 @@ const props = defineProps({
   relatedTours: Array,
 });
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
+const activeMediaIndex = ref(0);
+
+const mediaList = computed(() => {
+  return props.destination.media && props.destination.media.length > 0
+    ? props.destination.media
+    : [{ id: 'fallback', url: 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?auto=format&fit=crop&w=1200&q=80' }];
+});
+
+const activeImageUrl = computed(() => {
+  return mediaList.value[activeMediaIndex.value]?.url || mediaList.value[0]?.url;
+});
+
+const singleStopItinerary = computed(() => {
+  if (!props.destination?.latitude || !props.destination?.longitude) return [];
+  return [
+    {
+      id: 'dest-day-1',
+      day_number: 1,
+      title: props.destination.name,
+      stops: [
+        {
+          id: props.destination.id,
+          title: props.destination.name,
+          latitude: Number(props.destination.latitude),
+          longitude: Number(props.destination.longitude),
+          destination_name: props.destination.cluster_label,
+          destination_image_url: activeImageUrl.value,
+          destination_slug: null,
+        },
+      ],
+    },
+  ];
+});
 </script>
 
 <template>
@@ -39,25 +68,55 @@ const formatRupiah = (value) => {
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <!-- Main Content (2 Cols) -->
         <div class="lg:col-span-2 space-y-6">
-          <!-- Main Photo -->
-          <div class="rounded-2xl overflow-hidden shadow-card border border-border h-80 sm:h-96 bg-slate-100">
-            <img
-              :src="destination.media[0]?.url || 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?auto=format&fit=crop&w=1200&q=80'"
-              :alt="destination.name"
-              class="w-full h-full object-cover"
-            />
+          <!-- Interactive Dynamic Gallery -->
+          <div class="space-y-3">
+            <!-- Main Featured Image -->
+            <div class="relative rounded-3xl overflow-hidden shadow-card border border-border h-80 sm:h-[420px] bg-slate-900 group">
+              <img
+                :src="activeImageUrl"
+                :alt="destination.name"
+                class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none"></div>
+
+              <!-- Top Left Badges -->
+              <div class="absolute top-4 left-4 flex flex-wrap items-center gap-2">
+                <span class="bg-primary/90 text-white backdrop-blur-md text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                  {{ destination.cluster_label }}
+                </span>
+                <span class="bg-white/90 text-slate-800 backdrop-blur-md text-xs font-bold px-3 py-1 rounded-full shadow-md">
+                  {{ destination.category || t('home.default_category') }}
+                </span>
+              </div>
+
+              <!-- Bottom Right Photo Counter -->
+              <div class="absolute bottom-4 right-4 bg-black/60 backdrop-blur-md text-white text-xs font-medium px-3 py-1.5 rounded-xl border border-white/20 flex items-center gap-1.5 shadow-sm">
+                <span>📷</span>
+                <span>{{ activeMediaIndex + 1 }} / {{ mediaList.length }} {{ t('destinations.photos_badge') || 'Foto' }}</span>
+              </div>
+            </div>
+
+            <!-- Thumbnail Strip -->
+            <div v-if="mediaList.length > 1" class="flex items-center gap-3 overflow-x-auto pb-2 scrollbar-thin">
+              <button
+                v-for="(media, idx) in mediaList"
+                :key="media.id"
+                type="button"
+                @click="activeMediaIndex = idx"
+                :class="[
+                  'relative shrink-0 w-24 h-16 sm:w-28 sm:h-20 rounded-xl overflow-hidden border-2 transition-all cursor-pointer',
+                  activeMediaIndex === idx
+                    ? 'border-primary ring-2 ring-primary/40 shadow-md scale-105'
+                    : 'border-border opacity-70 hover:opacity-100 hover:border-primary/50'
+                ]"
+              >
+                <img :src="media.url" :alt="destination.name" class="w-full h-full object-cover" />
+              </button>
+            </div>
           </div>
 
           <!-- Header Info -->
           <div>
-            <div class="flex flex-wrap items-center gap-2 mb-2">
-              <span class="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
-                {{ destination.cluster_label }}
-              </span>
-              <span class="bg-secondary/10 text-secondary text-xs font-bold px-3 py-1 rounded-full">
-                {{ destination.category || t('home.default_category') }}
-              </span>
-            </div>
             <h1 class="text-2xl sm:text-3xl font-black text-text-main">
               {{ destination.name }}
             </h1>
@@ -69,6 +128,24 @@ const formatRupiah = (value) => {
             <p class="text-sm text-text-muted leading-relaxed whitespace-pre-line">
               {{ destination.description }}
             </p>
+          </div>
+
+          <!-- Interactive Google Map Location -->
+          <div v-if="singleStopItinerary.length > 0" class="bg-surface p-6 rounded-2xl border border-border shadow-card space-y-3">
+            <div class="flex items-center justify-between">
+              <h2 class="text-base font-bold text-text-main">Peta Lokasi Destinasi</h2>
+              <a
+                :href="`https://www.google.com/maps/search/?api=1&query=${destination.latitude},${destination.longitude}`"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-xs font-bold text-primary hover:underline"
+              >
+                Buka di Google Maps →
+              </a>
+            </div>
+            <div class="h-72">
+              <ItineraryMap :itinerary="singleStopItinerary" :is-single-destination="true" />
+            </div>
           </div>
 
           <!-- Related Tours Visiting This Destination -->

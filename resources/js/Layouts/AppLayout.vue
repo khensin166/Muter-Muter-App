@@ -1,14 +1,41 @@
 <script setup>
-import { ref } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { Link, usePage } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import LanguageSwitcher from '@/Components/LanguageSwitcher.vue';
 import { useTrans } from '@/Composables/useTrans';
+import { getInitials } from '@/Composables/useFormat';
 
 const showingNavigationDropdown = ref(false);
+const isProfileOpen = ref(false);
+const profileDropdownRef = ref(null);
+
 const page = usePage();
-const user = page.props.auth ? page.props.auth.user : null;
+const user = computed(() => (page.props.auth ? page.props.auth.user : null));
 const { t } = useTrans();
+
+const userInitials = computed(() => getInitials(user.value?.name));
+
+const userRoleLabel = computed(() => {
+  if (!user.value) return '';
+  if (user.value.role === 'ADMIN' || user.value.role === 'SUPER_ADMIN') return 'Administrator';
+  if (user.value.role === 'PARTNER') return 'Mitra Rental';
+  return 'Wisatawan';
+});
+
+const handleClickOutside = (e) => {
+  if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target)) {
+    isProfileOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  document.addEventListener('click', handleClickOutside);
+});
+
+onUnmounted(() => {
+  document.removeEventListener('click', handleClickOutside);
+});
 </script>
 
 <template>
@@ -42,34 +69,129 @@ const { t } = useTrans();
             <LanguageSwitcher />
 
             <template v-if="user">
-              <Link
-                v-if="user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'"
-                href="/admin"
-                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 hover:bg-purple-100 transition"
-              >
-                {{ t('nav.admin_panel') }}
-              </Link>
-              <Link
-                v-else-if="user.role === 'PARTNER'"
-                href="/partner"
-                class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition"
-              >
-                {{ t('nav.partner_portal') }}
-              </Link>
-              <Link
-                :href="route('dashboard')"
-                class="text-sm font-medium text-text-main hover:text-primary transition"
-              >
-                {{ t('nav.dashboard') }}
-              </Link>
-              <Link
-                :href="route('logout')"
-                method="post"
-                as="button"
-                class="text-sm font-medium text-text-muted hover:text-danger transition"
-              >
-                {{ t('nav.logout') }}
-              </Link>
+              <!-- Unified Profile Dropdown Button & Popover -->
+              <div class="relative" ref="profileDropdownRef">
+                <button
+                  type="button"
+                  @click="isProfileOpen = !isProfileOpen"
+                  class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl hover:bg-surface-muted border border-transparent hover:border-border transition cursor-pointer select-none"
+                >
+                  <!-- Avatar Circle -->
+                  <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary font-black text-xs flex items-center justify-center uppercase shrink-0">
+                    {{ userInitials }}
+                  </div>
+
+                  <!-- Name & Badge -->
+                  <div class="hidden sm:block text-left leading-tight">
+                    <div class="text-xs font-extrabold text-text-main line-clamp-1 max-w-[130px]">
+                      {{ user.name }}
+                    </div>
+                    <div class="text-[10px] text-text-muted font-semibold flex items-center gap-1">
+                      <span
+                        class="w-1.5 h-1.5 rounded-full"
+                        :class="user.role === 'PARTNER' ? 'bg-emerald-500' : 'bg-primary'"
+                      ></span>
+                      <span>{{ userRoleLabel }}</span>
+                    </div>
+                  </div>
+
+                  <!-- Chevron Icon -->
+                  <svg
+                    class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                    :class="isProfileOpen ? 'rotate-180 text-primary' : ''"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+                  </svg>
+                </button>
+
+                <!-- Popover Menu -->
+                <div
+                  v-if="isProfileOpen"
+                  class="absolute right-0 mt-2 w-64 rounded-2xl bg-surface shadow-xl border border-border py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1 duration-150"
+                >
+                  <div class="px-4 py-3 border-b border-border flex flex-col gap-1.5">
+                    <div>
+                      <div class="font-bold text-text-main text-sm break-words">{{ user.name }}</div>
+                      <div class="text-text-muted text-[11px] break-all">{{ user.email }}</div>
+                    </div>
+                    <div
+                      class="inline-flex self-start items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold"
+                      :class="user.role === 'PARTNER' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' : 'bg-primary/10 text-primary border border-primary/20'"
+                    >
+                      <span class="w-1.5 h-1.5 rounded-full" :class="user.role === 'PARTNER' ? 'bg-emerald-500' : 'bg-primary'"></span>
+                      <span>Status: {{ userRoleLabel }}</span>
+                    </div>
+                  </div>
+
+                  <div class="p-1 space-y-0.5">
+                    <Link
+                      v-if="user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'"
+                      href="/admin"
+                      @click="isProfileOpen = false"
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-primary bg-primary/8 hover:bg-primary/15 font-bold transition"
+                    >
+                      <span class="text-sm">🛡️</span>
+                      <span>{{ t('nav.admin_panel') }}</span>
+                    </Link>
+
+                    <Link
+                      v-if="user.role === 'PARTNER'"
+                      href="/partner"
+                      @click="isProfileOpen = false"
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-emerald-800 bg-emerald-50/60 hover:bg-emerald-50 font-bold transition"
+                    >
+                      <span class="text-sm">🚐</span>
+                      <span>{{ t('nav.partner_portal') }}</span>
+                    </Link>
+
+                    <Link
+                      :href="route('dashboard')"
+                      @click="isProfileOpen = false"
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
+                    >
+                      <span class="text-sm">📊</span>
+                      <span>{{ t('nav.dashboard') }}</span>
+                    </Link>
+
+                    <Link
+                      :href="route('bookings.my')"
+                      @click="isProfileOpen = false"
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
+                    >
+                      <span class="text-sm">📋</span>
+                      <span>{{ t('dashboard.my_bookings') }}</span>
+                    </Link>
+
+                    <Link
+                      href="/profile"
+                      @click="isProfileOpen = false"
+                      class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
+                    >
+                      <span class="text-sm">⚙️</span>
+                      <span>Pengaturan Akun & Profil</span>
+                    </Link>
+                  </div>
+
+                  <div class="p-1 border-t border-slate-100 mt-1">
+                    <Link
+                      :href="route('logout')"
+                      method="post"
+                      as="button"
+                      @click="isProfileOpen = false"
+                      class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
+                    >
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                      </svg>
+                      <span>{{ t('nav.logout') }}</span>
+                    </Link>
+                  </div>
+                </div>
+              </div>
             </template>
             <template v-else>
               <Link
@@ -124,8 +246,21 @@ const { t } = useTrans();
         <Link href="/custom-trip" class="block py-2 text-sm font-medium text-text-main hover:text-primary">{{ t('nav.custom_trip') }}</Link>
         <div class="pt-3 border-t border-border flex flex-col gap-2">
           <template v-if="user">
-            <Link :href="route('dashboard')" class="block py-2 text-sm font-medium text-primary">{{ t('nav.dashboard') }} ({{ user.name }})</Link>
-            <Link :href="route('logout')" method="post" as="button" class="text-left py-2 text-sm text-danger font-medium">{{ t('nav.logout') }}</Link>
+            <div class="px-3 py-2 flex items-center gap-2.5 bg-slate-50 rounded-xl mb-1 border border-slate-100">
+              <div class="w-8 h-8 rounded-lg bg-primary/10 text-primary font-black text-xs flex items-center justify-center shrink-0">
+                {{ userInitials }}
+              </div>
+              <div class="leading-tight min-w-0">
+                <div class="font-bold text-xs text-text-main truncate">{{ user.name }}</div>
+                <div class="text-[11px] text-text-muted truncate">{{ user.email }}</div>
+              </div>
+            </div>
+            <Link v-if="user.role === 'ADMIN' || user.role === 'SUPER_ADMIN'" href="/admin" class="block py-2 text-sm font-bold text-purple-700">🛡️ {{ t('nav.admin_panel') }}</Link>
+            <Link v-if="user.role === 'PARTNER'" href="/partner" class="block py-2 text-sm font-bold text-emerald-700">🚐 {{ t('nav.partner_portal') }}</Link>
+            <Link :href="route('dashboard')" class="block py-2 text-sm font-medium text-text-main hover:text-primary">📊 {{ t('nav.dashboard') }}</Link>
+            <Link :href="route('bookings.my')" class="block py-2 text-sm font-medium text-text-main hover:text-primary">📋 {{ t('dashboard.my_bookings') }}</Link>
+            <Link href="/profile" class="block py-2 text-sm font-medium text-text-main hover:text-primary">⚙️ Pengaturan Profil</Link>
+            <Link :href="route('logout')" method="post" as="button" class="text-left py-2 text-sm text-danger font-bold">🚪 {{ t('nav.logout') }}</Link>
           </template>
           <template v-else>
             <Link :href="route('login')" class="block py-2 text-sm font-medium text-text-main">{{ t('nav.login') }}</Link>

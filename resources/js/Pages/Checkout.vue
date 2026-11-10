@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
 import { ref, computed } from 'vue';
@@ -45,13 +46,6 @@ const calculatedBalanceAmount = computed(() => {
   return calculatedTotalPrice.value - calculatedDpAmount.value;
 });
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 
 // Calculate minimum allowed date for datepicker
 const minDate = computed(() => {

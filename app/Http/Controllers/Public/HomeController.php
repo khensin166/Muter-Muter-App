@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Public;
 
-use App\Enums\DestinationCluster;
 use App\Enums\ProductType;
 use App\Http\Controllers\Controller;
 use App\Models\Destination;
+use App\Models\DestinationCluster;
 use App\Models\Product;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -18,10 +18,7 @@ class HomeController extends Controller
      */
     public function __invoke(Request $request): Response
     {
-        $clusters = collect(DestinationCluster::cases())->map(fn ($cluster) => [
-            'value' => $cluster->value,
-            'label' => $cluster->label(),
-        ]);
+        $clusters = DestinationCluster::activeOptions();
 
         $featuredDestinations = Destination::query()
             ->with(['category', 'media'])

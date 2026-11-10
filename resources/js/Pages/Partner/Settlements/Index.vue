@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
 
@@ -9,13 +10,6 @@ const props = defineProps({
   partnerBank: Object,
 });
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 
 const statusTabs = [
   { key: 'ALL', label: 'Semua Transaksi' },

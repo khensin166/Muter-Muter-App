@@ -1,4 +1,5 @@
 <script setup>
+import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
 
@@ -16,13 +17,6 @@ const statusTabs = [
   { key: 'ALL', label: 'Semua Pesanan', count: props.counts.all, color: '' },
 ];
 
-const formatRupiah = (value) => {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
-    maximumFractionDigits: 0,
-  }).format(value || 0);
-};
 
 const approve = (id, code) => {
   if (confirm(`Setujui ketersediaan pesanan ${code}? Sistem akan menerbitkan tagihan DP dan hold inventory 24 jam.`)) {

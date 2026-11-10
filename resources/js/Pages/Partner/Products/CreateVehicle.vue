@@ -287,17 +287,13 @@ const submit = () => {
           </div>
 
           <div class="space-y-4 text-xs">
-            <div>
-              <label class="block font-bold text-text-muted uppercase mb-1">Tarif Sewa Harian (IDR) *</label>
-              <input
-                v-model.number="form.base_price"
-                type="number"
-                step="10000"
-                min="50000"
-                placeholder="850000"
-                class="w-full text-xs font-medium rounded-xl border-border focus:border-primary focus:ring-primary"
-                required
-              />
+            <div class="p-4 rounded-xl bg-primary/5 border border-primary/20 space-y-1.5">
+              <div class="font-extrabold text-primary flex items-center gap-1.5">
+                <span>🛡️ Standarisasi Tarif Sewa Terpusat oleh Admin Platform</span>
+              </div>
+              <p class="text-text-muted leading-relaxed">
+                Untuk menjaga kesetaraan harga antar mitra dan mencegah perang tarif yang merugikan pengemudi, tarif sewa resmi ditentukan secara terpusat oleh Admin Platform berdasarkan kategori dan kapasitas armada saat verifikasi.
+              </p>
             </div>
 
             <!-- Short Description -->

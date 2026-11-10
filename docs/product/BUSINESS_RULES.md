@@ -8,21 +8,35 @@
 
 ## 1. Product Catalog & Ownership Rules
 
-### 1.1 Ownership Types
-- `INTERNAL`: Managed, operated, and fulfilled directly by the platform team.
-  - Rule: `partner_id` MUST be null.
-  - Automatically approved upon creation by Admin.
-- `PARTNER`: Provided by an approved external local operator or vendor.
-  - Rule: `partner_id` MUST reference an active, approved `partners` record.
-  - Must undergo Admin approval before becoming publicly active (`approval_status = APPROVED` and `status = PUBLISHED`).
+### 1.1 Ownership Types & Platform-Curated Tour Model
+The platform operates on a **Platform-Curated, Partner-Fulfilled Hybrid Model**:
+- `INTERNAL` (Platform-Curated Tour Packages):
+  - Created, designed, priced, and curated directly by the **Super Admin**.
+  - `partner_id` in `products` is `NULL` upon creation.
+  - Features standardized, high-converting itineraries across North Sumatra corridors (e.g., *6D5N Famtrip North Sumatra: Bukit Lawang - Medan - Danau Toba*, *1D Keliling Samosir Eksotis*, *Open Trip Danau Toba Rp 270k/orang*).
+  - Automatically approved upon creation (`approval_status = APPROVED`, `status = PUBLISHED`).
+  - **Fulfillment via Dispatching:** When a traveler books an `INTERNAL` package, the Super Admin (or dispatch engine) assigns/dispatches the booking to an approved, available **Partner** (transporter/rental/driver community) whose fleet matches the requirements.
+- `PARTNER` (Partner-Owned Products):
+  - Uploaded directly by an approved external local operator or rental provider (e.g., standalone car rental units like *Innova Reborn + Driver*, *HiAce 14-Seat*).
+  - `partner_id` MUST reference an active, approved `partners` record.
+  - Undergoes mandatory Admin review (`approval_status = APPROVED` and `status = PUBLISHED`) before appearing publicly.
 
-### 1.2 Status Separation
+### 1.2 Preset Inclusions Khas Sumatera Utara
+To maintain consistent market standards and eliminate hidden fees for travelers, Tour Packages support standardized preset inclusions:
+1. **BBM Pulang-Pergi (Fuel Included)** — Round-trip fuel covering highway and caldera routes.
+2. **Driver merangkap Guide Lokal (Driver-Guide)** — Local driver experienced in steep caldera gradients and acting as friendly guide.
+3. **Makan & Uang Rokok Supir (Driver Meals & Cigarettes Included)** — Eliminates uncomfortable tipping friction for travelers.
+4. **Dokumentasi Foto & Video / Drone** — Professional visual documentation for social media.
+5. **Tiket Ferry Danau Toba PP** — Bundled Ro-Ro or passenger ferry tickets (Ajibata - Tomok / Ambarita).
+6. **Tiket Masuk Seluruh Objek Wisata** — Included entrance tickets to all itinerary stops.
+
+### 1.3 Status Separation
 A product maintains two independent status flags:
 - `approval_status`: `DRAFT`, `PENDING_REVIEW`, `APPROVED`, `REJECTED`
 - `status`: `DRAFT`, `PUBLISHED`, `ARCHIVED`, `SUSPENDED`
 - **Rule:** A partner can only toggle `status = PUBLISHED` if `approval_status == APPROVED`.
 
-### 1.3 Immutability of Historical Bookings
+### 1.4 Immutability of Historical Bookings
 - Modifying a product's price, description, terms, or cancellation policy MUST NOT affect past or active bookings.
 - When a booking is initialized, a comprehensive JSONB snapshot of the product and its policies is written to the booking record.
 
@@ -162,10 +176,11 @@ Refund percentage is determined by the timestamp of cancellation relative to the
 
 ## 6. Commission & Partner Settlement Rules
 
-### 6.1 Platform Commission Model
+### 6.1 Platform Commission Model (Configurable & Optional by Agreement)
 - Platform commission is calculated as a percentage of the base product price.
-- **Default Commission:** **10%**.
-- **Rule:** The commission percentage is snapshotted into the booking record at creation and remains immune to future commission changes.
+- **Default Baseline Commission:** **10%** (resulting in a 90% partner net payout).
+- **Rule on Flexibility:** The commission percentage is **configurable and optional** based on bilateral partnership terms, contractual agreements, product type, or promotional campaign arrangements.
+- **Immutability Rule:** The agreed commission percentage (`commission_percentage`) is snapshotted into the `bookings` record at creation and remains immune to future commission changes.
 - Commission is only earned on completed, non-refunded transactions.
 
 ### 6.2 Settlement Eligibility & Lifecycle
@@ -178,19 +193,242 @@ Refund percentage is determined by the timestamp of cancellation relative to the
 
 ---
 
-## 7. Partner & Multi-Staff Rules
+## 7. Dispatching & Partner Booking Assignment Rules
 
-### 7.1 Multi-Staff Roles
-Each partner organization supports multiple accounts:
-- **`Partner Owner`**:
-  - Full access to business profile, verified bank account details for payout, staff user invitations, product catalog CRUD, and settlement ledgers.
-- **`Partner Staff`**:
-  - Restricted operational access: view incoming booking requests, approve/reject availability, view daily vehicle/tour schedule. No access to financial bank settings.
+### 7.1 Platform-Curated Package Dispatching
+- When a traveler books an `INTERNAL` (Platform-Curated) package:
+  1. The booking is created with `partner_id = NULL` or flagged for Admin assignment.
+  2. The Super Admin accesses the **Booking Dispatch Interface** in Admin Console.
+  3. The system presents available, approved Partners filtered by:
+     - Operational geographic cluster (e.g., Medan, Parapat, Samosir).
+     - Fleet vehicle type capacity matching the passenger count (e.g., Avanza for 1-5 pax, Innova for 6-7 pax, HiAce for 8-14 pax).
+     - Partner performance metrics (highest `average_rating` and highest `completed_trips_count`).
+  4. Admin selects and dispatches the booking to the designated Partner.
+  5. The Partner receives an immediate WhatsApp and in-portal alert with a 24-hour response SLA to assign a specific vehicle unit and driver.
 
-### 7.2 Partner Onboarding & Verification
-- Partner must submit mandatory KYC documents:
-  1. KTP of the business owner / PIC.
-  2. NIB (Nomor Induk Berusaha) / Surat Keterangan Usaha.
-  3. Photos of fleet/units and operational legality.
-- Until an Admin verifies documents (`partner_status = APPROVED`), the partner CANNOT publish products to the public marketplace.
+### 7.2 Partner Assignment SLA & Fallback
+- If the dispatched Partner does not confirm or rejects within 24 hours:
+  - The booking enters `MANUAL_REVIEW`.
+  - Admin receives an urgent prompt to re-dispatch the order to an alternate qualified Partner.
+  - The traveler's schedule remains protected and unaffected.
+
+---
+
+## 8. Partner Performance, Trip History & Review System
+
+### 8.1 Completed Trips History Counter
+- The system automatically aggregates the lifetime completed trip count for every Partner:
+  $$\text{completed\_trips\_count} = \text{Count of bookings where } \text{partner\_id} = \text{Partner ID} \land \text{booking\_status} = \text{COMPLETED}$$
+- This metric represents the Partner's real-world operational track record and cannot be manually fabricated.
+- Displayed prominently in:
+  1. **Admin Console Dispatch Selector:** Enables Admin to pick verified, highly experienced operators.
+  2. **Partner Portal Dashboard:** Visual reputation badge for the partner.
+  3. **Public Product/Checkout Badges:** Shows travelers e.g., *"Dijalankan oleh Mitra Berizin ★ 4.9 (34 Trip Selesai)"*.
+
+### 8.2 Customer Reviews & Star Ratings
+- **Eligibility:** A Customer is ONLY eligible to submit a review once the booking status transitions to `COMPLETED`.
+- **Review Dimensions:**
+  - `rating`: Overall trip rating (1 to 5 Stars, mandatory).
+  - `driver_rating`: Sub-score for driver punctuality, hospitality, and mountain route safety (1 to 5 Stars, optional).
+  - `vehicle_rating`: Sub-score for vehicle air conditioning, clean interior, and suspension comfort (1 to 5 Stars, optional).
+  - `comment`: Free-text review describing customer experience (optional).
+- **One Review per Booking:** Enforced via a database unique constraint on `booking_id`.
+- **Aggregation:**
+  $$\text{average\_rating} = \frac{\sum \text{rating}}{\text{total\_reviews\_count}}$$
+  Recalculated upon every approved review submission.
+
+---
+
+## 9. Two-Tier Authorization & Role Permission Matrix
+
+The platform strictly separates user capabilities into two distinct RBAC tiers:
+
+```
+[Level 1: System-wide User Role (users.role)]
+  ├── SUPER_ADMIN : Platform Owner / Central Operations
+  ├── PARTNER     : Local Transporter / Rental Operator / Driver Organization
+  └── CUSTOMER    : Registered Traveler / Tourist
+
+[Level 2: Partner Organization Role (partner_members.role)]
+  ├── OWNER : Legal business owner / Proprietor with financial authority
+  └── STAFF : Operational driver / Dispatch coordinator without financial access
+```
+
+### 9.1 Role Definition & Capability Matrix
+
+| Capability / Action | SUPER_ADMIN | PARTNER (OWNER) | PARTNER (STAFF) | CUSTOMER |
+| :--- | :---: | :---: | :---: | :---: |
+| **Manage Master Destinations & Spots** | **Full** | View Public | View Public | View Public |
+| **Create & Publish Platform Curated Packages** | **Full** | — | — | — |
+| **Register & Manage Vehicle Fleet** | Audit / View | **Full CRUD** | View Fleet | — |
+| **Assign Driver & Unit to Dispatched Trip** | Dispatch Partner | **Assign** | **Assign** | — |
+| **View Customer Manifest & Pickup Schedule** | **Full** | **Full** | **Operational Only** | Own Booking |
+| **Approve / Verify Availability (SLA 24h)** | Force Intervene | **Yes** | **Yes** | — |
+| **Verify Bank Transfer Proof (DP)** | **Full** | — | — | — |
+| **View Settlement Ledger & Financial Balances**| **Full Platform** | **Own Payouts** | **FORBIDDEN (403)** | — |
+| **Update Bank Account Details for Payout** | Audit | **Own Bank Info**| **FORBIDDEN (403)** | — |
+| **Invite / Manage Partner Staff Accounts** | Audit | **Full CRUD** | **FORBIDDEN (403)** | — |
+| **Submit Booking & Pay DP** | — | — | — | **Full** |
+| **Submit Post-Trip Rating & Review** | Moderate | View Received | View Received | **Submit Own** |
+| **Audit Logs & System Health** | **Full** | — | — | — |
+
+### 9.2 Partner Member Isolation Rules
+- **Rule 1 (Multi-Tenancy):** A `PARTNER` user belonging to Partner A can NEVER view, query, or mutate vehicles, bookings, staff, or settlements belonging to Partner B. Enforced via Eloquent global scopes and Laravel Policies (`PartnerPolicy`).
+- **Rule 2 (Staff Financial Redaction):** `PartnerMember` with `role = STAFF` is strictly forbidden from accessing `/partner/settlements`, viewing bank numbers, or altering payout configurations. Enforced via `EnsureUserIsPartnerOwner` middleware and policy checks.
+- **Rule 3 (Customer Privacy):** Customers can only view their own booking records, payment receipts, and review submissions. Customer PII (phone number, email) is only exposed to assigned Partner drivers for the duration of active trip pickup coordination.
+
+---
+
+## 10. Anti-Disintermediation & Win-Win Protection Engine
+
+### 10.1 Strategic Philosophy: Ekosistem Saling Menguntungkan ("Win-Win")
+Praktek transaksi di luar platform (*disintermediation* atau *kebocoran jalur belakang*) sering terjadi ketika traveler dan supir bertukar nomor kontak lalu sepakat bertransaksi offline untuk menghindari biaya platform.
+
+Platform Muter-Muter mengadopsi filosofi: **Pencegahan kebocoran BUKAN dengan restriksi yang kaku atau saling memusuhi, melainkan dengan memberikan keunggulan nilai tambah (Value Locks) yang membuat kedua belah pihak (Wisatawan & Mitra Supir) merasa jauh lebih aman, untung, dan terlindungi jika bertransaksi di dalam platform.**
+
+```
+                         [ MUTER-MUTER PLATFORM ]
+                                    │
+           ┌────────────────────────┴────────────────────────┐
+           ▼                                                 ▼
+[ PILAR 1: MITRA SUPIR UNTUNG ]             [ PILAR 2: WISATAWAN TENANG & PUAS ]
+• Akumulasi Trip & Star Rating Resmi       • Garansi Unit Pengganti (1-2 Jam Rusak di Rute)
+• Priority Dispatch Order Bernilai Tinggi   • Include Tiket Ferry & Uang Makan/Rokok Supir
+• Kompensasi DP Pembatalan (< 3 Hari)       • Invoice Resmi & Reward Poin Trip Berikutnya
+• Bebas Perang Tarif Liar                  • Bebas Pungli & Canggung di Jalan
+           │                                                 │
+           └────────────────────────┬────────────────────────┘
+                                    ▼
+       [ PILAR 3: MASKED & TIMED CONTACT RELEASE (H-1 BUKA KONTAK) ]
+       [ PILAR 4: KOMISI WAJAR 10% (MITRA 90%) & KODE ETIK MITRA   ]
+```
+
+### 10.2 Pilar 1: Driver Loyalty & Priority Dispatching Engine (Mitra Diuntungkan)
+1. **Reputasi Permanen & Terverifikasi:**
+   - Jumlah `completed_trips_count` dan rating bintang (`average_rating`, misal ★ 4.9) hanya dapat bertambah jika transaksi diproses melalui platform.
+   - Reputasi ini menjadi portofolio digital resmi mitra untuk menarik ribuan wisatawan dari luar Sumatera Utara. Transaksi offline tidak menghasilkan rekam jejak.
+2. **Hak Istimewa Priority Dispatch:**
+   - Super Admin memprioritaskan order paket bernilai tinggi (misal Famtrip 6D5N, rombongan HiAce turis mancanegara, sewa jangka panjang) kepada mitra dengan badge reputasi tertinggi.
+   - Mitra yang mencoba bertransaksi offline kehilangan prioritas dispatch dan dialihkan ke antrian terbawah.
+3. **Kompensasi Pembatalan Terjamin (Protection Lock):**
+   - Jika wisatawan membatalkan trip secara mendadak (< 3 hari sebelum keberangkatan) atau no-show, mitra tetap menerima kompensasi Down Payment (DP) atas hari kerja yang sudah dialokasikan.
+   - Pada transaksi offline (jalur belakang), supir sering dirugikan tanpa jaminan ganti rugi ketika tamu membatalkan sepihak.
+4. **Kepastian Pendapatan & Bebas Perang Tarif:**
+   - Standar biaya harian dan komponen pengeluaran (BBM, uang makan & rokok supir) sudah terstruktur dan dijamin dibayarkan penuh melalui settlement resmi platform tanpa tawar-menawar liar di lapangan.
+
+### 10.3 Pilar 2: Traveler Protection Locks & Value Guarantee (Wisatawan Diuntungkan)
+1. **Garansi Armada Pengganti Darurat (Emergency Vehicle Replacement SLA):**
+   - Rute Sumatera Utara melintasi medan terjal, berliku, dan pegunungan (misal: tanjakan Tele Danau Toba, tebing Sibea-bea, hutan Bukit Lawang, perbukitan Merek/Tongging).
+   - **Komitmen Platform:** Jika kendaraan mengalami mogok mesin, pecah ban ganda, atau kendala mekanikal di tengah perjalanan, platform menjamin **pengiriman unit pengganti beserta supir cadangan dari jaringan mitra terdekat dalam waktu 1–2 jam**.
+   - Supir perorangan (jalur belakang) tidak memiliki jaringan armada cadangan dan tidak mampu memberikan garansi penyelamatan ini jika terjadi kerusakan fatal.
+2. **Bundled Value-Adds Bebas Canggung:**
+   - Paket wisata resmi mencakup fasilitas lengkap: tiket kapal ferry Danau Toba terjadwal, BBM PP, serta biaya makan dan uang rokok supir. Wisatawan terbebas dari rasa canggung, permintaan tips terselubung, atau pungutan liar.
+3. **Dokumen Legal & Invoice Resmi:**
+   - Wisatawan instansi, korporasi, keluarga besar, atau rombongan komunitas mendapatkan invoice dan kwitansi resmi berbadan hukum untuk keperluan klaim reimbursement kantor, yang tidak bisa disediakan oleh supir lepas offline.
+4. **Loyalitas & Cashback Trip Berikutnya:**
+   - Setiap transaksi yang berhasil memberikan poin reward/voucher diskon untuk pemesanan rute wisata Sumatera Utara berikutnya (misal sewa mobil di Medan atau trip trekking ke Tangkahan).
+
+### 10.4 Pilar 3: Masked & Timed Contact Release (Proteksi Intermediasi)
+Untuk menjaga keamanan data pribadi dan mencegah bypass kontak sebelum komitmen pesanan terkonfirmasi:
+1. **Masking Kontak Pra-Keberangkatan:**
+   - Nomor WhatsApp dan nomor telepon customer serta mitra/supir disamarkan (*masked*) pada halaman katalog, form checkout, dan dashboard awal.
+   - Komunikasi pra-keberangkatan difasilitasi melalui notifikasi otomatis sistem WhatsApp Gateway Muter-Muter.
+2. **Pelepasan Kontak Otomatis pada H-1 (Timed Release):**
+   - Kontak langsung antara Driver dan Wisatawan **hanya dibuka tepat H-1 (24 jam sebelum jadwal keberangkatan/penjemputan)** melalui E-Voucher digital dan pesan WhatsApp terintegrasi.
+   - Tujuan pelepasan kontak pada H-1 murni untuk sinkronisasi teknis kedatangan: konfirmasi nomor penerbangan di Bandara Kualanamu (KNO) / Silangit (DTB), nomor gerbang kedatangan (Gate Arrival), dan koordinasi titik kumpul penjemputan.
+
+### 10.5 Pilar 4: Komisi Wajar (10% Take-Rate) & Pakta Integritas Mitra
+1. **Struktur Bagi Hasil Sehat (90% Mitra, 10% Platform):**
+   - Berbeda dengan OTA konvensional yang memotong komisi 20%–30%, platform Muter-Muter menetapkan baseline komisi bersahabat sebesar **10%** (mitra menerima bersih 90% dari nilai sewa/transportasi).
+   - Skema komisi bersifat fleksibel/konfigurabel untuk promosi atau perjanjian kerjasama khusus.
+2. **Pakta Integritas (Partner Code of Conduct):**
+   - Setiap mitra yang mendaftar wajib menyetujui ketentuan etika kemitraan: dilarang keras membujuk, menawarkan, atau mengarahkan wisatawan untuk membatalkan pesanan platform demi transaksi offline.
+   - Pelanggaran terhadap ketentuan ini berakibat:
+     - Penangguhan (*suspension*) akun mitra dan armada.
+     - Penahanan (*on-hold*) dana settlement yang sedang berjalan.
+     - Penghapusan badge reputasi dan pencabutan hak prioritas dispatch.
+
+---
+
+## 11. Katalog Paket Acuan & Standar Biaya Sumatera Utara
+
+Berdasarkan analisa operasional lapangan di Sumatera Utara, berikut adalah acuan paket resmi platform yang dikelola terpusat oleh Super Admin dan difasilitasi oleh armada mitra:
+
+### 11.1 Paket Acuan 1: 6D5N Famtrip North Sumatra (Lintas Koridor Unggulan)
+Rute komprehensif mencakup Bandara KNO, Bukit Lawang, Medan Heritage, Parapat, dan Pulau Samosir:
+
+| Hari | Rute & Agenda Utama | Highlight Destinasi | Standar Biaya Armada (Termasuk BBM, Driver, Makan & Rokok Supir) |
+| :--- | :--- | :--- | :--- |
+| **Hari 1** | Arrival Bandara KNO $\rightarrow$ Bukit Lawang | Welcome dance Disbudparekraf, Orangutan Sanctuary, Check-in Eco Lodge Resort | **Rp 1.200.000 / hari** |
+| **Hari 2** | Bukit Lawang $\rightarrow$ Medan City | Jungle Trekking Taman Nasional Gunung Leuser, River Tubing, Kuliner RM Garuda, Hotel Grand Mercure | **Rp 1.200.000 / hari** |
+| **Hari 3** | Medan Heritage City Tour | Maha Vihara Maitreya, Museum Negeri Sumut, Pos Bloc, Seng Hap 1881 Kesawan, Tjong A Fie Mansion | **Rp 1.000.000 / hari** |
+| **Hari 4** | Medan $\rightarrow$ Parapat $\rightarrow$ Samosir | Scenic boat cruising Danau Toba, Batu Gantung, Air Terjun Situmurun, Ecovillage Silimalombu, Huta Siallagan | **Rp 1.300.000 / hari** |
+| **Hari 5** | Keliling Pulau Samosir | Bukit Holbung, Air Terjun Efrata, Bukit Cinta, Patung Yesus Sibea-bea, Pemandian Air Panas Pangururan, Samosir Waterfront | **Rp 1.300.000 / hari** |
+| **Hari 6** | Samosir $\rightarrow$ Medan via Jalan Tol | Jembatan Tano Ponggol, Jalan Tol Tebing Tinggi - Medan, Drop-off Bandara KNO / Stasiun Medan | **Rp 1.300.000 / hari** |
+
+### 11.2 Paket Acuan 2: 1-Day Tour Eksotis Danau Toba & Samosir
+Pilihan paket harian terpopuler untuk wisatawan domestik dan lokal:
+- **Opsi Open Trip (Per Orang):** Mulai **Rp 250.000 – Rp 270.000 / orang** (Armada Avanza/HiAce bersama, minimal kuota keberangkatan terpenuhi).
+- **Opsi Private Trip (Per Kendaraan):** Mulai **Rp 1.500.000 / unit kendaraan** (Avanza / Innova Reborn + Supir + BBM).
+- **Rute Destinasi Unggulan:**
+  1. Air Terjun Efrata
+  2. Bukit Holbung (Bukit Teletubbies Danau Toba)
+  3. Bukit Cinta
+  4. Patung Yesus Sibea-bea & Bukit Panorama
+  5. Jembatan Ikonik Tano Ponggol
+  6. Waterfront City Pangururan
+  7. Pemandian Air Panas Alami Pangururan
+  8. Danau di Atas Danau (Bukit & Danau Sidihoni)
+- **Fasilitas Termasuk (Preset Inclusions):**
+  - Armada Mobil SUV/MPV ber-AC dingin
+  - BBM Pulang-Pergi
+  - Driver profesional merangkap Guide Lokal
+  - Uang makan & rokok supir
+  - Air mineral & snack perjalanan
+  - Dokumentasi foto & video / drone
+  - Tiket Ferry penyeberangan Danau Toba PP
+
+---
+
+## 12. Relasi Sistem & Binding Foto: Destinasi ke Paket Wisata
+
+### 12.1 Arsitektur Relasi Database
+Untuk memastikan data tidak redundan dan wisatawan mendapatkan gambaran visual yang nyata mengenai setiap titik persinggahan tour:
+1. **Foreign Key Binding:**
+   - Tabel `tour_itinerary_stops` memiliki kolom `destination_id` bertipe `UUID NULLABLE` dengan foreign key berelasi ke `destinations.id`.
+   - Sebuah perhentian (*stop*) dapat mereferensikan satu destinasi master terdaftar.
+2. **Auto-Aggregated Photo Gallery (Galeri Foto Otomatis):**
+   - Setiap destinasi menyimpan galeri medianya di tabel `destination_media`.
+   - Halaman detail paket wisata (`Tours/Show.vue`) secara otomatis mengekstraksi media dari seluruh destinasi yang dikunjungi dalam paket tersebut:
+     $$\text{TourMediaCollection} = \text{ProductMedia} \cup \bigcup_{s \in \text{Stops}} \text{DestinationMedia}(s.\text{destination\_id})$$
+   - Admin tidak perlu mengunggah ulang foto-foto objek wisata yang sama (seperti Bukit Holbung, Air Terjun Efrata, Patung Sibea-bea) saat membuat paket baru.
+3. **Visual Timeline & Interactive Stops:**
+   - Pada timeline itinerary (Hari 1, Hari 2, dst.), setiap *stop* yang terhubung dengan `destination_id` akan menampilkan:
+     - Thumbnail foto resmi destinasi.
+     - Nama destinasi dan badge klaster (misal: "Samosir Barat").
+     - Estimasi durasi kunjungan (misal: "90 menit").
+     - Tautan langsung (*link*) yang dapat diklik ke halaman destinasi lengkap (`/destinations/{slug}`).
+
+---
+
+## 13. Standar Kebersihan, Kelayakan & Kenyamanan Armada (Clean Vehicle Standard)
+
+### 13.1 Standar Wajib Kendaraan Mitra
+Sebagai bagian dari jaminan perlindungan wisatawan dan reputasi platform, seluruh kendaraan mitra (Avanza, Innova, HiAce, Alphard) wajib memenuhi Standar Emas Armada:
+1. **Kebersihan Kabin & Sanitasi:**
+   - Kabin wajib dibersihkan dan disedot debu (*vacuum*) sebelum setiap penjemputan tamu.
+   - Kabin wajib beraroma segar dan **bebas total dari asap rokok** atau abu rokok dari perjalanan sebelumnya.
+   - Jok dan sabuk pengaman (*seatbelt*) berfungsi normal dan bersih tanpa noda.
+2. **Kenyamanan Suhu (AC Dingin):**
+   - Sistem pendingin udara (AC) wajib dingin dan berfungsi optimal di seluruh baris kursi hingga baris belakang (terutama pada rute panas seperti jalur Medan - Tebing Tinggi).
+3. **Kelaikan Teknis Rute Pegunungan:**
+   - Mengingat kondisi topografi Danau Toba dan Karo yang curam dan berliku, armada wajib memiliki:
+     - Sistem pengereman (kampas rem dan minyak rem) dalam kondisi prima.
+     - Ban dengan alur tapak layak (tidak botak / gundul) dan membawa ban cadangan siap pakai beserta dongkrak.
+     - Sistem pendingin mesin (radiator & cairan coolant) normal untuk mencegah overheat di tanjakan Tele / Bukit Lawang.
+4. **Verifikasi & Evaluasi Pengguna:**
+   - Review wisatawan pasca-trip mencakup penilaian spesifik `vehicle_rating` (1–5 bintang) yang menilai kebersihan, AC, dan suspensi.
+   - Mitra dengan rating kendaraan di bawah 4.0 akan mendapatkan notifikasi peringatan dan penangguhan sementara sampai unit diinspeksi ulang.
+
+
 

@@ -29,6 +29,27 @@ class DestinationMedia extends Model
         ];
     }
 
+    public function getMediaUrlAttribute(): string
+    {
+        if (empty($this->file_path)) {
+            return 'https://images.unsplash.com/photo-1578469550956-0e16b69c6a3d?auto=format&fit=crop&w=1200&q=80';
+        }
+
+        if (str_starts_with($this->file_path, 'http://') || str_starts_with($this->file_path, 'https://')) {
+            return $this->file_path;
+        }
+
+        if (str_starts_with($this->file_path, '/storage/')) {
+            return asset(ltrim($this->file_path, '/'));
+        }
+
+        if (str_starts_with($this->file_path, 'storage/')) {
+            return asset($this->file_path);
+        }
+
+        return asset('storage/' . ltrim($this->file_path, '/'));
+    }
+
     public function destination()
     {
         return $this->belongsTo(Destination::class);

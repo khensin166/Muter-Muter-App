@@ -23,6 +23,7 @@ Route::get('/destinations/{slug}', [DestinationController::class, 'show'])->name
 
 // Public Tour Packages Discovery
 Route::get('/tours', [TourController::class, 'index'])->name('tours.index');
+Route::get('/tours/{slug}/itinerary/print', [TourController::class, 'printItinerary'])->name('tours.itinerary.print');
 Route::get('/tours/{slug}', [TourController::class, 'show'])->name('tours.show');
 
 // Public Vehicle Rentals Discovery

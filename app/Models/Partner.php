@@ -23,6 +23,9 @@ class Partner extends Model
         'address',
         'city',
         'status',
+        'average_rating',
+        'total_reviews_count',
+        'completed_trips_count',
         'bank_name',
         'bank_account_number',
         'bank_account_holder',
@@ -32,7 +35,27 @@ class Partner extends Model
     {
         return [
             'status' => PartnerStatus::class,
+            'average_rating' => 'decimal:2',
+            'total_reviews_count' => 'integer',
+            'completed_trips_count' => 'integer',
         ];
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function recalculateRating(): void
+    {
+        $publishedReviews = $this->reviews()->where('is_published', true);
+        $count = $publishedReviews->count();
+        $avg = $count > 0 ? round((float) $publishedReviews->avg('rating'), 2) : 5.00;
+
+        $this->update([
+            'total_reviews_count' => $count,
+            'average_rating' => $avg,
+        ]);
     }
 
     public function members()

@@ -25,10 +25,8 @@ Route::prefix('partner')->name('partner.')->group(function () {
         Route::patch('staff/{id}/toggle', [PartnerStaffController::class, 'toggleStatus'])->name('staff.toggle');
         Route::delete('staff/{id}', [PartnerStaffController::class, 'destroy'])->name('staff.destroy');
 
-        // Product Catalog Management
+        // Fleet / Product Catalog Management (Vehicles Only - Tours curated by Super Admin)
         Route::get('products', [PartnerProductController::class, 'index'])->name('products.index');
-        Route::get('tours/create', [PartnerProductController::class, 'createTour'])->name('tours.create');
-        Route::post('tours', [PartnerProductController::class, 'storeTour'])->name('tours.store');
         Route::get('vehicles/create', [PartnerProductController::class, 'createVehicle'])->name('vehicles.create');
         Route::post('vehicles', [PartnerProductController::class, 'storeVehicle'])->name('vehicles.store');
         Route::patch('products/{id}/toggle', [PartnerProductController::class, 'toggleStatus'])->name('products.toggle');

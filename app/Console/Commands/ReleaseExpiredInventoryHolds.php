@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Enums\BookingStatus;
 use App\Enums\InventoryStatus;
 use App\Enums\PaymentStatus;
+use App\Models\Booking;
 use App\Models\BookingStatusHistory;
 use App\Models\InventoryHold;
 use App\Services\AppLogger;
@@ -48,10 +49,18 @@ class ReleaseExpiredInventoryHolds extends Command
 
         foreach ($expiredHolds as $hold) {
             DB::transaction(function () use ($hold) {
+                // Lock the booking to prevent race condition with concurrent payment verification
+                $booking = Booking::where('id', $hold->booking_id)->lockForUpdate()->first();
+
+                // If booking was already confirmed or paid while cron was running, do not expire!
+                if ($booking && in_array($booking->booking_status, [BookingStatus::CONFIRMED, BookingStatus::COMPLETED])) {
+                    $hold->status = InventoryStatus::ALLOCATED;
+                    $hold->save();
+                    return;
+                }
+
                 $hold->status = InventoryStatus::RELEASED;
                 $hold->save();
-
-                $booking = $hold->booking;
 
                 if ($booking && in_array($booking->booking_status, [BookingStatus::AWAITING_PAYMENT, BookingStatus::PENDING_APPROVAL])) {
                     $prevStatus = $booking->booking_status->value;

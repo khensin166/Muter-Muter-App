@@ -41,6 +41,11 @@ class TourItineraryStop extends Model
         return $this->belongsTo(TourItineraryDay::class, 'tour_itinerary_day_id');
     }
 
+    public function day()
+    {
+        return $this->itineraryDay();
+    }
+
     public function destination()
     {
         return $this->belongsTo(Destination::class);
