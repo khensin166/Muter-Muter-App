@@ -107,10 +107,53 @@ Urutan eksekusi file migrasi diatur secara kronologis berdasarkan dependensi rel
 | 12 | `2026_11_09_200000_backfill_english_translations_for_seeded_catalog.php` | Backfill otomatis translation EN untuk seeder awal. |
 | 13 | `2026_11_10_200000_add_destination_binding_and_driver_assignment.php` | Menambahkan FK `tour_itinerary_stops.destination_id`, `bookings.contact_unmasked`, `assigned_driver_name`, `assigned_vehicle_plate`. |
 | 14 | `2026_11_10_210000_add_performance_and_concurrency_indexes.php` | Indeks komposit performa, anti race-condition, dan foreign keys query filtering. |
+| 15 | `2026_11_10_220000_add_is_active_to_destinations_table.php` | Menambahkan kolom `is_active` (boolean, index) pada katalog destinasi. |
+| 16 | `2026_11_10_230000_create_destination_clusters_table.php` | Tabel master `destination_clusters` (UUID PK, multilingual name & desc, province, is_active, sort_order). |
 
 ---
 
-## 5. Troubleshooting & FAQ Eksekusi
+## 5. Standard Deployment & Post-Migration Verification (Docker & Production)
+
+Ketika melakukan *release* atau pembaruan di server produksi berbasis Docker (misal container `muter-muter-app`), gunakan urutan SOP berikut:
+
+### A. Eksekusi Migrasi & Seeder Aman
+```bash
+# 1. Jalankan migrasi tambahan secara paksa (hanya mengeksekusi migrasi yang belum terpasang)
+docker exec -it muter-muter-app php artisan migrate --force
+
+# 2. Jalankan seeder master data yang bersifat idempotent (updateOrCreate)
+docker exec -it muter-muter-app php artisan db:seed --class=DestinationClusterSeeder --force
+
+# 3. Optimalkan cache konfigurasi, route, dan blade
+docker exec -it muter-muter-app php artisan config:cache
+docker exec -it muter-muter-app php artisan route:cache
+docker exec -it muter-muter-app php artisan view:cache
+```
+
+### B. Skrip Validasi Otomatis (Sanity Check)
+Jalankan skrip validasi *one-liner* ini via Tinker untuk membuktikan 100% skema dan data master di production sudah sinkron tanpa perlu inspeksi database secara manual:
+
+```bash
+docker exec -it muter-muter-app php artisan tinker --execute="
+\$tables = ['destinations', 'destination_clusters', 'reviews', 'products', 'partners', 'bookings', 'inventory_holds'];
+foreach (\$tables as \$table) {
+    \$exists = Schema::hasTable(\$table);
+    echo (\$exists ? '✅ ' : '❌ ') . 'Tabel ' . \$table . PHP_EOL;
+}
+echo PHP_EOL . 'Cek Kolom Baru:' . PHP_EOL;
+echo (Schema::hasColumn('destinations', 'is_active') ? '✅ ' : '❌ ') . 'destinations.is_active' . PHP_EOL;
+echo (Schema::hasColumn('partners', 'average_rating') ? '✅ ' : '❌ ') . 'partners.average_rating' . PHP_EOL;
+echo (Schema::hasColumn('partners', 'completed_trips_count') ? '✅ ' : '❌ ') . 'partners.completed_trips_count' . PHP_EOL;
+echo (Schema::hasColumn('destination_clusters', 'code') ? '✅ ' : '❌ ') . 'destination_clusters.code' . PHP_EOL;
+echo PHP_EOL . 'Total Klaster Aktif di DB: ' . \App\Models\DestinationCluster::count() . ' klaster.' . PHP_EOL;
+"
+```
+
+Jika output seluruh tabel dan kolom bercentang hijau (`✅`) serta jumlah klaster aktif bernilai `8`, maka database production dipastikan sehat dan sinkron sempurna.
+
+---
+
+## 6. Troubleshooting & FAQ Eksekusi
 
 ### Q1: Error `SQLSTATE[08006] connection to server at 127.0.0.1 failed`
 - **Penyebab:** Service PostgreSQL tidak sedang berjalan atau kredensial port 5432 salah.

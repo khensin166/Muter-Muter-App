@@ -24,6 +24,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 COPY --from=vendor-builder /app/vendor ./vendor
+ARG VITE_GOOGLE_MAPS_API_KEY
+ENV VITE_GOOGLE_MAPS_API_KEY=$VITE_GOOGLE_MAPS_API_KEY
 RUN npm run build
 
 # ==========================================

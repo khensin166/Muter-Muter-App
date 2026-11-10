@@ -113,6 +113,8 @@ jobs:
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+          build-args: |
+            VITE_GOOGLE_MAPS_API_KEY=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || vars.VITE_GOOGLE_MAPS_API_KEY }}
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
 
@@ -165,5 +167,6 @@ jobs:
             -e "translation_driver=${{ vars.TRANSLATION_DRIVER || 'libretranslate' }}" \
             -e "libretranslate_url=${{ vars.LIBRETRANSLATE_URL || 'https://translate.kenantomfie.com' }}" \
             -e "libretranslate_api_key=${{ secrets.LIBRETRANSLATE_API_KEY || vars.LIBRETRANSLATE_API_KEY || 'kenan_secret_translate_key_2026' }}" \
-            -e "translation_mock_mode=${{ vars.TRANSLATION_MOCK_MODE || 'false' }}"
+            -e "translation_mock_mode=${{ vars.TRANSLATION_MOCK_MODE || 'false' }}" \
+            -e "vite_google_maps_api_key=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || vars.VITE_GOOGLE_MAPS_API_KEY }}"
 
