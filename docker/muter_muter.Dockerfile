@@ -9,9 +9,7 @@ RUN --mount=type=secret,id=github_token \
         composer config --global github-oauth.github.com "$(cat /run/secrets/github_token)"; \
     fi && \
     composer config --global process-timeout 600 && \
-    for i in 1 2 3; do \
-        composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs && break || sleep 10; \
-    done
+    composer install --no-dev --no-scripts --no-autoloader --prefer-dist --no-interaction --ignore-platform-reqs
 COPY . .
 RUN composer dump-autoload --optimize --no-dev
 
@@ -33,7 +31,7 @@ RUN npm run build
 # ==========================================
 FROM dunglas/frankenphp:latest-php8.2-alpine AS runner
 
-# Install PostgreSQL and essential PHP extensions
+# Install essential PHP extensions & clean package cache immediately
 RUN install-php-extensions \
     pdo_pgsql \
     pgsql \
@@ -43,7 +41,8 @@ RUN install-php-extensions \
     intl \
     opcache \
     zip \
-    pcntl
+    pcntl \
+    && rm -rf /var/cache/apk/* /tmp/* /var/tmp/*
 
 WORKDIR /app
 
@@ -52,10 +51,21 @@ ENV APP_ENV=production
 ENV SERVER_NAME=":8000"
 ENV FRANKENPHP_CONFIG="worker ./public/index.php"
 
-# Copy source code and pre-built artifacts
-COPY . /app
-COPY --from=vendor-builder /app/vendor /app/vendor
-COPY --from=frontend-builder /app/public/build /app/public/build
+# Pre-create writable storage structure with proper ownership
+RUN mkdir -p \
+    /app/storage/framework/cache \
+    /app/storage/framework/sessions \
+    /app/storage/framework/views \
+    /app/storage/app/public \
+    /app/storage/logs \
+    /app/bootstrap/cache \
+    && chown -R www-data:www-data /app/storage /app/bootstrap/cache \
+    && chmod -R 775 /app/storage /app/bootstrap/cache
+
+# Copy clean application source code (filtered strictly by .dockerignore)
+COPY --chown=www-data:www-data . /app
+COPY --chown=www-data:www-data --from=vendor-builder /app/vendor /app/vendor
+COPY --chown=www-data:www-data --from=frontend-builder /app/public/build /app/public/build
 
 # Copy Caddyfile and Entrypoint
 COPY docker/Caddyfile /etc/caddy/Caddyfile
@@ -67,4 +77,3 @@ EXPOSE 8000
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["frankenphp", "run", "--config", "/etc/caddy/Caddyfile"]
-

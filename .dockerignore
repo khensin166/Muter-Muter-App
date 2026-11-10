@@ -1,22 +1,49 @@
+# Version Control & CI/CD
 .git
 .github
+.gitignore
+
+# IDEs & OS Files
 .idea
 .vscode
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# Documentation & Design Specs (Tidak diperlukan di runtime container)
+docs
+AGENTS.md
+README.md
+
+# Testing Suite & Reports (Hanya berjalan di CI/CD, tidak di production container)
+tests
+phpunit.xml
+pest.php
+.phpunit.result.cache
+
+# Deployment & Provisioning Scripts
+deploy
+docker-compose*.yml
+
+# Frontend Source Artifacts (Sudah di-build ke public/build di Stage 2)
 node_modules
+npm-debug.log
+yarn-error.log
+
+# Composer Local Cache (Sudah di-build di Stage 1)
 vendor
-public/build
+
+# Storage & Temporary Caches
 public/storage
 storage/*.key
 storage/app/*
-!storage/app/public
 storage/framework/cache/*
 storage/framework/sessions/*
 storage/framework/views/*
 storage/logs/*
-.env
-.env.backup
-.env.production
-.phpunit.result.cache
-npm-debug.log
-yarn-error.log
 
+# Local Environment Secrets
+.env
+.env.*
+!.env.example
