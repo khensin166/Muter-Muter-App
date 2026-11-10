@@ -18,3 +18,4 @@ export function useTrans() {
 
   return { t, locale, translations };
 }
+

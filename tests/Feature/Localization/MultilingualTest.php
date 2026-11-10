@@ -90,6 +90,23 @@ test('static translation json dictionaries exist and contain matching keys', fun
 
     expect($idDict)->toBeArray()->not->toBeEmpty();
     expect($enDict)->toBeArray()->not->toBeEmpty();
-    expect($idDict['nav.tours'])->toBe('Paket Wisata');
-    expect($enDict['nav.tours'])->toBe('Tour Packages');
+    expect($idDict['nav.tour_packages'])->toBe('Paket Wisata');
+    expect($enDict['nav.tour_packages'])->toBe('Tour Packages');
+});
+
+test('homepage returns english translations and cluster labels when locale is en', function () {
+    $response = $this->withSession(['locale' => 'en'])->get('/');
+
+    $response->assertOk();
+    $response->assertInertia(fn (\Inertia\Testing\AssertableInertia $page) => $page
+        ->component('Welcome')
+        ->where('locale', 'en')
+        ->has('translations')
+        ->where('translations', fn ($translations) => 
+            isset($translations['nav.explore_destinations']) &&
+            $translations['nav.explore_destinations'] === 'Explore Destinations' &&
+            isset($translations['home.hero_badge']) &&
+            $translations['home.hero_badge'] === 'North Sumatra Integrated Travel Marketplace'
+        )
+    );
 });

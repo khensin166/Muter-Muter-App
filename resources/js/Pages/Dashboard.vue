@@ -1,6 +1,9 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t, locale } = useTrans();
 
 const props = defineProps({
   metrics: Object,
@@ -22,7 +25,7 @@ const formatRupiah = (value) => {
 
 <template>
   <AppLayout>
-    <Head title="Travel Hub — Dashboard Wisatawan" />
+    <Head :title="t('dashboard.title')" />
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
       <!-- Welcome Header -->
@@ -30,13 +33,13 @@ const formatRupiah = (value) => {
         <div class="relative z-10 max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-semibold mb-3">
             <span>🌿</span>
-            <span>BetaTudia Travel Hub — Sumatera Utara</span>
+            <span>{{ t('dashboard.welcome_badge') }}</span>
           </div>
           <h1 class="text-2xl sm:text-3xl font-black tracking-tight">
-            Horas, {{ $page.props.auth.user.name }}! 👋
+            {{ t('dashboard.greeting', { name: $page.props.auth.user.name }) }}
           </h1>
           <p class="text-white/80 text-sm mt-1 sm:mt-2">
-            Rencanakan petualangan wisata Sumatera Utara Anda (Danau Toba, Bukit Lawang, Tangkahan, Berastagi), pantau konfirmasi reservasi mitra lokal, dan akses tiket perjalanan Anda di sini.
+            {{ t('dashboard.subtitle') }}
           </p>
 
           <div class="flex flex-wrap gap-3 mt-5">
@@ -45,21 +48,21 @@ const formatRupiah = (value) => {
               class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs font-bold shadow-sm transition inline-flex items-center gap-1.5"
             >
               <span>🔍</span>
-              <span>Cari Paket Wisata</span>
+              <span>{{ t('dashboard.find_tours') }}</span>
             </Link>
             <Link
               href="/vehicles"
               class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold backdrop-blur-md border border-white/20 transition inline-flex items-center gap-1.5"
             >
               <span>🚗</span>
-              <span>Sewa Kendaraan</span>
+              <span>{{ t('dashboard.rent_vehicle') }}</span>
             </Link>
             <Link
               :href="route('bookings.my')"
               class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white text-xs font-bold backdrop-blur-md border border-white/20 transition inline-flex items-center gap-1.5"
             >
               <span>📋</span>
-              <span>Riwayat Pesanan</span>
+              <span>{{ t('dashboard.my_bookings') }}</span>
             </Link>
           </div>
         </div>
@@ -72,9 +75,9 @@ const formatRupiah = (value) => {
       <div v-if="actionRequired && actionRequired.length > 0" class="space-y-3">
         <div class="flex items-center gap-2">
           <span class="text-lg">⚠️</span>
-          <h2 class="text-base font-bold text-text-main">Perlu Tindakan Segera</h2>
+          <h2 class="text-base font-bold text-text-main">{{ t('dashboard.action_required_title') }}</h2>
           <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-black uppercase">
-            {{ actionRequired.length }} Menunggu
+            {{ actionRequired.length }} {{ locale === 'en' ? 'Pending' : 'Menunggu' }}
           </span>
         </div>
 
@@ -92,7 +95,7 @@ const formatRupiah = (value) => {
                 </span>
               </div>
               <h3 class="font-bold text-text-main text-sm line-clamp-1">{{ item.product_name }}</h3>
-              <p class="text-xs text-text-muted mt-0.5">Jadwal: {{ item.service_start_date }}</p>
+              <p class="text-xs text-text-muted mt-0.5">{{ t('dashboard.departure_date') }}: {{ item.service_start_date }}</p>
               
               <div class="mt-3 p-3 bg-white/80 rounded-xl border border-amber-200/60 flex items-center justify-between">
                 <span class="text-xs text-text-muted">Target DP:</span>
@@ -104,7 +107,7 @@ const formatRupiah = (value) => {
               :href="route('bookings.show', item.booking_code)"
               class="w-full text-center py-2 px-3 bg-accent hover:bg-accent-hover text-white text-xs font-bold rounded-xl shadow-xs transition"
             >
-              Upload Bukti Transfer DP &rarr;
+              {{ t('dashboard.upload_proof_btn') }} &rarr;
             </Link>
           </div>
         </div>
@@ -114,46 +117,46 @@ const formatRupiah = (value) => {
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-5 bg-surface rounded-2xl border border-border shadow-xs space-y-1">
           <div class="flex items-center justify-between text-text-muted">
-            <span class="text-xs font-semibold">Trip Berjalan / Datang</span>
+            <span class="text-xs font-semibold">{{ t('dashboard.upcoming_trips') }}</span>
             <span class="text-base">🎒</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black text-text-main">
             {{ metrics.active_trips }}
           </div>
-          <span class="text-[11px] text-emerald-600 font-semibold block">Siap dinikmati</span>
+          <span class="text-[11px] text-emerald-600 font-semibold block">{{ locale === 'en' ? 'Ready to experience' : 'Siap dinikmati' }}</span>
         </div>
 
         <div class="p-5 bg-surface rounded-2xl border border-border shadow-xs space-y-1">
           <div class="flex items-center justify-between text-text-muted">
-            <span class="text-xs font-semibold">Menunggu Bayar DP</span>
+            <span class="text-xs font-semibold">{{ t('dashboard.awaiting_payment') }}</span>
             <span class="text-base">💳</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black" :class="metrics.pending_payment > 0 ? 'text-amber-600' : 'text-text-main'">
             {{ metrics.pending_payment }}
           </div>
-          <span class="text-[11px] text-text-muted block">Batas hold 2 jam</span>
+          <span class="text-[11px] text-text-muted block">{{ locale === 'en' ? 'Hold 24 hours' : 'Batas hold 24 jam' }}</span>
         </div>
 
         <div class="p-5 bg-surface rounded-2xl border border-border shadow-xs space-y-1">
           <div class="flex items-center justify-between text-text-muted">
-            <span class="text-xs font-semibold">Trip Selesai</span>
+            <span class="text-xs font-semibold">{{ t('dashboard.completed_trips') }}</span>
             <span class="text-base">✨</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black text-text-main">
             {{ metrics.completed_trips }}
           </div>
-          <span class="text-[11px] text-primary font-semibold block">Pengalaman terukir</span>
+          <span class="text-[11px] text-primary font-semibold block">{{ locale === 'en' ? 'Memorable journeys' : 'Pengalaman terukir' }}</span>
         </div>
 
         <div class="p-5 bg-surface rounded-2xl border border-border shadow-xs space-y-1">
           <div class="flex items-center justify-between text-text-muted">
-            <span class="text-xs font-semibold">Total Semua Pesanan</span>
+            <span class="text-xs font-semibold">{{ t('dashboard.active_bookings') }}</span>
             <span class="text-base">📄</span>
           </div>
           <div class="text-2xl sm:text-3xl font-black text-text-main">
             {{ metrics.total_bookings }}
           </div>
-          <span class="text-[11px] text-text-muted block">Aktivitas di platform</span>
+          <span class="text-[11px] text-text-muted block">{{ locale === 'en' ? 'Platform activity' : 'Aktivitas di platform' }}</span>
         </div>
       </div>
 

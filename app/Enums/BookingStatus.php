@@ -19,6 +19,23 @@ enum BookingStatus: string
 
     public function label(): string
     {
+        if (app()->getLocale() === 'en') {
+            return match ($this) {
+                self::PENDING_APPROVAL => 'Awaiting Partner Approval',
+                self::MANUAL_REVIEW => 'Admin Manual Review',
+                self::AWAITING_PAYMENT => 'Awaiting DP Payment',
+                self::PAYMENT_REVIEW => 'Payment Verification',
+                self::CONFIRMED => 'Confirmed',
+                self::IN_PROGRESS => 'In Progress',
+                self::COMPLETED => 'Completed',
+                self::CANCELLED => 'Cancelled',
+                self::EXPIRED => 'Expired',
+                self::REFUND_PENDING => 'Refund Pending',
+                self::REFUNDED => 'Refunded',
+                self::REJECTED => 'Rejected',
+            };
+        }
+
         return match ($this) {
             self::PENDING_APPROVAL => 'Menunggu Persetujuan Mitra',
             self::MANUAL_REVIEW => 'Intervensi Manual Admin',

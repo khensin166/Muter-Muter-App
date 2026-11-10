@@ -9,9 +9,16 @@ enum TransmissionType: string
 
     public function label(): string
     {
+        if (app()->getLocale() === 'en') {
+            return match ($this) {
+                self::MANUAL => 'Manual',
+                self::AUTOMATIC => 'Automatic',
+            };
+        }
+
         return match ($this) {
             self::MANUAL => 'Manual',
-            self::AUTOMATIC => 'Automatic',
+            self::AUTOMATIC => 'Otomatis',
         };
     }
 }

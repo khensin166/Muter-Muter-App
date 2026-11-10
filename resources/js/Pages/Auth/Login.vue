@@ -6,6 +6,9 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t } = useTrans();
 
 defineProps({
     canResetPassword: {
@@ -31,7 +34,7 @@ const submit = () => {
 
 <template>
     <GuestLayout>
-        <Head title="Log in" />
+        <Head :title="t('auth.login_title')" />
 
         <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
             {{ status }}
@@ -39,7 +42,7 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="email" :value="t('auth.email')" />
 
                 <TextInput
                     id="email"
@@ -55,7 +58,7 @@ const submit = () => {
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="password" :value="t('auth.password')" />
 
                 <TextInput
                     id="password"
@@ -73,27 +76,35 @@ const submit = () => {
                 <label class="flex items-center">
                     <Checkbox name="remember" v-model:checked="form.remember" />
                     <span class="ms-2 text-sm text-gray-600"
-                        >Remember me</span
+                        >{{ t('auth.remember_me') }}</span
                     >
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="mt-4 flex items-center justify-between">
                 <Link
                     v-if="canResetPassword"
                     :href="route('password.request')"
                     class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                    Forgot your password?
+                    {{ t('auth.forgot_password') }}
                 </Link>
+                <span v-else></span>
 
                 <PrimaryButton
                     class="ms-4"
                     :class="{ 'opacity-25': form.processing }"
                     :disabled="form.processing"
                 >
-                    Log in
+                    {{ t('auth.login_btn') }}
                 </PrimaryButton>
+            </div>
+
+            <div class="mt-6 pt-4 border-t border-gray-100 text-center text-xs text-gray-500">
+                <span>{{ t('auth.no_account') }} </span>
+                <Link :href="route('register')" class="text-primary font-bold hover:underline">
+                    {{ t('auth.register_btn') }}
+                </Link>
             </div>
         </form>
     </GuestLayout>

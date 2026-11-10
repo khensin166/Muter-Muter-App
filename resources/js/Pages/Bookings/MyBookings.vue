@@ -1,6 +1,9 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/Layouts/AppLayout.vue';
+import { useTrans } from '@/Composables/useTrans';
+
+const { t, locale } = useTrans();
 
 const props = defineProps({
   bookings: Object,
@@ -17,21 +20,21 @@ const formatRupiah = (value) => {
 
 <template>
   <AppLayout>
-    <Head title="Pesanan Saya — BetaTudia" />
+    <Head :title="t('my_bookings.title')" />
 
     <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-6">
       <div class="flex items-center justify-between">
         <div>
-          <span class="text-xs font-bold text-accent uppercase tracking-wider">Dashboard Wisatawan</span>
-          <h1 class="text-2xl font-black text-text-main">Riwayat Pesanan Saya</h1>
-          <p class="text-xs text-text-muted mt-0.5">Pantau status konfirmasi mitra vendor dan tagihan DP perjalanan Anda.</p>
+          <span class="text-xs font-bold text-accent uppercase tracking-wider">{{ t('my_bookings.eyebrow') }}</span>
+          <h1 class="text-2xl font-black text-text-main">{{ t('my_bookings.heading') }}</h1>
+          <p class="text-xs text-text-muted mt-0.5">{{ t('my_bookings.subtitle') }}</p>
         </div>
 
         <Link
           href="/tours"
           class="px-4 py-2 bg-primary text-white rounded-xl text-xs font-bold hover:bg-primary-dark transition shadow-sm"
         >
-          + Pesan Trip Baru
+          {{ t('my_bookings.new_trip_btn') }}
         </Link>
       </div>
 
@@ -61,14 +64,14 @@ const formatRupiah = (value) => {
 
             <h3 class="font-bold text-text-main text-base">{{ b.product_name }}</h3>
             <div class="mt-1 text-xs text-text-muted flex items-center gap-3">
-              <span>📅 Berangkat: {{ b.service_start_date }}</span>
-              <span>🏢 Mitra: {{ b.partner_name }}</span>
+              <span>📅 {{ t('dashboard.departure_date') }}: {{ b.service_start_date }}</span>
+              <span>🏢 {{ b.partner_name }}</span>
             </div>
           </div>
 
           <div class="flex sm:flex-col items-center sm:items-end justify-between border-t sm:border-t-0 pt-3 sm:pt-0 border-border gap-2">
             <div>
-              <span class="text-[10px] uppercase text-text-muted block text-right font-bold">Total Biaya</span>
+              <span class="text-[10px] uppercase text-text-muted block text-right font-bold">{{ t('dashboard.total_amount') }}</span>
               <span class="text-base font-black text-primary">{{ formatRupiah(b.total_price) }}</span>
             </div>
 
@@ -76,7 +79,7 @@ const formatRupiah = (value) => {
               :href="route('bookings.show', b.booking_code)"
               class="px-4 py-2 bg-primary hover:bg-primary-dark text-white rounded-xl text-xs font-bold transition shadow-xs"
             >
-              Lihat Rincian →
+              {{ t('dashboard.view_detail') }} →
             </Link>
           </div>
         </div>
@@ -85,14 +88,14 @@ const formatRupiah = (value) => {
       <!-- Empty State -->
       <div v-else class="text-center py-16 bg-surface rounded-2xl border border-border">
         <span class="text-4xl">🎒</span>
-        <h3 class="text-lg font-bold text-text-main mt-3">Belum ada pemesanan</h3>
-        <p class="text-xs text-text-muted mt-1">Anda belum memiliki pemesanan aktif. Jelajahi katalog paket tour dan sewa kendaraan kami.</p>
+        <h3 class="text-lg font-bold text-text-main mt-3">{{ t('my_bookings.empty_title') }}</h3>
+        <p class="text-xs text-text-muted mt-1">{{ t('my_bookings.empty_desc') }}</p>
         <div class="mt-4 flex justify-center gap-3">
           <Link href="/tours" class="px-4 py-2 bg-primary text-white text-xs font-bold rounded-xl">
-            Lihat Paket Tour
+            {{ t('dashboard.find_tours') }}
           </Link>
           <Link href="/vehicles" class="px-4 py-2 bg-secondary text-white text-xs font-bold rounded-xl">
-            Sewa Kendaraan
+            {{ t('dashboard.rent_vehicle') }}
           </Link>
         </div>
       </div>
