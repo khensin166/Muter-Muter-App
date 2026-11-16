@@ -4,6 +4,7 @@ import PartnerLayout from '@/Layouts/PartnerLayout.vue';
 import FlagIcon from '@/Components/FlagIcon.vue';
 import { ref } from 'vue';
 import axios from 'axios';
+import { useImageUpload } from '@/Composables/useImageUpload';
 
 const props = defineProps({
   vehicleTypes: Array,
@@ -12,6 +13,9 @@ const props = defineProps({
 
 const contentLang = ref('id');
 const isTranslating = ref(false);
+const isOptimizing = ref(false);
+const uploadError = ref(null);
+const { processFiles } = useImageUpload();
 
 const form = useForm({
   name: '',
@@ -66,8 +70,24 @@ const autoTranslateAll = async () => {
   }
 };
 
-const handlePhotoUpload = (e) => {
-  form.photos = Array.from(e.target.files);
+const handlePhotoUpload = async (e) => {
+  const files = Array.from(e.target.files || []);
+  if (!files.length) return;
+
+  isOptimizing.value = true;
+  uploadError.value = null;
+
+  try {
+    const { optimizedFiles, errors } = await processFiles(files);
+    if (errors.length > 0) {
+      uploadError.value = errors.join(' ');
+    }
+    if (optimizedFiles.length > 0) {
+      form.photos = optimizedFiles;
+    }
+  } finally {
+    isOptimizing.value = false;
+  }
 };
 
 const submit = () => {
@@ -347,6 +367,14 @@ const submit = () => {
                 accept="image/*"
                 class="w-full text-xs text-text-muted file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-secondary file:text-white hover:file:bg-secondary/90 cursor-pointer"
               />
+
+              <div v-if="isOptimizing" class="flex items-center gap-2 text-xs text-primary font-bold animate-pulse mt-2">
+                <span class="text-sm">⏳</span>
+                <span>Mengoptimasi resolusi foto secara otomatis agar cepat diunggah...</span>
+              </div>
+              <div v-if="uploadError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold mt-2">
+                ⚠️ {{ uploadError }}
+              </div>
             </div>
           </div>
         </div>

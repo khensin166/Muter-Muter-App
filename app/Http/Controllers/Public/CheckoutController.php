@@ -33,7 +33,12 @@ class CheckoutController extends Controller
         $dpAmount = round($totalPrice * ((float) $product->dp_percentage / 100), 2);
         $balanceAmount = $totalPrice - $dpAmount;
 
+        $currentUser = $request->user();
+        $isCustomer = $currentUser ? $currentUser->isCustomer() : true;
+
         return Inertia::render('Checkout', [
+            'isCustomer' => $isCustomer,
+            'userRole' => $currentUser?->role?->value,
             'product' => [
                 'id' => $product->id,
                 'name' => $product->name,
@@ -80,6 +85,12 @@ class CheckoutController extends Controller
         if (! $user) {
             return redirect()->route('login')
                 ->with('error', 'Silakan login terlebih dahulu untuk menyelesaikan pemesanan.');
+        }
+
+        if (! $user->isCustomer()) {
+            return back()->withErrors([
+                'booking' => 'Akun Pengelola (Admin) dan Mitra Vendor tidak diizinkan melakukan pemesanan transaksi. Silakan login sebagai akun Pelanggan/Wisatawan.',
+            ]);
         }
 
         $validated = $request->validate([

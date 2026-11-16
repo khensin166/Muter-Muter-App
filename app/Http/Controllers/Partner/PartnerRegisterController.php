@@ -62,11 +62,11 @@ class PartnerRegisterController extends Controller
 
         // Deep 4-layer file inspection & sanitization before DB transaction
         $ktpPath = $request->hasFile('ktp_file')
-            ? FileSecurityService::validateAndStore($request->file('ktp_file'), 'partner_documents/ktp', 'ktp_file', allowPdf: true, disk: 'public')
+            ? FileSecurityService::validateAndStore($request->file('ktp_file'), 'partner_documents/ktp', 'ktp_file', allowPdf: true)
             : null;
 
         $nibPath = $request->hasFile('nib_file')
-            ? FileSecurityService::validateAndStore($request->file('nib_file'), 'partner_documents/nib', 'nib_file', allowPdf: true, disk: 'public')
+            ? FileSecurityService::validateAndStore($request->file('nib_file'), 'partner_documents/nib', 'nib_file', allowPdf: true)
             : null;
 
         $fleetPaths = [];
@@ -76,8 +76,7 @@ class PartnerRegisterController extends Controller
                     file: $photo,
                     directory: 'partner_documents/fleet',
                     fieldName: "fleet_photos.{$idx}",
-                    allowPdf: false,
-                    disk: 'public'
+                    allowPdf: false
                 );
             }
         }

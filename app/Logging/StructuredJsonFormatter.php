@@ -22,18 +22,20 @@ class StructuredJsonFormatter extends NormalizerFormatter
     {
         $context = $record->context;
 
+        $req = app()->has('request') ? request() : null;
+
         // Extract trace_id and channel from context if present
-        $traceId = $context['trace_id'] ?? request()?->attributes?->get('trace_id') ?? 'sys-system';
+        $traceId = $context['trace_id'] ?? $req?->attributes?->get('trace_id') ?? 'sys-system';
         $channel = $context['channel'] ?? $record->channel ?? 'application';
         $event = $context['event'] ?? ($channel . '.' . strtolower($record->level->name));
 
         // Resolve actor details
-        $user = auth()->user();
+        $user = app()->has('auth') ? auth()->user() : null;
         $actor = $context['actor'] ?? [
             'user_id' => $user?->id ?? null,
             'role' => $user?->role?->value ?? ($user ? 'AUTHENTICATED' : 'ANONYMOUS'),
-            'ip' => request()?->ip() ?? '127.0.0.1',
-            'user_agent' => request()?->userAgent() ?? 'CLI/System',
+            'ip' => $req?->ip() ?? '127.0.0.1',
+            'user_agent' => $req?->userAgent() ?? 'CLI/System',
         ];
 
         // Clean domain context (remove metadata already extracted to root)

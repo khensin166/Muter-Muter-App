@@ -110,9 +110,9 @@ const form = useForm({
                 <PrimaryButton :disabled="form.processing">Save</PrimaryButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
+                    enter-active-class="transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
+                    leave-active-class="transition duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
                     leave-to-class="opacity-0"
                 >
                     <p

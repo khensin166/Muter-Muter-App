@@ -92,10 +92,10 @@ const applyFilters = () => {
         <div
           v-for="veh in vehicles.data"
           :key="veh.id"
-          class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover transition-all flex flex-col"
+          class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift flex flex-col group"
         >
           <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img :src="veh.image_url" :alt="veh.name" class="w-full h-full object-cover" />
+            <img :src="veh.image_url" :alt="veh.name" class="w-full h-full object-cover hover-card-media" />
             <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
               {{ t('home.min_hours_lead', { hours: veh.min_lead_time_hours }) }}
             </div>
@@ -110,6 +110,19 @@ const applyFilters = () => {
               <h3 class="text-lg font-bold text-text-main">
                 <Link :href="`/vehicles/${veh.slug}`">{{ veh.name }}</Link>
               </h3>
+
+              <!-- Partner Transparency Badge -->
+              <div v-if="veh.partner_name" class="mt-2 flex items-center justify-between text-[11px] text-text-muted bg-surface-muted/60 px-2.5 py-1.5 rounded-lg border border-border/80">
+                <div class="flex items-center gap-1.5 overflow-hidden">
+                  <span class="text-xs">🏢</span>
+                  <span class="font-bold text-text-main truncate">{{ veh.partner_name }}</span>
+                  <span v-if="veh.partner_city" class="text-text-muted text-[10px] shrink-0">({{ veh.partner_city }})</span>
+                </div>
+                <div class="flex items-center gap-0.5 text-amber-500 font-bold shrink-0 text-[10px] ml-1">
+                  <span>★</span>
+                  <span>{{ veh.partner_rating }}</span>
+                </div>
+              </div>
 
               <div class="mt-3 flex items-center gap-4 text-xs text-text-muted font-medium bg-surface-muted p-2.5 rounded-xl border border-border">
                 <div class="flex items-center gap-1">

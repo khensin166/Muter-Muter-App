@@ -157,7 +157,7 @@ const shareToTwitter = () => {
               <img
                 :src="currentMedia.url"
                 :alt="currentMedia.caption || product.name"
-                class="w-full h-full object-cover transition-all duration-500"
+                class="w-full h-full object-cover transition-opacity duration-200 ease-out"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent"></div>
 
@@ -548,7 +548,7 @@ const shareToTwitter = () => {
               <a
                 :href="`/tours/${product.slug}/itinerary/print`"
                 target="_blank"
-                class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer tactile-press"
               >
                 <span>📄</span>
                 <span>Unduh PDF</span>
@@ -556,7 +556,7 @@ const shareToTwitter = () => {
               <button
                 type="button"
                 @click="openShareModal"
-                class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer"
+                class="py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold transition flex items-center justify-center gap-1.5 cursor-pointer tactile-press"
               >
                 <span>📤</span>
                 <span>Bagikan</span>
@@ -568,81 +568,90 @@ const shareToTwitter = () => {
     </div>
 
     <!-- Share Tour Modal (Beta Tudia Experience) -->
-    <div
-      v-if="isShareModalOpen"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
-      @click.self="isShareModalOpen = false"
+    <Transition
+      enter-active-class="transition duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-[cubic-bezier(0.23,1,0.32,1)]"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
     >
-      <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 animate-in fade-in zoom-in-95 duration-200">
-        <div class="flex items-start justify-between">
-          <div>
-            <span class="text-[10px] font-black uppercase tracking-widest text-primary">Beta Tudia • Bagikan Perjalanan</span>
-            <h3 class="text-lg font-black text-slate-900 mt-0.5">Ajak Teman & Keluarga Liburan</h3>
-          </div>
-          <button
-            type="button"
-            @click="isShareModalOpen = false"
-            class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-bold transition cursor-pointer"
-          >
-            ✕
-          </button>
-        </div>
-
-        <p class="text-xs text-slate-600 leading-relaxed">
-          Bagikan rute terkurasi <strong>{{ product.name }}</strong> langsung ke kontak WhatsApp atau sosial media Anda:
-        </p>
-
-        <!-- Direct WhatsApp Share Button (Hero Option) -->
-        <button
-          type="button"
-          @click="shareToWhatsApp"
-          class="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md hover:shadow-lg transition cursor-pointer"
-        >
-          <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-            <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.693.076-2.072-.495-1.769-.733-2.906-2.535-2.994-2.651-.088-.116-.719-.958-.719-1.826 0-.868.455-1.294.618-1.469.163-.175.356-.219.474-.219.119 0 .237.001.341.006.11.005.257-.042.401.306.149.36.509 1.242.553 1.332.044.09.074.195.015.313-.06.118-.089.192-.178.297-.089.105-.187.235-.267.316-.089.09-.182.188-.078.367.104.179.463.766.995 1.241.684.611 1.261.801 1.44.89.179.089.284.075.39-.045.105-.12.446-.521.565-.7.119-.179.238-.149.401-.089.163.059 1.036.489 1.214.578.178.089.297.134.341.209.045.074.045.433-.099.838z"/>
-          </svg>
-          <span>Bagikan ke WhatsApp Chat / Group</span>
-        </button>
-
-        <!-- Social Share Row -->
-        <div class="grid grid-cols-2 gap-2 text-xs">
-          <button
-            type="button"
-            @click="shareToFacebook"
-            class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold border border-blue-200 transition cursor-pointer"
-          >
-            <span>Facebook</span>
-          </button>
-          <button
-            type="button"
-            @click="shareToTwitter"
-            class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 transition cursor-pointer"
-          >
-            <span>X / Twitter</span>
-          </button>
-        </div>
-
-        <!-- Copy Link Section -->
-        <div class="space-y-1.5 pt-2 border-t border-slate-100">
-          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tautan Paket</label>
-          <div class="flex items-center gap-2">
-            <input
-              type="text"
-              readonly
-              :value="shareUrl"
-              class="w-full bg-slate-50 text-slate-700 text-xs px-3 py-2 rounded-xl border border-slate-200 select-all font-mono"
-            />
+      <div
+        v-if="isShareModalOpen"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs"
+        @click.self="isShareModalOpen = false"
+      >
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 space-y-5 transform transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-[10px] font-black uppercase tracking-widest text-primary">Beta Tudia • Bagikan Perjalanan</span>
+              <h3 class="text-lg font-black text-slate-900 mt-0.5">Ajak Teman &amp; Keluarga Liburan</h3>
+            </div>
             <button
               type="button"
-              @click="copyShareLink"
-              class="shrink-0 px-4 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer"
-              :class="copiedLink ? 'bg-emerald-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'"
+              @click="isShareModalOpen = false"
+              class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-sm font-bold transition cursor-pointer tactile-press"
             >
-              {{ copiedLink ? 'Disalin! ✓' : 'Salin' }}
+              ✕
             </button>
+          </div>
+
+          <p class="text-xs text-slate-600 leading-relaxed">
+            Bagikan rute terkurasi <strong>{{ product.name }}</strong> langsung ke kontak WhatsApp atau sosial media Anda:
+          </p>
+
+          <!-- Direct WhatsApp Share Button (Hero Option) -->
+          <button
+            type="button"
+            @click="shareToWhatsApp"
+            class="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-md hover:shadow-lg transition cursor-pointer tactile-press"
+          >
+            <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+              <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.693.076-2.072-.495-1.769-.733-2.906-2.535-2.994-2.651-.088-.116-.719-.958-.719-1.826 0-.868.455-1.294.618-1.469.163-.175.356-.219.474-.219.119 0 .237.001.341.006.11.005.257-.042.401.306.149.36.509 1.242.553 1.332.044.09.074.195.015.313-.06.118-.089.192-.178.297-.089.105-.187.235-.267.316-.089.09-.182.188-.078.367.104.179.463.766.995 1.241.684.611 1.261.801 1.44.89.179.089.284.075.39-.045.105-.12.446-.521.565-.7.119-.179.238-.149.401-.089.163.059 1.036.489 1.214.578.178.089.297.134.341.209.045.074.045.433-.099.838z"/>
+            </svg>
+            <span>Bagikan ke WhatsApp Chat / Group</span>
+          </button>
+
+          <!-- Social Share Row -->
+          <div class="grid grid-cols-2 gap-2 text-xs">
+            <button
+              type="button"
+              @click="shareToFacebook"
+              class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold border border-blue-200 transition cursor-pointer tactile-press"
+            >
+              <span>Facebook</span>
+            </button>
+            <button
+              type="button"
+              @click="shareToTwitter"
+              class="flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold border border-slate-300 transition cursor-pointer tactile-press"
+            >
+              <span>X / Twitter</span>
+            </button>
+          </div>
+
+          <!-- Copy Link Section -->
+          <div class="space-y-1.5 pt-2 border-t border-slate-100">
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">Tautan Paket</label>
+            <div class="flex items-center gap-2">
+              <input
+                type="text"
+                readonly
+                :value="shareUrl"
+                class="w-full bg-slate-50 text-slate-700 text-xs px-3 py-2 rounded-xl border border-slate-200 select-all font-mono"
+              />
+              <button
+                type="button"
+                @click="copyShareLink"
+                class="shrink-0 px-4 py-2 rounded-xl text-xs font-extrabold transition cursor-pointer tactile-press"
+                :class="copiedLink ? 'bg-emerald-600 text-white' : 'bg-slate-900 hover:bg-slate-800 text-white'"
+              >
+                {{ copiedLink ? 'Disalin! ✓' : 'Salin' }}
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </div>
+    </Transition>
   </AppLayout>
 </template>

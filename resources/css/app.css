@@ -38,4 +38,63 @@
   --color-warning: #F59E0B;          /* Amber 500 */
   --color-danger: #EF4444;           /* Rose/Red 500 */
   --color-info: #0284C7;             /* Sky 600 */
+
+  /* =========================================================================
+     5. Motion Curves (Design Engineering - Emil Kowalski Tokens)
+     ========================================================================= */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out-strong: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-in-out-strong: cubic-bezier(0.77, 0, 0.175, 1);
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tactile-press {
+  transition: transform 150ms var(--ease-out-strong),
+              background-color 150ms ease,
+              border-color 150ms ease,
+              color 150ms ease,
+              box-shadow 150ms ease;
+}
+
+.tactile-press:active {
+  transform: scale(0.97);
+}
+
+.hover-card-lift {
+  transition: transform 200ms var(--ease-out-strong),
+              box-shadow 200ms var(--ease-out-strong),
+              border-color 150ms ease;
+}
+
+.hover-card-media {
+  transition: transform 300ms var(--ease-out-strong);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .hover-card-lift:hover {
+    transform: translateY(-2px);
+  }
+  .hover-card-lift:hover .hover-card-media {
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tactile-press:active,
+  .hover-card-lift:hover,
+  .hover-card-lift:hover .hover-card-media {
+    transform: none;
+  }
+
+  .tactile-press,
+  .hover-card-lift,
+  .hover-card-media {
+    transition-property: background-color, border-color, color, opacity, box-shadow;
+    transition-duration: 150ms;
+  }
 }

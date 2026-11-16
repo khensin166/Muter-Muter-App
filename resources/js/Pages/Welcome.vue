@@ -75,17 +75,17 @@ const clusterIcons = {
           class="mt-10 max-w-4xl mx-auto bg-surface rounded-2xl p-4 sm:p-6 shadow-2xl border border-border text-left text-text-main">
           <div class="flex items-center gap-2 border-b border-border pb-3 mb-4 text-xs sm:text-sm font-bold">
             <button @click="activeSearchTab = 'tour'"
-              :class="activeSearchTab === 'tour' ? 'bg-primary text-white' : 'hover:bg-surface-muted text-text-muted'"
-              class="px-4 py-2 rounded-xl transition">
+              :class="activeSearchTab === 'tour' ? 'bg-primary text-white shadow-xs' : 'hover:bg-surface-muted text-text-muted'"
+              class="px-4 py-2 rounded-xl transition-colors duration-150 tactile-press cursor-pointer">
               {{ t('home.tab_tours') }}
             </button>
             <button @click="activeSearchTab = 'vehicle'"
-              :class="activeSearchTab === 'vehicle' ? 'bg-primary text-white' : 'hover:bg-surface-muted text-text-muted'"
-              class="px-4 py-2 rounded-xl transition">
+              :class="activeSearchTab === 'vehicle' ? 'bg-primary text-white shadow-xs' : 'hover:bg-surface-muted text-text-muted'"
+              class="px-4 py-2 rounded-xl transition-colors duration-150 tactile-press cursor-pointer">
               {{ t('home.tab_vehicles') }}
             </button>
             <Link href="/destinations"
-              class="px-4 py-2 rounded-xl hover:bg-surface-muted text-text-muted transition inline-flex items-center gap-1.5">
+              class="px-4 py-2 rounded-xl hover:bg-surface-muted text-text-muted transition-colors duration-150 inline-flex items-center gap-1.5 tactile-press">
               {{ t('home.tab_destinations') }}
             </Link>
           </div>
@@ -127,7 +127,7 @@ const clusterIcons = {
             </span>
             <Link
               :href="activeSearchTab === 'tour' ? `/tours${selectedCluster ? '?cluster=' + selectedCluster : ''}` : `/vehicles`"
-              class="w-full sm:w-auto bg-accent hover:bg-accent-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2">
+              class="w-full sm:w-auto bg-accent hover:bg-accent-hover text-white text-sm font-bold py-2.5 px-6 rounded-xl shadow-md transition-colors flex items-center justify-center gap-2 tactile-press">
               <span>🔍</span>
               <span>{{ t('home.btn_view_catalog') }}</span>
             </Link>
@@ -138,15 +138,15 @@ const clusterIcons = {
         <div class="mt-8 flex flex-wrap justify-center items-center gap-3 text-xs">
           <span class="text-slate-300">{{ t('home.quick_access') }}</span>
           <Link href="/destinations"
-            class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition">
+            class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white font-medium transition tactile-press">
             {{ t('home.quick_destinations') }}
           </Link>
           <Link href="/partner"
-            class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 font-semibold transition">
+            class="px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 font-semibold transition tactile-press">
             {{ t('home.quick_partner') }}
           </Link>
           <Link href="/admin"
-            class="px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-400/30 font-semibold transition">
+            class="px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-200 border border-purple-400/30 font-semibold transition tactile-press">
             {{ t('home.quick_admin') }}
           </Link>
         </div>
@@ -167,7 +167,7 @@ const clusterIcons = {
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <Link v-for="cluster in clusters" :key="cluster.value" :href="`/destinations?cluster=${cluster.value}`"
-          class="bg-surface rounded-2xl p-6 border border-border hover:border-primary/40 hover:shadow-card-hover transition-all group flex flex-col justify-between cursor-pointer">
+          class="bg-surface rounded-2xl p-6 border border-border hover-card-lift tactile-press group flex flex-col justify-between cursor-pointer">
           <div>
             <div class="flex items-center justify-between mb-4">
               <span class="text-3xl">{{ clusterIcons[cluster.value] || '📍' }}</span>
@@ -185,7 +185,7 @@ const clusterIcons = {
           <div
             class="mt-6 pt-3 border-t border-border flex items-center justify-between text-xs font-bold text-primary">
             <span>{{ t('home.cluster_view_spots') }}</span>
-            <span class="group-hover:translate-x-1 transition-transform">{{ t('home.cluster_explore') }}</span>
+            <span class="group-hover:translate-x-1 transition-transform duration-200 ease-out">{{ t('home.cluster_explore') }}</span>
           </div>
         </Link>
       </div>
@@ -201,17 +201,17 @@ const clusterIcons = {
             <h2 class="text-2xl sm:text-3xl font-extrabold text-text-main mt-1">{{ t('home.destinations_title') }}</h2>
           </div>
           <Link href="/destinations"
-            class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1">
+            class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1 tactile-press">
             {{ t('home.destinations_view_all') }}
           </Link>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           <Link v-for="dest in featuredDestinations" :key="dest.id" :href="`/destinations/${dest.slug}`"
-            class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover hover:border-primary/30 transition-all flex flex-col group">
+            class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift tactile-press flex flex-col group">
             <div class="relative h-48 overflow-hidden bg-slate-100">
               <img :src="dest.image_url" :alt="dest.name"
-                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                class="w-full h-full object-cover hover-card-media" />
               <div
                 class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-primary shadow-sm">
                 {{ dest.cluster_label }}
@@ -246,16 +246,16 @@ const clusterIcons = {
           <p class="text-sm text-text-muted mt-1">{{ t('home.tours_subtitle') }}</p>
         </div>
         <Link href="/tours"
-          class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1">
+          class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1 tactile-press">
           {{ t('home.tours_view_all') }}
         </Link>
       </div>
 
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         <div v-for="tour in featuredTours" :key="tour.id"
-          class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover hover:border-primary/30 transition-all flex flex-col">
+          class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift flex flex-col group">
           <div class="relative h-48 overflow-hidden bg-slate-200">
-            <img :src="tour.image_url" :alt="tour.name" class="w-full h-full object-cover" />
+            <img :src="tour.image_url" :alt="tour.name" class="w-full h-full object-cover hover-card-media" />
             <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
               <span class="bg-primary/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
                 {{ tour.duration_days }}{{ locale === 'en' ? 'D' : 'H' }}{{ tour.duration_nights }}{{ locale === 'en' ?
@@ -325,16 +325,16 @@ const clusterIcons = {
             <p class="text-sm text-text-muted mt-1">{{ t('home.vehicles_subtitle') }}</p>
           </div>
           <Link href="/vehicles"
-            class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1">
+            class="text-sm font-bold text-primary hover:text-primary-dark mt-2 md:mt-0 flex items-center gap-1 tactile-press">
             {{ t('home.vehicles_view_all') }}
           </Link>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <div v-for="veh in featuredVehicles" :key="veh.id"
-            class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover transition-all flex flex-col">
+            class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift flex flex-col group">
             <div class="relative h-44 overflow-hidden bg-slate-100">
-              <img :src="veh.image_url" :alt="veh.name" class="w-full h-full object-cover" />
+              <img :src="veh.image_url" :alt="veh.name" class="w-full h-full object-cover hover-card-media" />
               <div
                 class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm">
                 {{ t('home.min_hours_lead', { hours: veh.min_lead_time_hours }) }}
@@ -378,7 +378,7 @@ const clusterIcons = {
                   </div>
                 </div>
                 <Link :href="`/vehicles/${veh.slug}`"
-                  class="bg-accent hover:bg-accent-hover text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors shadow-sm">
+                  class="bg-accent hover:bg-accent-hover text-white font-bold py-2 px-4 rounded-xl text-xs transition-colors shadow-sm tactile-press">
                   {{ t('home.rent_unit_btn') }}
                 </Link>
               </div>
@@ -411,7 +411,7 @@ const clusterIcons = {
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
         <!-- 1. Clean Vehicle Standard -->
         <div
-          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover-card-lift flex flex-col justify-between">
           <div>
             <div
               class="w-11 h-11 rounded-xl bg-emerald-50 border border-emerald-200/60 text-emerald-700 flex items-center justify-center mb-4">
@@ -438,7 +438,7 @@ const clusterIcons = {
 
         <!-- 2. Emergency Replacement 1-2 Hours -->
         <div
-          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover-card-lift flex flex-col justify-between">
           <div>
             <div
               class="w-11 h-11 rounded-xl bg-primary/10 border border-primary/20 text-primary flex items-center justify-center mb-4">
@@ -465,7 +465,7 @@ const clusterIcons = {
 
         <!-- 3. Driver Meals & Cigarettes Included -->
         <div
-          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover-card-lift flex flex-col justify-between">
           <div>
             <div
               class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200/60 text-amber-700 flex items-center justify-center mb-4">
@@ -492,7 +492,7 @@ const clusterIcons = {
 
         <!-- 4. Scheduled Ferry Tickets -->
         <div
-          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover-card-lift flex flex-col justify-between">
           <div>
             <div
               class="w-11 h-11 rounded-xl bg-sky-50 border border-sky-200/60 text-sky-700 flex items-center justify-center mb-4">
@@ -515,7 +515,7 @@ const clusterIcons = {
 
         <!-- 5. Transparent 30% DP & H-1 Contact Sync -->
         <div
-          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover:shadow-md transition flex flex-col justify-between">
+          class="p-5 rounded-2xl border border-slate-200/80 bg-white shadow-2xs hover-card-lift flex flex-col justify-between">
           <div>
             <div
               class="w-11 h-11 rounded-xl bg-indigo-50 border border-indigo-200/60 text-indigo-700 flex items-center justify-center mb-4">

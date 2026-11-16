@@ -5,6 +5,8 @@ namespace App\Enums;
 enum BookingStatus: string
 {
     case PENDING_APPROVAL = 'PENDING_APPROVAL';
+    case ASSIGNED_TO_PARTNER = 'ASSIGNED_TO_PARTNER';
+    case PARTNER_CONFIRMED = 'PARTNER_CONFIRMED';
     case MANUAL_REVIEW = 'MANUAL_REVIEW';
     case AWAITING_PAYMENT = 'AWAITING_PAYMENT';
     case PAYMENT_REVIEW = 'PAYMENT_REVIEW';
@@ -22,6 +24,8 @@ enum BookingStatus: string
         if (app()->getLocale() === 'en') {
             return match ($this) {
                 self::PENDING_APPROVAL => 'Awaiting Partner Approval',
+                self::ASSIGNED_TO_PARTNER => 'Assigned to Partner',
+                self::PARTNER_CONFIRMED => 'Partner Confirmed',
                 self::MANUAL_REVIEW => 'Admin Manual Review',
                 self::AWAITING_PAYMENT => 'Awaiting DP Payment',
                 self::PAYMENT_REVIEW => 'Payment Verification',
@@ -38,6 +42,8 @@ enum BookingStatus: string
 
         return match ($this) {
             self::PENDING_APPROVAL => 'Menunggu Persetujuan Mitra',
+            self::ASSIGNED_TO_PARTNER => 'Ditugaskan ke Mitra',
+            self::PARTNER_CONFIRMED => 'Dikonfirmasi Mitra',
             self::MANUAL_REVIEW => 'Intervensi Manual Admin',
             self::AWAITING_PAYMENT => 'Menunggu Pembayaran DP',
             self::PAYMENT_REVIEW => 'Verifikasi Pembayaran',

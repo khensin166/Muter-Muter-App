@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link } from '@inertiajs/vue3';
+import { ref } from 'vue';
+import { Head, Link, router } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
 
 const props = defineProps({
@@ -7,6 +8,27 @@ const props = defineProps({
   metrics: Object,
   incomingBookings: Array,
 });
+
+const isProcessing = ref(null);
+
+const approve = (id, code) => {
+  if (confirm(`Setujui ketersediaan pesanan ${code}? Sistem akan menerbitkan tagihan DP dan hold inventory 24 jam.`)) {
+    isProcessing.value = id;
+    router.post(route('partner.bookings.approve', id), {}, {
+      onFinish: () => { isProcessing.value = null; },
+    });
+  }
+};
+
+const reject = (id, code) => {
+  const reason = prompt(`Masukkan alasan penolakan untuk pesanan ${code} (akan dialihkan ke antrean intervensi admin):`);
+  if (reason && reason.trim()) {
+    isProcessing.value = id;
+    router.post(route('partner.bookings.reject', id), { reason: reason.trim() }, {
+      onFinish: () => { isProcessing.value = null; },
+    });
+  }
+};
 </script>
 
 <template>
@@ -123,9 +145,17 @@ const props = defineProps({
             Konfirmasi ketersediaan armada atau guide agar customer dapat membayar DP dalam masa hold 24 jam.
           </p>
         </div>
-        <span class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
-          {{ incomingBookings.length }} Perlu Respon
-        </span>
+        <div class="flex items-center gap-3">
+          <Link
+            :href="route('partner.bookings.index')"
+            class="text-xs font-bold text-primary hover:underline hidden sm:inline-flex items-center gap-1"
+          >
+            Semua Permintaan →
+          </Link>
+          <span class="text-xs font-bold text-primary bg-primary/10 px-3 py-1 rounded-full">
+            {{ incomingBookings.length }} Perlu Respon
+          </span>
+        </div>
       </div>
 
       <div v-if="incomingBookings.length > 0" class="overflow-x-auto">
@@ -172,13 +202,29 @@ const props = defineProps({
                 </div>
               </td>
               <td class="p-4 pr-6 text-right">
-                <div class="flex items-center justify-end gap-2">
-                  <button class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-xs transition">
-                    ✓ Setujui
+                <div class="flex items-center justify-end gap-1.5">
+                  <button
+                    type="button"
+                    :disabled="isProcessing === b.id"
+                    @click="approve(b.id, b.code)"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-1.5 px-3 rounded-lg shadow-xs transition disabled:opacity-50 cursor-pointer tactile-press"
+                  >
+                    {{ isProcessing === b.id ? 'Memproses...' : '✓ Setujui' }}
                   </button>
-                  <button class="border border-border text-text-muted hover:text-danger hover:border-danger font-semibold py-1.5 px-2.5 rounded-lg transition">
+                  <button
+                    type="button"
+                    :disabled="isProcessing === b.id"
+                    @click="reject(b.id, b.code)"
+                    class="border border-border text-text-muted hover:text-danger hover:border-danger font-semibold py-1.5 px-2.5 rounded-lg transition disabled:opacity-50 cursor-pointer tactile-press"
+                  >
                     ✕ Tolak
                   </button>
+                  <Link
+                    :href="route('partner.bookings.show', b.id)"
+                    class="text-xs font-bold text-text-muted hover:text-primary px-2.5 py-1.5 rounded-lg hover:bg-surface-muted transition tactile-press"
+                  >
+                    Detail →
+                  </Link>
                 </div>
               </td>
             </tr>

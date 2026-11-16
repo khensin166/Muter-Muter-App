@@ -26,7 +26,7 @@ const toggleLocale = (targetLocale) => {
         currentLocale === 'id'
           ? 'bg-white text-slate-900 font-bold shadow-xs'
           : 'text-slate-500 hover:text-slate-900 font-medium',
-        'px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5 transition-all duration-150 cursor-pointer'
+        'px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5 transition-colors duration-150 tactile-press cursor-pointer'
       ]"
       title="Bahasa Indonesia"
     >
@@ -42,7 +42,7 @@ const toggleLocale = (targetLocale) => {
         currentLocale === 'en'
           ? 'bg-white text-slate-900 font-bold shadow-xs'
           : 'text-slate-500 hover:text-slate-900 font-medium',
-        'px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5 transition-all duration-150 cursor-pointer'
+        'px-2.5 py-1 rounded-full text-xs flex items-center gap-1.5 transition-colors duration-150 tactile-press cursor-pointer'
       ]"
       title="English"
     >

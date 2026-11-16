@@ -145,7 +145,7 @@ test('partner 1-click approves availability: unlocks DP bill and creates 24h inv
     expect($lastHistory->actor_type)->toBe('PARTNER');
 });
 
-test('partner can reject booking availability with reason', function () {
+test('partner can reject booking availability and system routes to admin manual review for hybrid fallback', function () {
     $response = $this->actingAs($this->ownerA)->post(route('partner.bookings.reject', $this->bookingA->id), [
         'reason' => 'Semua armada dan guide sudah penuh pada tanggal tersebut.',
     ]);
@@ -153,10 +153,52 @@ test('partner can reject booking availability with reason', function () {
     $response->assertRedirect(route('partner.bookings.index'));
 
     $this->bookingA->refresh();
-    expect($this->bookingA->booking_status)->toBe(BookingStatus::REJECTED);
-    expect($this->bookingA->inventory_status)->toBe(InventoryStatus::RELEASED);
+    expect($this->bookingA->booking_status)->toBe(BookingStatus::MANUAL_REVIEW);
+    expect($this->bookingA->rejection_reason)->toBe('Semua armada dan guide sudah penuh pada tanggal tersebut.');
 
     $lastHistory = $this->bookingA->statusHistories->last();
-    expect($lastHistory->new_status)->toBe(BookingStatus::REJECTED->value);
+    expect($lastHistory->new_status)->toBe(BookingStatus::MANUAL_REVIEW->value);
     expect($lastHistory->reason)->toContain('Semua armada dan guide sudah penuh');
+});
+
+test('admin can reassign rejected or unhandled booking to partner B and partner B can approve it', function () {
+    $admin = User::create([
+        'name' => 'Super Admin',
+        'email' => 'admin@mutermuter.id',
+        'role' => UserRole::ADMIN,
+        'password' => bcrypt('password'),
+    ]);
+
+    // 1. Partner A rejects booking
+    $this->actingAs($this->ownerA)->post(route('partner.bookings.reject', $this->bookingA->id), [
+        'reason' => 'Armada sedang diservis.',
+    ]);
+
+    $this->bookingA->refresh();
+    expect($this->bookingA->booking_status)->toBe(BookingStatus::MANUAL_REVIEW);
+
+    // 2. Admin reassigns to Partner B
+    $reassignResponse = $this->actingAs($admin)->post(route('admin.sla.reassign', $this->bookingA->id), [
+        'partner_id' => $this->partnerB->id,
+        'assigned_driver_name' => 'Ucok Sitorus',
+        'assigned_driver_phone' => '081299881122',
+        'assigned_vehicle_plate' => 'BK 9988 TOB',
+        'reason' => 'Dialihkan ke CV Parapat Indah karena armada Partner A sedang servis.',
+    ]);
+
+    $reassignResponse->assertRedirect();
+
+    $this->bookingA->refresh();
+    expect($this->bookingA->partner_id)->toBe($this->partnerB->id);
+    expect($this->bookingA->original_partner_id)->toBe($this->partnerA->id);
+    expect($this->bookingA->booking_status)->toBe(BookingStatus::ASSIGNED_TO_PARTNER);
+    expect($this->bookingA->assigned_driver_name)->toBe('Ucok Sitorus');
+
+    // 3. Partner B sees the dispatched booking and approves it
+    $approveResponse = $this->actingAs($this->ownerB)->post(route('partner.bookings.approve', $this->bookingA->id));
+    $approveResponse->assertRedirect(route('partner.bookings.index'));
+
+    $this->bookingA->refresh();
+    expect($this->bookingA->booking_status)->toBe(BookingStatus::AWAITING_PAYMENT);
+    expect($this->bookingA->inventory_status)->toBe(InventoryStatus::HELD);
 });

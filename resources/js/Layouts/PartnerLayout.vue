@@ -19,12 +19,21 @@ const closeDropdownOnOutside = (e) => {
   }
 };
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') {
+    isProfileOpen.value = false;
+    isSidebarOpen.value = false;
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', closeDropdownOnOutside);
+  document.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', closeDropdownOnOutside);
+  document.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -68,7 +77,8 @@ onUnmounted(() => {
             <button
               type="button"
               @click="isProfileOpen = !isProfileOpen"
-              class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl hover:bg-surface-muted border border-transparent hover:border-border transition cursor-pointer select-none"
+              :aria-expanded="isProfileOpen"
+              class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl hover:bg-surface-muted border border-transparent hover:border-border transition duration-150 cursor-pointer select-none tactile-press"
             >
               <!-- Avatar Circle -->
               <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary font-black text-xs flex items-center justify-center uppercase shrink-0">
@@ -88,7 +98,7 @@ onUnmounted(() => {
 
               <!-- Chevron Icon -->
               <svg
-                class="w-4 h-4 text-slate-400 transition-transform duration-200"
+                class="w-4 h-4 text-slate-400 transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
                 :class="isProfileOpen ? 'rotate-180 text-primary' : ''"
                 fill="none"
                 stroke="currentColor"
@@ -100,89 +110,114 @@ onUnmounted(() => {
             </button>
 
             <!-- Dropdown Menu Panel -->
-            <div
-              v-if="isProfileOpen"
-              class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 animate-in fade-in zoom-in-95 duration-150"
+            <Transition
+              enter-active-class="transition duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top-right"
+              enter-from-class="opacity-0 scale-95 -translate-y-1"
+              enter-to-class="opacity-100 scale-100 translate-y-0"
+              leave-active-class="transition duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top-right"
+              leave-from-class="opacity-100 scale-100 translate-y-0"
+              leave-to-class="opacity-0 scale-95 -translate-y-1"
             >
-              <!-- User Info Card in Dropdown -->
-              <div class="px-4 py-3 border-b border-border flex flex-col gap-1.5">
-                <div>
-                  <div class="text-xs font-black text-text-main break-words">{{ user?.name || 'Mitra Pengelola' }}</div>
-                  <div class="text-[11px] text-text-muted break-all mt-0.5">{{ user?.email || 'mitra@mutermuter.id' }}</div>
+              <div
+                v-if="isProfileOpen"
+                class="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 py-2 z-50 text-xs"
+              >
+                <!-- User Info Card in Dropdown -->
+                <div class="px-4 py-3 border-b border-border flex flex-col gap-1.5">
+                  <div>
+                    <div class="text-xs font-black text-text-main break-words">{{ user?.name || 'Mitra Pengelola' }}</div>
+                    <div class="text-[11px] text-text-muted break-all mt-0.5">{{ user?.email || 'mitra@mutermuter.id' }}</div>
+                  </div>
+                  <div class="inline-flex self-start items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-[10px] font-bold text-emerald-800">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Status: {{ t('partner.status_verified') }}</span>
+                  </div>
                 </div>
-                <div class="inline-flex self-start items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/70 text-[10px] font-bold text-emerald-800">
-                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-                  <span>Status: {{ t('partner.status_verified') }}</span>
+
+                <!-- Navigation Menu Items -->
+                <div class="p-1 space-y-0.5 text-xs">
+                  <Link
+                    href="/partner"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">📊</span>
+                    <span>{{ t('partner.menu_summary') }}</span>
+                  </Link>
+
+                  <Link
+                    href="/partner/staff"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">👥</span>
+                    <span>{{ t('partner.menu_staff') }}</span>
+                  </Link>
+
+                  <Link
+                    href="/partner/settlements"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">💰</span>
+                    <span>{{ t('partner.menu_settlements') }}</span>
+                  </Link>
+
+                  <Link
+                    href="/profile"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">⚙️</span>
+                    <span>Pengaturan Profil Akun</span>
+                  </Link>
+                </div>
+
+                <!-- Logout Button Row -->
+                <div class="p-1 border-t border-slate-100 mt-1">
+                  <Link
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
+                    @click="isProfileOpen = false"
+                    class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer tactile-press"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                    </svg>
+                    <span>{{ t('nav.logout') }}</span>
+                  </Link>
                 </div>
               </div>
-
-              <!-- Navigation Menu Items -->
-              <div class="p-1 space-y-0.5 text-xs">
-                <Link
-                  href="/partner"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">📊</span>
-                  <span>{{ t('partner.menu_summary') }}</span>
-                </Link>
-
-                <Link
-                  href="/partner/staff"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">👥</span>
-                  <span>{{ t('partner.menu_staff') }}</span>
-                </Link>
-
-                <Link
-                  href="/partner/settlements"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">💰</span>
-                  <span>{{ t('partner.menu_settlements') }}</span>
-                </Link>
-
-                <Link
-                  href="/profile"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">⚙️</span>
-                  <span>Pengaturan Profil Akun</span>
-                </Link>
-              </div>
-
-              <!-- Logout Button Row -->
-              <div class="p-1 border-t border-slate-100 mt-1">
-                <Link
-                  :href="route('logout')"
-                  method="post"
-                  as="button"
-                  @click="isProfileOpen = false"
-                  class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                  </svg>
-                  <span>{{ t('nav.logout') }}</span>
-                </Link>
-              </div>
-            </div>
+            </Transition>
           </div>
         </div>
       </div>
     </header>
 
     <div class="flex-1 flex">
+      <!-- Mobile Backdrop Overlay -->
+      <Transition
+        enter-active-class="transition-opacity duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isSidebarOpen"
+          @click="isSidebarOpen = false"
+          class="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-25 md:hidden"
+        />
+      </Transition>
+
       <!-- Left Sidebar -->
       <aside
         :class="[
-          'bg-surface border-r border-border w-64 p-4 space-y-1 shrink-0 transition-transform duration-200 z-30',
+          'bg-surface border-r border-border w-64 p-4 space-y-1 shrink-0 transition-transform duration-250 ease-[cubic-bezier(0.32,0.72,0,1)] z-30',
           'fixed inset-y-0 left-0 top-16 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto md:translate-x-0',
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+          isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
         ]"
       >
         <!-- Mitra Vendor Badge Relocated to Sidebar Top (Stacked vertically so text never clips) -->

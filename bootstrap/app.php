@@ -26,5 +26,14 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        $exceptions->render(function (\Illuminate\Http\Exceptions\PostTooLargeException $e, \Illuminate\Http\Request $request) {
+            \Illuminate\Support\Facades\Log::warning('PostTooLargeException: Unggahan melebihi batas post_max_size server.', [
+                'url' => $request->fullUrl(),
+                'ip' => $request->ip(),
+            ]);
+
+            return back()->withErrors([
+                'photos' => 'Ukuran total file yang diunggah terlalu besar melebihi batas server (maksimal 5 MB per foto).',
+            ])->with('error', 'Ukuran total file yang diunggah terlalu besar melebihi batas server. Silakan pilih foto dengan resolusi lebih wajar atau kompres terlebih dahulu.');
+        });
     })->create();

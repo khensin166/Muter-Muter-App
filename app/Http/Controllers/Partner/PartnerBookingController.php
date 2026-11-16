@@ -26,7 +26,7 @@ class PartnerBookingController extends Controller
         $statusFilter = $request->query('status', 'PENDING_APPROVAL');
 
         $query = Booking::where('partner_id', $partner->id)
-            ->with(['user', 'product', 'tourDetail', 'vehicleDetail']);
+            ->with(['user', 'product', 'tourDetail', 'vehicleDetail', 'originalPartner']);
 
         if ($statusFilter !== 'ALL') {
             $query->where('booking_status', $statusFilter);
@@ -34,7 +34,7 @@ class PartnerBookingController extends Controller
 
         $bookings = $query->orderBy('created_at', 'desc')->paginate(15)->through(function ($b) {
             $remainingHours = null;
-            if ($b->booking_status === BookingStatus::PENDING_APPROVAL && $b->vendor_sla_deadline) {
+            if (in_array($b->booking_status, [BookingStatus::PENDING_APPROVAL, BookingStatus::ASSIGNED_TO_PARTNER]) && $b->vendor_sla_deadline) {
                 $remainingHours = round(now()->diffInMinutes($b->vendor_sla_deadline, false) / 60, 1);
             }
 
@@ -52,6 +52,8 @@ class PartnerBookingController extends Controller
                 'booking_status' => $b->booking_status->value,
                 'booking_status_label' => $b->booking_status->label(),
                 'payment_status' => $b->payment_status->value,
+                'is_platform_assigned' => $b->booking_status === BookingStatus::ASSIGNED_TO_PARTNER || ($b->original_partner_id && $b->original_partner_id !== $b->partner_id),
+                'original_partner_name' => $b->originalPartner?->business_name,
                 'vendor_sla_deadline' => $b->vendor_sla_deadline?->toIso8601String(),
                 'remaining_sla_hours' => $remainingHours,
                 'is_sla_expired' => $remainingHours !== null && $remainingHours <= 0,
@@ -61,6 +63,7 @@ class PartnerBookingController extends Controller
 
         $counts = [
             'pending_approval' => Booking::where('partner_id', $partner->id)->where('booking_status', BookingStatus::PENDING_APPROVAL)->count(),
+            'assigned_to_partner' => Booking::where('partner_id', $partner->id)->where('booking_status', BookingStatus::ASSIGNED_TO_PARTNER)->count(),
             'awaiting_payment' => Booking::where('partner_id', $partner->id)->where('booking_status', BookingStatus::AWAITING_PAYMENT)->count(),
             'confirmed' => Booking::where('partner_id', $partner->id)->where('booking_status', BookingStatus::CONFIRMED)->count(),
             'all' => Booking::where('partner_id', $partner->id)->count(),
@@ -150,7 +153,7 @@ class PartnerBookingController extends Controller
 
         $booking = Booking::where('partner_id', $partner->id)->findOrFail($id);
 
-        if (! in_array($booking->booking_status, [BookingStatus::PENDING_APPROVAL, BookingStatus::MANUAL_REVIEW])) {
+        if (! in_array($booking->booking_status, [BookingStatus::PENDING_APPROVAL, BookingStatus::ASSIGNED_TO_PARTNER, BookingStatus::MANUAL_REVIEW])) {
             return back()->with('error', 'Pesanan ini tidak dalam status menunggu persetujuan.');
         }
 
@@ -173,13 +176,17 @@ class PartnerBookingController extends Controller
                 'status' => InventoryStatus::HELD,
             ]);
 
+            $approvalReason = $prevStatus === BookingStatus::ASSIGNED_TO_PARTNER->value
+                ? 'Mitra menyetujui penugasan dari platform. Tagihan DP dan hold inventory 24 jam aktif.'
+                : 'Mitra menyetujui ketersediaan jadwal. Tagihan DP dan hold inventory 24 jam aktif.';
+
             BookingStatusHistory::create([
                 'booking_id' => $booking->id,
                 'actor_id' => $user->id,
                 'actor_type' => 'PARTNER',
                 'previous_status' => $prevStatus,
                 'new_status' => BookingStatus::AWAITING_PAYMENT->value,
-                'reason' => 'Mitra menyetujui ketersediaan jadwal. Tagihan DP dan hold inventory 24 jam aktif.',
+                'reason' => $approvalReason,
             ]);
         });
 
@@ -204,7 +211,7 @@ class PartnerBookingController extends Controller
     }
 
     /**
-     * Partner rejects booking availability with explanation.
+     * Partner rejects booking availability with explanation, routing to Admin for fallback dispatching.
      */
     public function reject(Request $request, string $id): RedirectResponse
     {
@@ -217,15 +224,16 @@ class PartnerBookingController extends Controller
 
         $booking = Booking::where('partner_id', $partner->id)->findOrFail($id);
 
-        if (! in_array($booking->booking_status, [BookingStatus::PENDING_APPROVAL, BookingStatus::MANUAL_REVIEW])) {
+        if (! in_array($booking->booking_status, [BookingStatus::PENDING_APPROVAL, BookingStatus::ASSIGNED_TO_PARTNER, BookingStatus::MANUAL_REVIEW])) {
             return back()->with('error', 'Pesanan ini tidak dalam status menunggu persetujuan.');
         }
 
         $prevStatus = $booking->booking_status->value;
 
-        DB::transaction(function () use ($booking, $user, $prevStatus, $request) {
-            $booking->booking_status = BookingStatus::REJECTED;
-            $booking->inventory_status = InventoryStatus::RELEASED;
+        DB::transaction(function () use ($booking, $user, $prevStatus, $request, $partner) {
+            // Route to Admin MANUAL_REVIEW queue to salvage booking instead of cancelling immediately
+            $booking->booking_status = BookingStatus::MANUAL_REVIEW;
+            $booking->rejection_reason = $request->reason;
             $booking->save();
 
             BookingStatusHistory::create([
@@ -233,13 +241,13 @@ class PartnerBookingController extends Controller
                 'actor_id' => $user->id,
                 'actor_type' => 'PARTNER',
                 'previous_status' => $prevStatus,
-                'new_status' => BookingStatus::REJECTED->value,
-                'reason' => $request->reason,
+                'new_status' => BookingStatus::MANUAL_REVIEW->value,
+                'reason' => "Mitra {$partner->business_name} tidak dapat melayani pesanan: {$request->reason}. Dialihkan ke antrean Admin untuk dicarikan mitra pengganti.",
             ]);
         });
 
         // Structured Logging
-        AppLogger::booking('booking.vendor.rejected', "Mitra menolak pesanan [{$booking->booking_code}] dengan alasan: {$request->reason}", [
+        AppLogger::booking('booking.vendor.rejected', "Mitra menolak pesanan [{$booking->booking_code}], dialihkan ke antrean Admin: {$request->reason}", [
             'booking_id' => $booking->id,
             'booking_code' => $booking->booking_code,
             'partner_id' => $partner->id,
@@ -248,6 +256,6 @@ class PartnerBookingController extends Controller
         ]);
 
         return redirect()->route('partner.bookings.index')
-            ->with('success', "Pesanan {$booking->booking_code} telah ditolak.");
+            ->with('success', "Pesanan {$booking->booking_code} telah ditolak dan dialihkan ke tim Admin untuk dicarikan mitra alternatif.");
     }
 }

@@ -22,7 +22,7 @@ class PartnerDashboardController extends Controller
 
         // 1. Incoming Booking Requests (SLA 24 Hours)
         $incomingBookings = Booking::where('partner_id', $partner->id)
-            ->where('booking_status', BookingStatus::PENDING_APPROVAL)
+            ->whereIn('booking_status', [BookingStatus::PENDING_APPROVAL, BookingStatus::ASSIGNED_TO_PARTNER])
             ->with(['product', 'user'])
             ->orderBy('created_at', 'asc')
             ->get()

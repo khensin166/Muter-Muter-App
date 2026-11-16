@@ -111,6 +111,20 @@ const submit = () => {
                     {{ t('auth.register_btn') }}
                 </PrimaryButton>
             </div>
+
+            <!-- Subtle Link for Partner Onboarding -->
+            <div class="mt-6 pt-4 border-t border-slate-200/80 text-center">
+                <p class="text-xs text-slate-500">
+                    Memiliki armada rental mobil di Sumatera Utara?
+                    <Link
+                        :href="route('partner.register')"
+                        class="text-primary font-bold hover:underline inline-flex items-center gap-0.5 ml-1"
+                    >
+                        <span>Daftar sebagai Mitra Rental</span>
+                        <span>→</span>
+                    </Link>
+                </p>
+            </div>
         </form>
     </GuestLayout>
 </template>

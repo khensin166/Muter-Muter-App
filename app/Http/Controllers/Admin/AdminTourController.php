@@ -119,12 +119,11 @@ class AdminTourController extends Controller
         $photoPaths = [];
         if ($request->hasFile('photos')) {
             foreach ($request->file('photos') as $idx => $photo) {
-                $photoPaths[] = '/storage/' . FileSecurityService::validateAndStore(
+                $photoPaths[] = FileSecurityService::validateAndStore(
                     file: $photo,
                     directory: 'products/tours',
                     fieldName: "photos.{$idx}",
-                    allowPdf: false,
-                    disk: 'public'
+                    allowPdf: false
                 );
             }
         }

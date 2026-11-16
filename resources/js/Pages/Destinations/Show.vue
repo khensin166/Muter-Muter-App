@@ -75,7 +75,7 @@ const singleStopItinerary = computed(() => {
               <img
                 :src="activeImageUrl"
                 :alt="destination.name"
-                class="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+                class="w-full h-full object-cover hover-card-media"
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/20 pointer-events-none"></div>
 

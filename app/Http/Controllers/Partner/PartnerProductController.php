@@ -139,8 +139,7 @@ class PartnerProductController extends Controller
                     file: $photo,
                     directory: 'products/vehicles',
                     fieldName: "photos.{$idx}",
-                    allowPdf: false,
-                    disk: 'public'
+                    allowPdf: false
                 );
             }
         }

@@ -110,12 +110,11 @@ class AdminDestinationController extends Controller
                 $files = [$files];
             }
             foreach ($files as $idx => $photo) {
-                $photoPaths[] = '/storage/' . FileSecurityService::validateAndStore(
+                $photoPaths[] = FileSecurityService::validateAndStore(
                     file: $photo,
                     directory: 'destinations',
                     fieldName: "photos.{$idx}",
-                    allowPdf: false,
-                    disk: 'public'
+                    allowPdf: false
                 );
             }
         }
@@ -216,14 +215,14 @@ class AdminDestinationController extends Controller
                 'is_active' => isset($validated['is_active']) ? (bool) $validated['is_active'] : $dest->is_active,
             ]);
 
-            // Handle deleted media and clean up physical disk files
+            // Handle deleted media and clean up physical disk & R2 files
             if (! empty($validated['deleted_media_ids'])) {
                 $mediaToDelete = DestinationMedia::where('destination_id', $dest->id)
                     ->whereIn('id', $validated['deleted_media_ids'])
                     ->get();
 
                 foreach ($mediaToDelete as $mediaItem) {
-                    $this->deletePhysicalMediaFile($mediaItem->file_path);
+                    FileSecurityService::deleteFile($mediaItem->file_path);
                     $mediaItem->delete();
                 }
             }
@@ -237,12 +236,11 @@ class AdminDestinationController extends Controller
                 }
                 foreach ($files as $idx => $photo) {
                     $maxSortOrder++;
-                    $storedPath = '/storage/' . FileSecurityService::validateAndStore(
+                    $storedPath = FileSecurityService::validateAndStore(
                         file: $photo,
                         directory: 'destinations',
                         fieldName: "photos.{$idx}",
-                        allowPdf: false,
-                        disk: 'public'
+                        allowPdf: false
                     );
 
                     DestinationMedia::create([
@@ -302,7 +300,7 @@ class AdminDestinationController extends Controller
 
         DB::transaction(function () use ($dest) {
             foreach ($dest->media as $mediaItem) {
-                $this->deletePhysicalMediaFile($mediaItem->file_path);
+                FileSecurityService::deleteFile($mediaItem->file_path);
             }
 
             $dest->delete();
@@ -324,20 +322,5 @@ class AdminDestinationController extends Controller
         $statusText = $dest->is_active ? 'diaktifkan' : 'dinonaktifkan';
 
         return back()->with('success', 'Destinasi "' . $dest->name . '" berhasil ' . $statusText . '.');
-    }
-
-    /**
-     * Safely delete physical media file from public disk if stored locally.
-     */
-    private function deletePhysicalMediaFile(?string $filePath): void
-    {
-        if (! $filePath || filter_var($filePath, FILTER_VALIDATE_URL)) {
-            return;
-        }
-
-        $relative = preg_replace('#^/?(storage/)?#', '', trim($filePath));
-        if ($relative !== '' && Storage::disk('public')->exists($relative)) {
-            Storage::disk('public')->delete($relative);
-        }
     }
 }

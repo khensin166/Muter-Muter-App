@@ -11,10 +11,14 @@
 .DS_Store
 Thumbs.db
 
-# Documentation & Design Specs (Tidak diperlukan di runtime container)
+# Documentation & AI Assistant Customizations (Tidak diperlukan di runtime container)
 docs
 AGENTS.md
 README.md
+.agents
+.agent
+_agents
+_agent
 
 # Testing Suite & Reports (Hanya berjalan di CI/CD, tidak di production container)
 tests

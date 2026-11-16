@@ -75,7 +75,7 @@ const setCluster = (clusterVal) => {
         <button
           @click="setCluster('')"
           :class="!selectedCluster ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
-          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
+          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors duration-150 tactile-press cursor-pointer"
         >
           {{ t('destinations.all_clusters', { total: destinations.total }) }}
         </button>
@@ -84,7 +84,7 @@ const setCluster = (clusterVal) => {
           :key="c.value"
           @click="setCluster(c.value)"
           :class="selectedCluster === c.value ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
-          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
+          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors duration-150 tactile-press cursor-pointer"
         >
           {{ c.label }}
         </button>
@@ -96,10 +96,10 @@ const setCluster = (clusterVal) => {
           v-for="dest in destinations.data"
           :key="dest.id"
           :href="`/destinations/${dest.slug}`"
-          class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover hover:border-primary/40 transition-all flex flex-col group cursor-pointer"
+          class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift tactile-press flex flex-col group cursor-pointer"
         >
           <div class="relative h-48 overflow-hidden bg-slate-100">
-            <img :src="dest.image_url" :alt="dest.name" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <img :src="dest.image_url" :alt="dest.name" class="w-full h-full object-cover hover-card-media" />
             <div class="absolute top-3 left-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-lg text-xs font-bold text-primary shadow-sm">
               {{ dest.cluster_label }}
             </div>

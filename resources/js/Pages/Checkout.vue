@@ -10,6 +10,14 @@ const { t, locale } = useTrans();
 const props = defineProps({
   product: Object,
   initialConfig: Object,
+  isCustomer: {
+    type: Boolean,
+    default: true,
+  },
+  userRole: {
+    type: String,
+    default: '',
+  },
 });
 
 const page = usePage();
@@ -301,20 +309,42 @@ const submit = () => {
               </p>
             </div>
 
+            <!-- Role Restriction Notice (Admin & Partner cannot book) -->
+            <div
+              v-if="authUser && !isCustomer"
+              class="p-4 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-800 space-y-2"
+            >
+              <div class="flex items-center gap-1.5 font-bold text-rose-900">
+                <span>🚫</span>
+                <span>Pemesanan Tidak Diizinkan</span>
+              </div>
+              <p class="text-[11px] text-rose-700 leading-relaxed">
+                Anda sedang masuk sebagai akun <strong>{{ userRole === 'PARTNER' ? 'Mitra Rental' : 'Admin Pengelola' }}</strong>. Transaksi pemesanan wisata dan rental kendaraan hanya dapat dilakukan oleh akun Wisatawan/Pelanggan.
+              </p>
+              <Link
+                href="/logout"
+                method="post"
+                as="button"
+                class="w-full py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition tactile-press cursor-pointer text-center block"
+              >
+                Keluar dan Masuk sebagai Pelanggan
+              </Link>
+            </div>
+
             <!-- Submit Button -->
             <button
-              v-if="authUser"
+              v-else-if="authUser"
               type="submit"
               form="checkout-form"
               :disabled="form.processing"
-              class="w-full bg-accent hover:bg-accent-hover text-white font-bold py-3.5 px-4 rounded-xl text-center text-sm transition-colors shadow-lg disabled:opacity-50"
+              class="w-full bg-accent hover:bg-accent-hover text-white font-bold py-3.5 px-4 rounded-xl text-center text-sm transition-colors shadow-lg disabled:opacity-50 tactile-press cursor-pointer"
             >
               {{ form.processing ? t('checkout.submitting') : t('checkout.submit_btn') }}
             </button>
             <Link
               v-else
               :href="route('login')"
-              class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl text-center text-sm transition-colors shadow-lg block"
+              class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-3.5 px-4 rounded-xl text-center text-sm transition-colors shadow-lg block tactile-press text-center"
             >
               {{ t('checkout.login_btn') }}
             </Link>

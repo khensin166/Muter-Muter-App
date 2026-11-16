@@ -56,6 +56,37 @@ return [
             'throw' => false,
         ],
 
+        'r2' => [
+            'driver' => 's3',
+            'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+            'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+            'region' => env('CLOUDFLARE_R2_DEFAULT_REGION', 'auto'),
+            'bucket' => env('CLOUDFLARE_R2_BUCKET', 'muter-muter-media'),
+            'url' => env('CLOUDFLARE_R2_URL'),
+            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+            'use_path_style_endpoint' => env('CLOUDFLARE_R2_USE_PATH_STYLE_ENDPOINT', true),
+            'visibility' => 'public',
+            'throw' => true,
+            'http' => [
+                'verify' => env('CLOUDFLARE_R2_VERIFY_SSL', true),
+            ],
+        ],
+
+        'r2-private' => [
+            'driver' => 's3',
+            'key' => env('CLOUDFLARE_R2_ACCESS_KEY_ID'),
+            'secret' => env('CLOUDFLARE_R2_SECRET_ACCESS_KEY'),
+            'region' => env('CLOUDFLARE_R2_DEFAULT_REGION', 'auto'),
+            'bucket' => env('CLOUDFLARE_R2_PRIVATE_BUCKET', env('CLOUDFLARE_R2_BUCKET', 'muter-muter-media')),
+            'endpoint' => env('CLOUDFLARE_R2_ENDPOINT'),
+            'use_path_style_endpoint' => env('CLOUDFLARE_R2_USE_PATH_STYLE_ENDPOINT', true),
+            'visibility' => 'private',
+            'throw' => true,
+            'http' => [
+                'verify' => env('CLOUDFLARE_R2_VERIFY_SSL', true),
+            ],
+        ],
+
     ],
 
     /*

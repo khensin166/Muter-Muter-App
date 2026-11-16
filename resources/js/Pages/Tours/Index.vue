@@ -72,7 +72,7 @@ const setTourType = (typeVal) => {
         <button
           @click="setTourType('')"
           :class="!selectedType ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
-          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
+          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors duration-150 tactile-press cursor-pointer"
         >
           {{ t('tours.all_types', { total: tours.total }) }}
         </button>
@@ -81,7 +81,7 @@ const setTourType = (typeVal) => {
           :key="tt.value"
           @click="setTourType(tt.value)"
           :class="selectedType === tt.value ? 'bg-primary text-white shadow-md' : 'bg-surface text-text-muted hover:bg-surface-muted border border-border'"
-          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all"
+          class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors duration-150 tactile-press cursor-pointer"
         >
           {{ tt.label }}
         </button>
@@ -92,10 +92,10 @@ const setTourType = (typeVal) => {
         <div
           v-for="tour in tours.data"
           :key="tour.id"
-          class="bg-surface rounded-2xl overflow-hidden border border-border hover:shadow-card-hover hover:border-primary/30 transition-all flex flex-col"
+          class="bg-surface rounded-2xl overflow-hidden border border-border hover-card-lift flex flex-col group"
         >
           <div class="relative h-48 overflow-hidden bg-slate-200">
-            <img :src="tour.image_url" :alt="tour.name" class="w-full h-full object-cover" />
+            <img :src="tour.image_url" :alt="tour.name" class="w-full h-full object-cover hover-card-media" />
             <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
               <span class="bg-primary/90 text-white text-[11px] font-bold px-2.5 py-1 rounded-full backdrop-blur-sm">
                 {{ tour.duration_days }}{{ locale === 'en' ? 'D' : 'H' }}{{ tour.duration_nights }}{{ locale === 'en' ? 'N' : 'M' }}

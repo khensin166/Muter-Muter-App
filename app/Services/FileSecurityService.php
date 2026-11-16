@@ -59,9 +59,10 @@ class FileSecurityService
         string $directory,
         string $fieldName = 'file',
         bool $allowPdf = false,
-        string $disk = 'public',
+        ?string $disk = null,
         int $maxSizeBytes = self::DEFAULT_MAX_BYTES
     ): string {
+        $disk = $disk ?? (config('filesystems.default') === 'r2' || (env('CLOUDFLARE_R2_ACCESS_KEY_ID') && !app()->environment('testing')) ? 'r2' : 'public');
         // 1. Validate upload integrity & file size
         if (! $file->isValid()) {
             throw ValidationException::withMessages([
@@ -198,7 +199,24 @@ class FileSecurityService
 
         // 7. Store using cryptographic UUID v4 filename (never preserve original user filename)
         $relativePath = trim($directory, '/') . '/' . Str::uuid()->toString() . '.' . $canonicalExt;
-        Storage::disk($disk)->put($relativePath, $cleanImageBinary);
+
+        if ($disk === 'r2') {
+            try {
+                Storage::disk('r2')->put($relativePath, $cleanImageBinary);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('R2 upload failed, falling back to local public disk: ' . $e->getMessage());
+                $disk = 'public';
+            }
+
+            // Also mirror to local public disk so images load seamlessly in local development
+            try {
+                Storage::disk('public')->put($relativePath, $cleanImageBinary);
+            } catch (\Throwable $e) {
+                // ignore local mirror failure
+            }
+        } else {
+            Storage::disk($disk)->put($relativePath, $cleanImageBinary);
+        }
 
         return $relativePath;
     }
@@ -267,5 +285,125 @@ class FileSecurityService
         throw ValidationException::withMessages([
             $fieldName => $userMessage,
         ]);
+    }
+
+    /**
+     * Resolve public CDN / storage URL for an uploaded media file.
+     */
+    public static function publicUrl(?string $path): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $cleanPath = ltrim(str_replace('/storage/', '', $path), '/');
+
+        // If custom R2 public domain (r2.dev or custom CDN domain) is set and public
+        $r2Url = env('CLOUDFLARE_R2_URL');
+        if (!empty($r2Url) && !str_contains($r2Url, '.r2.cloudflarestorage.com')) {
+            return rtrim($r2Url, '/') . '/' . $cleanPath;
+        }
+
+        return asset('storage/' . $cleanPath);
+    }
+
+    /**
+     * Generate secure, temporary presigned URL for sensitive documents (e.g. KYC, payment proofs).
+     */
+    public static function temporaryUrl(?string $path, int $minutes = 15): ?string
+    {
+        if (empty($path)) {
+            return null;
+        }
+
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+
+        $cleanPath = ltrim(str_replace('/storage/', '', $path), '/');
+
+        if (config('filesystems.disks.r2.key')) {
+            try {
+                return Storage::disk('r2')->temporaryUrl($cleanPath, now()->addMinutes($minutes));
+            } catch (\Throwable $e) {
+                return Storage::disk('r2')->url($cleanPath);
+            }
+        }
+
+        return '/storage/' . $cleanPath;
+    }
+
+    /**
+     * Safely delete an uploaded file from Cloudflare R2 and local public storage.
+     */
+    public static function deleteFile(?string $path): bool
+    {
+        if (empty($path)) {
+            return false;
+        }
+
+        // Handle external or full URLs
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            $parsedUrl = parse_url($path);
+            $host = $parsedUrl['host'] ?? '';
+            $urlPath = $parsedUrl['path'] ?? '';
+
+            $r2Url = env('CLOUDFLARE_R2_URL');
+            $r2Host = !empty($r2Url) ? parse_url($r2Url, PHP_URL_HOST) : null;
+
+            // Only delete if the URL points to our R2 public domain, S3 endpoint, or local dev server
+            $isManagedStorage = ($r2Host && str_contains($host, $r2Host))
+                || str_contains($host, '.r2.cloudflarestorage.com')
+                || str_contains($host, 'localhost')
+                || str_contains($host, '127.0.0.1');
+
+            if (! $isManagedStorage) {
+                return false;
+            }
+
+            $cleanPath = ltrim($urlPath, '/');
+            $bucketName = env('CLOUDFLARE_R2_BUCKET', 'muter-muter-media');
+            if (str_starts_with($cleanPath, $bucketName . '/')) {
+                $cleanPath = substr($cleanPath, strlen($bucketName) + 1);
+            }
+        } else {
+            $cleanPath = ltrim(str_replace('/storage/', '', $path), '/');
+        }
+
+        $cleanPath = preg_replace('#^/?(storage/)?#', '', $cleanPath);
+
+        if (empty($cleanPath)) {
+            return false;
+        }
+
+        $deleted = false;
+
+        // 1. Delete from Cloudflare R2 if configured and not in test environment
+        if (config('filesystems.disks.r2.key') && ! app()->environment('testing')) {
+            try {
+                if (Storage::disk('r2')->exists($cleanPath)) {
+                    $deleted = Storage::disk('r2')->delete($cleanPath) || $deleted;
+                    \Illuminate\Support\Facades\Log::info("File deleted from Cloudflare R2: {$cleanPath}");
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning("Gagal menghapus file dari Cloudflare R2: {$cleanPath} - " . $e->getMessage());
+            }
+        }
+
+        // 2. Delete from local public disk
+        try {
+            if (Storage::disk('public')->exists($cleanPath)) {
+                $deleted = Storage::disk('public')->delete($cleanPath) || $deleted;
+                \Illuminate\Support\Facades\Log::info("File deleted from local public storage: {$cleanPath}");
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning("Gagal menghapus file dari disk lokal: {$cleanPath} - " . $e->getMessage());
+        }
+
+        return $deleted;
     }
 }

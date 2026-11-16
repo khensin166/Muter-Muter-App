@@ -29,12 +29,21 @@ const handleClickOutside = (e) => {
   }
 };
 
+const handleKeyDown = (e) => {
+  if (e.key === 'Escape') {
+    isProfileOpen.value = false;
+    isSidebarOpen.value = false;
+  }
+};
+
 onMounted(() => {
   document.addEventListener('click', handleClickOutside);
+  document.addEventListener('keydown', handleKeyDown);
 });
 
 onUnmounted(() => {
   document.removeEventListener('click', handleClickOutside);
+  document.removeEventListener('keydown', handleKeyDown);
 });
 </script>
 
@@ -85,7 +94,8 @@ onUnmounted(() => {
             <button
               type="button"
               @click="isProfileOpen = !isProfileOpen"
-              class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl hover:bg-surface-muted border border-transparent hover:border-border transition cursor-pointer select-none"
+              :aria-expanded="isProfileOpen"
+              class="flex items-center gap-2.5 p-1.5 sm:px-3 sm:py-1.5 rounded-2xl hover:bg-surface-muted border border-transparent hover:border-border transition duration-150 cursor-pointer select-none tactile-press"
             >
               <!-- Avatar Circle -->
               <div class="w-8 h-8 rounded-xl bg-primary/10 border border-primary/20 text-primary font-black text-xs flex items-center justify-center uppercase shrink-0">
@@ -105,7 +115,7 @@ onUnmounted(() => {
 
               <!-- Chevron Icon -->
               <svg
-                class="w-4 h-4 text-text-muted transition-transform duration-200"
+                class="w-4 h-4 text-text-muted transition-transform duration-200 ease-[cubic-bezier(0.23,1,0.32,1)]"
                 :class="isProfileOpen ? 'rotate-180 text-primary' : ''"
                 fill="none"
                 stroke="currentColor"
@@ -117,78 +127,103 @@ onUnmounted(() => {
             </button>
 
             <!-- Popover Menu -->
-            <div
-              v-if="isProfileOpen"
-              class="absolute right-0 mt-2 w-64 rounded-2xl bg-surface shadow-xl border border-border py-2 z-50 text-xs animate-in fade-in slide-in-from-top-1 duration-150"
+            <Transition
+              enter-active-class="transition duration-150 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top-right"
+              enter-from-class="opacity-0 scale-95 -translate-y-1"
+              enter-to-class="opacity-100 scale-100 translate-y-0"
+              leave-active-class="transition duration-100 ease-[cubic-bezier(0.23,1,0.32,1)] origin-top-right"
+              leave-from-class="opacity-100 scale-100 translate-y-0"
+              leave-to-class="opacity-0 scale-95 -translate-y-1"
             >
-              <div class="px-4 py-3 border-b border-border flex flex-col gap-1.5">
-                <div>
-                  <div class="font-bold text-text-main text-sm break-words">{{ user?.name || 'Administrator' }}</div>
-                  <div class="text-text-muted text-[11px] break-all">{{ user?.email }}</div>
+              <div
+                v-if="isProfileOpen"
+                class="absolute right-0 mt-2 w-64 rounded-2xl bg-surface shadow-xl border border-border py-2 z-50 text-xs"
+              >
+                <div class="px-4 py-3 border-b border-border flex flex-col gap-1.5">
+                  <div>
+                    <div class="font-bold text-text-main text-sm break-words">{{ user?.name || 'Administrator' }}</div>
+                    <div class="text-text-muted text-[11px] break-all">{{ user?.email }}</div>
+                  </div>
+                  <div class="inline-flex self-start items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                    <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                    <span>Status: Super Admin Console</span>
+                  </div>
                 </div>
-                <div class="inline-flex self-start items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
-                  <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-                  <span>Status: Super Admin Console</span>
+
+                <div class="p-1 space-y-0.5">
+                  <Link
+                    href="/admin"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">📊</span>
+                    <span>{{ t('admin.menu_dashboard') }}</span>
+                  </Link>
+
+                  <Link
+                    href="/"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">🌐</span>
+                    <span>{{ t('nav.back_to_marketplace') }}</span>
+                  </Link>
+
+                  <Link
+                    href="/profile"
+                    @click="isProfileOpen = false"
+                    class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition tactile-press"
+                  >
+                    <span class="text-sm">⚙️</span>
+                    <span>Pengaturan Akun Admin</span>
+                  </Link>
+                </div>
+
+                <!-- Logout Button Row -->
+                <div class="p-1 border-t border-slate-100 mt-1">
+                  <Link
+                    :href="route('logout')"
+                    method="post"
+                    as="button"
+                    @click="isProfileOpen = false"
+                    class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer tactile-press"
+                  >
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
+                    </svg>
+                    <span>{{ t('nav.logout') }}</span>
+                  </Link>
                 </div>
               </div>
-
-              <div class="p-1 space-y-0.5">
-                <Link
-                  href="/admin"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">📊</span>
-                  <span>{{ t('admin.menu_dashboard') }}</span>
-                </Link>
-
-                <Link
-                  href="/"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">🌐</span>
-                  <span>{{ t('nav.back_to_marketplace') }}</span>
-                </Link>
-
-                <Link
-                  href="/profile"
-                  @click="isProfileOpen = false"
-                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 hover:bg-slate-50 hover:text-primary font-medium transition"
-                >
-                  <span class="text-sm">⚙️</span>
-                  <span>Pengaturan Akun Admin</span>
-                </Link>
-              </div>
-
-              <!-- Logout Button Row -->
-              <div class="p-1 border-t border-slate-100 mt-1">
-                <Link
-                  :href="route('logout')"
-                  method="post"
-                  as="button"
-                  @click="isProfileOpen = false"
-                  class="w-full text-left flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition cursor-pointer"
-                >
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" />
-                  </svg>
-                  <span>{{ t('nav.logout') }}</span>
-                </Link>
-              </div>
-            </div>
+            </Transition>
           </div>
         </div>
       </div>
     </header>
 
     <div class="flex-1 flex">
+      <!-- Mobile Backdrop Overlay -->
+      <Transition
+        enter-active-class="transition-opacity duration-200 ease-out"
+        enter-from-class="opacity-0"
+        enter-to-class="opacity-100"
+        leave-active-class="transition-opacity duration-150 ease-in"
+        leave-from-class="opacity-100"
+        leave-to-class="opacity-0"
+      >
+        <div
+          v-if="isSidebarOpen"
+          @click="isSidebarOpen = false"
+          class="fixed inset-0 bg-slate-900/40 backdrop-blur-2xs z-25 md:hidden"
+        />
+      </Transition>
+
       <!-- Left Enterprise Sidebar -->
       <aside
         :class="[
-          'bg-surface border-r border-border w-64 py-5 px-3.5 flex flex-col justify-between shrink-0 transition-transform duration-200 z-30',
+          'bg-surface border-r border-border w-64 py-5 px-3.5 flex flex-col justify-between shrink-0 transition-transform duration-250 ease-[cubic-bezier(0.32,0.72,0,1)] z-30',
           'fixed inset-y-0 left-0 top-16 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:overflow-y-auto md:translate-x-0',
-          isSidebarOpen ? 'translate-x-0 shadow-xl' : '-translate-x-full md:translate-x-0'
+          isSidebarOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full md:translate-x-0'
         ]"
       >
         <div class="space-y-6">
@@ -214,7 +249,7 @@ onUnmounted(() => {
               <Link
                 href="/admin"
                 :class="[
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin', true)
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -227,9 +262,27 @@ onUnmounted(() => {
               </Link>
 
               <Link
+                href="/admin/bookings"
+                :class="[
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
+                  isActive('/admin/bookings')
+                    ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
+                    : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                ]"
+              >
+                <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 shrink-0" :class="isActive('/admin/bookings') ? 'text-primary' : 'text-slate-400 group-hover:text-slate-700'" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                  </svg>
+                  <span>{{ t('admin.menu_bookings') }}</span>
+                </div>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">All</span>
+              </Link>
+
+              <Link
                 href="/admin/sla-monitoring"
                 :class="[
-                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/sla-monitoring')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -258,7 +311,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/destinations"
                 :class="[
-                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/destinations')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -277,7 +330,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/destination-clusters"
                 :class="[
-                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/destination-clusters')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -295,7 +348,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/tours/create"
                 :class="[
-                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/tours/create')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -313,7 +366,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/products"
                 :class="[
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/products')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -335,9 +388,27 @@ onUnmounted(() => {
             </div>
             <nav class="space-y-1">
               <Link
+                href="/admin/users"
+                :class="[
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
+                  isActive('/admin/users')
+                    ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
+                    : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
+                ]"
+              >
+                <div class="flex items-center gap-3">
+                  <svg class="w-4 h-4 shrink-0" :class="isActive('/admin/users') ? 'text-primary' : 'text-slate-400 group-hover:text-slate-700'" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                  </svg>
+                  <span>{{ t('admin.menu_users') }}</span>
+                </div>
+                <span class="text-[10px] font-semibold px-2 py-0.5 rounded-md bg-purple-50 text-purple-700 border border-purple-200/60">RBAC</span>
+              </Link>
+
+              <Link
                 href="/admin/payments"
                 :class="[
-                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/payments')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -357,7 +428,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/partners"
                 :class="[
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/partners')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -380,7 +451,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/settlements"
                 :class="[
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/settlements')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'
@@ -395,7 +466,7 @@ onUnmounted(() => {
               <Link
                 href="/admin/refunds"
                 :class="[
-                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-all group',
+                  'flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold transition-colors duration-150 tactile-press group',
                   isActive('/admin/refunds')
                     ? 'bg-primary/8 text-primary font-bold border-l-3 border-primary'
                     : 'text-slate-600 hover:bg-slate-100/80 hover:text-slate-900'

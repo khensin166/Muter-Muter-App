@@ -34,6 +34,11 @@ class CreateBookingAction
      */
     public function execute(User $customer, Product $product, array $data): Booking
     {
+        // 0. Role Restriction: Only CUSTOMER accounts can make bookings
+        if (! $customer->isCustomer()) {
+            throw new InvalidArgumentException('Akun Pengelola (Admin) dan Mitra Vendor tidak diizinkan melakukan pemesanan wisata. Silakan gunakan akun Pelanggan/Wisatawan.');
+        }
+
         // 1. Validate Product Status
         if ($product->status !== ProductStatus::PUBLISHED || $product->approval_status !== ApprovalStatus::APPROVED) {
             throw new InvalidArgumentException('Produk tidak tersedia untuk dipesan saat ini.');
@@ -153,6 +158,8 @@ class CreateBookingAction
                 'user_id' => $customer->id,
                 'product_id' => $product->id,
                 'partner_id' => $product->partner_id,
+                'original_partner_id' => $product->partner_id,
+                'assigned_at' => now(),
                 'booking_status' => BookingStatus::PENDING_APPROVAL,
                 'payment_status' => PaymentStatus::UNPAID,
                 'inventory_status' => InventoryStatus::NONE,

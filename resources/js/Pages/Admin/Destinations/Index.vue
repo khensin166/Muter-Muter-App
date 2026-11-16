@@ -1,8 +1,13 @@
 <script setup>
 import { formatRupiah } from '@/Composables/useFormat';
+import { useImageUpload } from '@/Composables/useImageUpload';
 import { ref } from 'vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AdminLayout from '@/Layouts/AdminLayout.vue';
+
+const { processFiles } = useImageUpload();
+const isOptimizing = ref(false);
+const uploadError = ref(null);
 
 const props = defineProps({
   destinations: {
@@ -79,13 +84,26 @@ const removeCreateImageUrlField = (idx) => {
   createForm.image_urls.splice(idx, 1);
 };
 
-const handleCreateFileChange = (e) => {
+const handleCreateFileChange = async (e) => {
   const newFiles = Array.from(e.target.files || []);
   if (!newFiles.length) return;
-  createForm.photos = [...createForm.photos, ...newFiles];
-  const newUrls = newFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) }));
-  createPhotoPreviews.value = [...createPhotoPreviews.value, ...newUrls];
-  e.target.value = '';
+
+  isOptimizing.value = true;
+  uploadError.value = null;
+
+  try {
+    const { optimizedFiles, previews, errors } = await processFiles(newFiles);
+    if (errors.length > 0) {
+      uploadError.value = errors.join(' ');
+    }
+    if (optimizedFiles.length > 0) {
+      createForm.photos = [...createForm.photos, ...optimizedFiles];
+      createPhotoPreviews.value = [...createPhotoPreviews.value, ...previews];
+    }
+  } finally {
+    isOptimizing.value = false;
+    e.target.value = '';
+  }
 };
 
 const removeCreatePendingPhoto = (idx) => {
@@ -94,6 +112,7 @@ const removeCreatePendingPhoto = (idx) => {
 };
 
 const submitCreate = () => {
+  uploadError.value = null;
   createForm.post(route('admin.destinations.store'), {
     forceFormData: true,
     preserveScroll: true,
@@ -107,6 +126,7 @@ const submitCreate = () => {
 
 // Methods for Edit Form
 const openEditModal = (dest) => {
+  uploadError.value = null;
   editForm.id = dest.id;
   editForm.name = dest.name;
   editForm.cluster = dest.cluster;
@@ -142,13 +162,26 @@ const removeEditImageUrlField = (idx) => {
   editForm.image_urls.splice(idx, 1);
 };
 
-const handleEditFileChange = (e) => {
+const handleEditFileChange = async (e) => {
   const newFiles = Array.from(e.target.files || []);
   if (!newFiles.length) return;
-  editForm.photos = [...editForm.photos, ...newFiles];
-  const newUrls = newFiles.map((file) => ({ name: file.name, url: URL.createObjectURL(file) }));
-  editPhotoPreviews.value = [...editPhotoPreviews.value, ...newUrls];
-  e.target.value = '';
+
+  isOptimizing.value = true;
+  uploadError.value = null;
+
+  try {
+    const { optimizedFiles, previews, errors } = await processFiles(newFiles);
+    if (errors.length > 0) {
+      uploadError.value = errors.join(' ');
+    }
+    if (optimizedFiles.length > 0) {
+      editForm.photos = [...editForm.photos, ...optimizedFiles];
+      editPhotoPreviews.value = [...editPhotoPreviews.value, ...previews];
+    }
+  } finally {
+    isOptimizing.value = false;
+    e.target.value = '';
+  }
 };
 
 const removeEditPendingPhoto = (idx) => {
@@ -286,12 +319,12 @@ const filterByCluster = (clusterValue) => {
       <div
         v-for="dest in destinations"
         :key="dest.id"
-        class="bg-surface rounded-2xl border border-border overflow-hidden shadow-2xs hover:shadow-md transition flex flex-col justify-between"
+        class="bg-surface rounded-2xl border border-border overflow-hidden shadow-2xs hover-card-lift flex flex-col justify-between"
       >
         <div>
           <!-- Thumbnail & Badges -->
           <div class="relative h-44 bg-surface-muted overflow-hidden group">
-            <img :src="dest.image_url" :alt="dest.name" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <img :src="dest.image_url" :alt="dest.name" class="w-full h-full object-cover hover-card-media" />
 
             <div class="absolute top-3 left-3 flex flex-wrap gap-1.5">
               <span class="px-2.5 py-1 rounded-lg bg-slate-900/80 backdrop-blur-xs text-white text-[10px] font-bold">
@@ -558,6 +591,14 @@ const filterByCluster = (clusterValue) => {
                 class="text-xs text-text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
               />
 
+              <div v-if="isOptimizing" class="flex items-center gap-2 text-xs text-primary font-bold animate-pulse mt-2">
+                <span class="text-sm">⏳</span>
+                <span>Mengoptimasi resolusi foto secara otomatis agar cepat diunggah...</span>
+              </div>
+              <div v-if="uploadError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold mt-2">
+                ⚠️ {{ uploadError }}
+              </div>
+
               <!-- Preview Uploaded Files with Remove Button -->
               <div v-if="createPhotoPreviews.length > 0" class="flex flex-wrap gap-2.5 mt-3">
                 <div
@@ -725,6 +766,12 @@ const filterByCluster = (clusterValue) => {
                 :class="editForm.deleted_media_ids.includes(media.id) ? 'opacity-40 grayscale border-rose-300 bg-rose-50' : 'border-border bg-surface'"
                 class="relative rounded-xl border p-1.5 flex flex-col justify-between transition"
               >
+                <span
+                  v-if="editForm.deleted_media_ids.includes(media.id)"
+                  class="absolute top-1 right-1 z-10 bg-rose-600 text-white text-[8px] font-bold px-1.5 py-0.5 rounded shadow-xs"
+                >
+                  Akan Dihapus
+                </span>
                 <div class="h-18 rounded-lg overflow-hidden bg-surface-muted mb-1.5">
                   <img :src="media.url" :alt="media.caption" class="w-full h-full object-cover" />
                 </div>
@@ -796,6 +843,14 @@ const filterByCluster = (clusterValue) => {
                   @change="handleEditFileChange"
                   class="text-xs text-text-muted file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 cursor-pointer"
                 />
+
+                <div v-if="isOptimizing" class="flex items-center gap-2 text-xs text-primary font-bold animate-pulse mt-2">
+                  <span class="text-sm">⏳</span>
+                  <span>Mengoptimasi resolusi foto secara otomatis agar cepat diunggah...</span>
+                </div>
+                <div v-if="uploadError" class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs font-semibold mt-2">
+                  ⚠️ {{ uploadError }}
+                </div>
 
                 <div v-if="editPhotoPreviews.length > 0" class="flex flex-wrap gap-2.5 mt-2.5">
                   <div

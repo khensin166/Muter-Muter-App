@@ -21,6 +21,9 @@ class Booking extends Model
         'user_id',
         'product_id',
         'partner_id',
+        'original_partner_id',
+        'assigned_at',
+        'assigned_by_id',
         'booking_status',
         'payment_status',
         'inventory_status',
@@ -41,6 +44,7 @@ class Booking extends Model
         'assigned_driver_name',
         'assigned_driver_phone',
         'assigned_vehicle_plate',
+        'rejection_reason',
     ];
 
     protected function casts(): array
@@ -52,6 +56,7 @@ class Booking extends Model
             'service_start_date' => 'date',
             'service_end_date' => 'date',
             'vendor_sla_deadline' => 'datetime',
+            'assigned_at' => 'datetime',
             'contact_unmasked' => 'boolean',
             'total_price' => 'decimal:2',
             'dp_amount' => 'decimal:2',
@@ -78,6 +83,16 @@ class Booking extends Model
     public function partner()
     {
         return $this->belongsTo(Partner::class);
+    }
+
+    public function originalPartner()
+    {
+        return $this->belongsTo(Partner::class, 'original_partner_id');
+    }
+
+    public function assignedBy()
+    {
+        return $this->belongsTo(User::class, 'assigned_by_id');
     }
 
     public function tourDetail()

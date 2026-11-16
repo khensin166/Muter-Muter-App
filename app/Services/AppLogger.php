@@ -78,6 +78,8 @@ class AppLogger
     ): AuditLog {
         $user = auth()->user();
 
+        $ip = app()->has('request') ? request()?->ip() : null;
+
         // 1. Persist to PostgreSQL audit_logs table
         $auditLog = AuditLog::create([
             'user_id' => $user?->id,
@@ -86,7 +88,7 @@ class AppLogger
             'entity_id' => $model->getKey(),
             'old_values' => ! empty($oldValues) ? $oldValues : null,
             'new_values' => ! empty($newValues) ? $newValues : null,
-            'ip_address' => request()?->ip(),
+            'ip_address' => $ip,
         ]);
 
         // 2. Emit structured log entry to the unified log stream

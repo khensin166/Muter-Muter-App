@@ -125,3 +125,38 @@ test('pdf containing embedded javascript action is strictly rejected', function 
     ))->toThrow(ValidationException::class);
 });
 
+test('deleteFile cleans up physical file from storage', function () {
+    Storage::fake('public');
+
+    $file = UploadedFile::fake()->image('gallery.jpg', 600, 400);
+    $path = FileSecurityService::validateAndStore(
+        file: $file,
+        directory: 'destinations',
+        fieldName: 'photos.0',
+        allowPdf: false,
+        disk: 'public'
+    );
+
+    Storage::disk('public')->assertExists($path);
+
+    $deleted = FileSecurityService::deleteFile($path);
+    expect($deleted)->toBeTrue();
+    Storage::disk('public')->assertMissing($path);
+});
+
+test('PostTooLargeException is handled gracefully with user friendly flash error', function () {
+    $response = $this->withExceptionHandling()->get('/up'); // basic sanity
+    expect($response->status())->toBe(200);
+
+    // Test exception handler via custom route simulation
+    Illuminate\Support\Facades\Route::post('/test-post-too-large', function () {
+        throw new Illuminate\Http\Exceptions\PostTooLargeException();
+    });
+
+    $res = $this->from('/admin/destinations')->post('/test-post-too-large');
+    $res->assertRedirect('/admin/destinations');
+    $res->assertSessionHas('error');
+    $res->assertSessionHasErrors(['photos']);
+});
+
+

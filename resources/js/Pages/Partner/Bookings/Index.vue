@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue';
 import { formatRupiah } from '@/Composables/useFormat';
 import { Head, Link, router } from '@inertiajs/vue3';
 import PartnerLayout from '@/Layouts/PartnerLayout.vue';
@@ -10,17 +11,32 @@ const props = defineProps({
   filters: Object,
 });
 
+const isProcessing = ref(null);
+
 const statusTabs = [
   { key: 'PENDING_APPROVAL', label: 'Perlu Konfirmasi', count: props.counts.pending_approval, color: 'text-amber-700 bg-amber-50' },
+  { key: 'ASSIGNED_TO_PARTNER', label: 'Penugasan Platform', count: props.counts.assigned_to_partner, color: 'text-blue-700 bg-blue-50' },
   { key: 'AWAITING_PAYMENT', label: 'Menunggu DP', count: props.counts.awaiting_payment, color: 'text-blue-700 bg-blue-50' },
   { key: 'CONFIRMED', label: 'Terkonfirmasi', count: props.counts.confirmed, color: 'text-emerald-700 bg-emerald-50' },
   { key: 'ALL', label: 'Semua Pesanan', count: props.counts.all, color: '' },
 ];
 
-
 const approve = (id, code) => {
   if (confirm(`Setujui ketersediaan pesanan ${code}? Sistem akan menerbitkan tagihan DP dan hold inventory 24 jam.`)) {
-    router.post(route('partner.bookings.approve', id));
+    isProcessing.value = id;
+    router.post(route('partner.bookings.approve', id), {}, {
+      onFinish: () => { isProcessing.value = null; },
+    });
+  }
+};
+
+const reject = (id, code) => {
+  const reason = prompt(`Masukkan alasan penolakan untuk pesanan ${code} (akan dialihkan ke antrean intervensi admin):`);
+  if (reason && reason.trim()) {
+    isProcessing.value = id;
+    router.post(route('partner.bookings.reject', id), { reason: reason.trim() }, {
+      onFinish: () => { isProcessing.value = null; },
+    });
   }
 };
 </script>
@@ -96,6 +112,9 @@ const approve = (id, code) => {
                   <span class="font-mono font-bold text-primary block">{{ b.booking_code }}</span>
                   <span class="font-bold text-text-main">{{ b.customer_name }}</span>
                   <span class="text-text-muted text-[11px] block">{{ b.customer_phone }}</span>
+                  <span v-if="b.is_platform_assigned" class="inline-block mt-1 px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                    📢 Penugasan Platform
+                  </span>
                 </td>
 
                 <td class="py-4 px-6">
@@ -109,7 +128,7 @@ const approve = (id, code) => {
                 </td>
 
                 <td class="py-4 px-6">
-                  <div v-if="b.booking_status === 'PENDING_APPROVAL'">
+                  <div v-if="['PENDING_APPROVAL', 'ASSIGNED_TO_PARTNER'].includes(b.booking_status)">
                     <span
                       v-if="!b.is_sla_expired"
                       :class="{
@@ -138,15 +157,26 @@ const approve = (id, code) => {
                 <td class="py-4 px-6 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <button
-                      v-if="b.booking_status === 'PENDING_APPROVAL'"
+                      v-if="['PENDING_APPROVAL', 'ASSIGNED_TO_PARTNER'].includes(b.booking_status)"
+                      type="button"
+                      :disabled="isProcessing === b.id"
                       @click="approve(b.id, b.booking_code)"
-                      class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs"
+                      class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs tactile-press cursor-pointer disabled:opacity-50"
                     >
-                      ✓ Setujui
+                      {{ isProcessing === b.id ? 'Memproses...' : '✓ Setujui' }}
+                    </button>
+                    <button
+                      v-if="['PENDING_APPROVAL', 'ASSIGNED_TO_PARTNER'].includes(b.booking_status)"
+                      type="button"
+                      :disabled="isProcessing === b.id"
+                      @click="reject(b.id, b.booking_code)"
+                      class="px-2.5 py-1.5 rounded-xl border border-border text-text-muted hover:text-danger hover:border-danger text-xs font-semibold transition tactile-press cursor-pointer disabled:opacity-50"
+                    >
+                      ✕ Tolak
                     </button>
                     <Link
                       :href="route('partner.bookings.show', b.id)"
-                      class="px-3 py-1.5 rounded-xl border border-border text-xs font-bold hover:bg-surface-muted transition"
+                      class="px-3 py-1.5 rounded-xl border border-border text-xs font-bold hover:bg-surface-muted transition tactile-press cursor-pointer"
                     >
                       Detail →
                     </Link>

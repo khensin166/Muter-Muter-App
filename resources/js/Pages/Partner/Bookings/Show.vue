@@ -47,8 +47,9 @@ const submitReject = () => {
         <span
           :class="{
             'bg-amber-100 text-amber-900 border-amber-300': booking.booking_status === 'PENDING_APPROVAL',
+            'bg-blue-100 text-blue-900 border-blue-300': booking.booking_status === 'ASSIGNED_TO_PARTNER',
             'bg-purple-100 text-purple-900 border-purple-300': booking.booking_status === 'MANUAL_REVIEW',
-            'bg-blue-100 text-blue-900 border-blue-300': booking.booking_status === 'AWAITING_PAYMENT',
+            'bg-indigo-100 text-indigo-900 border-indigo-300': booking.booking_status === 'AWAITING_PAYMENT',
             'bg-emerald-100 text-emerald-900 border-emerald-300': booking.booking_status === 'CONFIRMED',
             'bg-rose-100 text-danger border-rose-300': ['REJECTED', 'CANCELLED', 'EXPIRED'].includes(booking.booking_status),
           }"
@@ -58,25 +59,34 @@ const submitReject = () => {
         </span>
       </div>
 
-      <!-- SLA Alert if Pending -->
-      <div v-if="booking.booking_status === 'PENDING_APPROVAL'" class="p-5 bg-amber-50 rounded-2xl border border-amber-200 text-xs text-amber-900 flex items-center justify-between gap-4">
+      <!-- SLA Alert if Pending / Assigned -->
+      <div v-if="['PENDING_APPROVAL', 'ASSIGNED_TO_PARTNER'].includes(booking.booking_status)" class="p-5 rounded-2xl border text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4"
+        :class="booking.booking_status === 'ASSIGNED_TO_PARTNER' ? 'bg-blue-50/80 border-blue-200 text-blue-950' : 'bg-amber-50 border-amber-200 text-amber-900'"
+      >
         <div>
-          <span class="font-bold text-sm text-amber-800 block">⚡ SLA Konfirmasi Ketersediaan: 24 Jam</span>
-          <p class="mt-0.5">Sisa waktu respons: <strong>{{ booking.remaining_sla_hours }} Jam lagi</strong>. Harap berikan konfirmasi sebelum batas waktu habis.</p>
+          <span v-if="booking.booking_status === 'ASSIGNED_TO_PARTNER'" class="font-bold text-sm text-blue-800 block">
+            📢 Penugasan Khusus dari Super Admin Platform
+          </span>
+          <span v-else class="font-bold text-sm text-amber-800 block">
+            ⚡ SLA Konfirmasi Ketersediaan: 24 Jam
+          </span>
+          <p class="mt-0.5">
+            Sisa batas waktu respons: <strong>{{ booking.remaining_sla_hours }} Jam lagi</strong>. Harap berikan konfirmasi kesiapan armada/layanan sebelum batas waktu habis.
+          </p>
         </div>
 
         <div class="flex items-center gap-2 shrink-0">
           <button
             @click="submitApprove"
-            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-sm"
+            class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs transition shadow-sm tactile-press cursor-pointer"
           >
             ✓ Setujui Ketersediaan
           </button>
           <button
             @click="isRejectModalOpen = true"
-            class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm"
+            class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl text-xs transition shadow-sm tactile-press cursor-pointer"
           >
-            ✕ Tolak
+            ✕ Tidak Tersedia (Tolak)
           </button>
         </div>
       </div>

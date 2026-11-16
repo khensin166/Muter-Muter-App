@@ -447,7 +447,15 @@ const statusDotClass = (status) => {
             <h3 class="text-sm font-bold text-slate-900">Pesanan Terbaru & Dispatch Armada Mitra</h3>
             <p class="text-[11px] text-slate-500">Tugaskan mitra dan supir terbaik untuk pesanan paket wisata</p>
           </div>
-          <span class="text-[11px] font-semibold text-slate-500">Total: {{ metrics.total_bookings || 0 }} Pesanan</span>
+          <Link
+            :href="route('admin.bookings.index')"
+            class="text-xs text-primary font-bold hover:underline inline-flex items-center gap-1"
+          >
+            <span>Semua Pesanan ({{ metrics.total_bookings || 0 }})</span>
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+            </svg>
+          </Link>
         </div>
 
         <div v-if="recentBookings.length === 0" class="py-10 text-center text-slate-400 text-xs">
