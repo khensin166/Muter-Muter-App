@@ -67,6 +67,15 @@
 
           # Google Maps API Integration
           VITE_GOOGLE_MAPS_API_KEY="{{ vite_google_maps_api_key | default('') }}"
+
+          # Cloudflare R2 Object Storage
+          CLOUDFLARE_R2_ACCESS_KEY_ID={{ cloudflare_r2_access_key_id | default('') }}
+          CLOUDFLARE_R2_SECRET_ACCESS_KEY={{ cloudflare_r2_secret_access_key | default('') }}
+          CLOUDFLARE_R2_DEFAULT_REGION={{ cloudflare_r2_default_region | default('auto') }}
+          CLOUDFLARE_R2_BUCKET={{ cloudflare_r2_bucket | default('muter-muter-media') }}
+          CLOUDFLARE_R2_URL={{ cloudflare_r2_url | default('') }}
+          CLOUDFLARE_R2_ENDPOINT={{ cloudflare_r2_endpoint | default('') }}
+          CLOUDFLARE_R2_USE_PATH_STYLE_ENDPOINT={{ cloudflare_r2_use_path_style_endpoint | default('true') }}
         dest: "{{ project_dir }}/.env"
         mode: '0600'
       no_log: true

@@ -39,11 +39,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: mbstring, pdo_sqlite, sqlite3, curl, fileinfo, bcmath, intl, zip
+          php-version: '8.4'
+          extensions: mbstring, pdo_sqlite, sqlite3, curl, fileinfo, bcmath, intl, zip, gd
           coverage: none
 
       - name: Setup Node.js 20
@@ -168,5 +168,12 @@ jobs:
             -e "libretranslate_url=${{ vars.LIBRETRANSLATE_URL || 'https://translate.kenantomfie.com' }}" \
             -e "libretranslate_api_key=${{ secrets.LIBRETRANSLATE_API_KEY || vars.LIBRETRANSLATE_API_KEY || 'kenan_secret_translate_key_2026' }}" \
             -e "translation_mock_mode=${{ vars.TRANSLATION_MOCK_MODE || 'false' }}" \
-            -e "vite_google_maps_api_key=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || vars.VITE_GOOGLE_MAPS_API_KEY }}"
+            -e "vite_google_maps_api_key=${{ secrets.VITE_GOOGLE_MAPS_API_KEY || vars.VITE_GOOGLE_MAPS_API_KEY }}" \
+            -e "cloudflare_r2_access_key_id=${{ secrets.CLOUDFLARE_R2_ACCESS_KEY_ID || vars.CLOUDFLARE_R2_ACCESS_KEY_ID }}" \
+            -e "cloudflare_r2_secret_access_key=${{ secrets.CLOUDFLARE_R2_SECRET_ACCESS_KEY || vars.CLOUDFLARE_R2_SECRET_ACCESS_KEY }}" \
+            -e "cloudflare_r2_default_region=${{ vars.CLOUDFLARE_R2_DEFAULT_REGION || 'auto' }}" \
+            -e "cloudflare_r2_bucket=${{ vars.CLOUDFLARE_R2_BUCKET || 'muter-muter-media' }}" \
+            -e "cloudflare_r2_url=${{ secrets.CLOUDFLARE_R2_URL || vars.CLOUDFLARE_R2_URL }}" \
+            -e "cloudflare_r2_endpoint=${{ vars.CLOUDFLARE_R2_ENDPOINT || 'https://4c0b75a3b711422f66ca40fc636d4488.r2.cloudflarestorage.com' }}" \
+            -e "cloudflare_r2_use_path_style_endpoint=${{ vars.CLOUDFLARE_R2_USE_PATH_STYLE_ENDPOINT || 'true' }}"
 

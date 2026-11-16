@@ -29,7 +29,7 @@ RUN npm run build
 # ==========================================
 # STAGE 3: PRODUCTION RUNNER (FrankenPHP)
 # ==========================================
-FROM dunglas/frankenphp:latest-php8.2-alpine AS runner
+FROM dunglas/frankenphp:latest-php8.4-alpine AS runner
 
 # Install essential PHP extensions & clean package cache immediately
 RUN install-php-extensions \
